@@ -1,48 +1,18 @@
 from ziDrivers import Controller
 from functools import partial
 
-
 from qcodes.instrument.base import Instrument
 from qcodes.instrument.channel import InstrumentChannel, ChannelList
 from qcodes.utils import validators as validators
 
 
 
-#######################
-# some helper functions
-#######################
-def dictify(data, keys, val):
-    key = keys[0]
-    key = int(key) if key.isdecimal() else key.lower()
-    if len(keys) == 1:
-        data[key] = val
-    else:
-        if key in data.keys():
-            data[key] = dictify(data[key], keys[1:], val)
-        else:
-            data[key] = dictify({}, keys[1:], val)
-    return data
-
-def join_enumeration(lst):
-    for i, l in enumerate(lst):
-        if any([str(j) in l for j in range(10)]):
-            lst[i-1:i+1] = ["".join(lst[i-1:i+1])]
-    return lst
-
-def dict_to_doc(d):
-    s = ""
-    for k, v in d.items():
-        s += f"* {k}:\n\t{v}\n\n"
-    return s
-
-
-#######################
-# ZINode Class 
-#######################
 class ZINode(InstrumentChannel):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
+    """
+    ZINode class collects submodules (which can be again ZINodes) 
+    and parameters to represent the hirarchy of the ZI node tree in QCoDeS. 
+    It inherits from InstrumentChannel and overrides the __repr__ and snapshot methods
+    """
     def print_readable_snapshot(self, update: bool = False, max_chars: int = 80) -> None:
         if self.parameters:
             super().print_readable_snapshot(update=update, max_chars=max_chars)
@@ -63,103 +33,16 @@ class ZINode(InstrumentChannel):
         for p in self.parameters.keys():
             s += f"         * {p}\n"  
         return s
-
-
-#######################
-# ZIAWG Class 
-#######################
-class ZIAWG(InstrumentChannel):
-    def __init__(self, parent, index, **kwargs) -> None: 
-        self.index = index
-        self._controller = parent._controller
-        self._dev = parent._dev
-        name = f"awg{index}"
-        super().__init__(parent, name, **kwargs)
-
-    def __repr__(self):
-        params = self.sequence_params["sequence_parameters"]
-        s = f"ZIAWG: {self.name}\n"
-        s += f"    parent  : {self._parent}\n"
-        s += f"    index   : {self.index}\n"
-        s += f"    sequence: \n"
-        s += f"           type: {self.sequence_params['sequence_type']}\n"
-        for i in params.items():
-            s += f"            {i}\n"
-        return s
-    
-    def print_readable_snapshot(self, update: bool = False, max_chars: int = 80) -> None:
-        print(f"{self}")
-    
-    def run(self):
-        self._controller.awg_run(self._dev, self.index)
-
-    def stop(self):
-        self._controller.awg_stop(self._dev, self.index)
-
-    def compile(self):
-        self._controller.awg_compile(self._dev, self.index)
-    
-    def reset_queue(self):
-        self._controller.awg_reset_queue(self._dev, self.index)
-
-    def queue_waveform(self, wave1, wave2):
-        self._controller.awg_queue_waveform(
-            self._dev,
-            self.index,
-            data=(wave1, wave2)
-        )
-
-    def replace_waveform(self, wave1, wave2, i=0):
-        self._controller.awg_replace_waveform(
-            self._dev,
-            self.index,
-            data=(wave1, wave2),
-            index=i
-        )
-
-    def upload_waveforms(self):
-        self._controller.awg_upload_waveforms(
-            self._dev,
-            self.index
-        )
-
-    def compile_and_upload_waveforms(self):
-        self._controller.awg_compile_and_upload_waveforms(
-            self._dev,
-            self.index
-        )
-
-    def set_sequence_params(self, **kwargs):
-        self._controller.awg_set_sequence_params(
-            self._dev,
-            self.index,
-            **kwargs
-        )
-    
-    @property
-    def is_running(self):
-        return self._controller.awg_is_running(
-            self._dev, 
-            self.index
-        )
-
-    @property
-    def sequence_params(self):
-        return self._controller.awg_list_params(
-            self._dev,
-            self.index
-        )
-
-    
+ 
 
 
 
-
-#######################
-# ZIBaseInstrument class
-#######################
 class ZIBaseInstrument(Instrument):
-
+    """
+    Base class for all ZI Instruments. Implements basic wrapper 
+    around ziDrivers.Controller() and translates the ZI node tree 
+    to a QCoDeS hirarchy of ZINodes
+    """
     def __init__(self, name: str, type: str, serial: str, interface="1gbe", **kwargs) -> None:
         """
         Create an instance of the instrument.
@@ -181,6 +64,9 @@ class ZIBaseInstrument(Instrument):
         self.__get_nodetree_dict()
 
     def __get_nodetree_dict(self):
+        """
+        Retrieve the nodetree from the device as a nested dict and process it accordingly.
+        """
         tree = self._controller.get_nodetree(f"{self._serial}/*")
         self.nodetree_dict = dict()
         for key, value in tree.items():
@@ -189,6 +75,15 @@ class ZIBaseInstrument(Instrument):
             dictify(self.nodetree_dict, hirarchy, value)
     
     def __add_submodules_recursively(self, parent, treedict: dict):
+        """
+        Recursively add submodules (ZINodes) for each node in the ZI node tree.
+        At the leaves create a parameter. Create a ChannelList as submodules
+        whenever a node is enumerated, e.g. 'dev8030/sigouts/*/on'.
+        
+        Arguments:
+            parent   -- parent QCoDeS object, either Instrument(-Channel) or ZINode
+            treedict -- dictionary specifying the (sub-)tree of the ZI node hirarchy
+        """
         for key, value in treedict.items():
             if all(isinstance(k, int) for k in value.keys()):
                 # if enumerated node
@@ -220,6 +115,15 @@ class ZIBaseInstrument(Instrument):
             
 
     def __add_parameter_from_dict(self, instr, name, params):
+        """
+        Add a QCoDeS parameter associated to a ZI noe from a dict describing 
+        the parameter with e.g. 'Node', 'Properties', 'Description', 'Options' etc.
+        
+        Arguments:
+            instr  -- instrument/submodule the parameter is associated with
+            name   -- parameter name
+            params -- dictionary describing the parameter, innermost layer of nodetree_dict
+        """
         node = params["Node"].lower().replace(f"/{self._serial}/" ,"")
         if "Read" in params["Properties"]:
             getter = partial(
@@ -246,6 +150,13 @@ class ZIBaseInstrument(Instrument):
         )
     
     def init_submodule(self, key):
+        """
+        Recursively initialize submodules from highest layer keys in nodetree dictionary.
+        For e.g. 'dev8030/sigouts/...' one would call this method with 'sigouts'.
+        
+        Arguments:
+            key  -- dictionary key in the highest layer of nodetree_dict
+        """
         if key in self.nodetree_dict.keys():
             self.__add_submodules_recursively(self, {key: self.nodetree_dict[key]})
         else:
@@ -253,3 +164,30 @@ class ZIBaseInstrument(Instrument):
 
 
         
+
+"""
+Helper functions used to process the nodetree dictionary in ZIBaseInstrument.
+"""
+def dictify(data, keys, val):
+    key = keys[0]
+    key = int(key) if key.isdecimal() else key.lower()
+    if len(keys) == 1:
+        data[key] = val
+    else:
+        if key in data.keys():
+            data[key] = dictify(data[key], keys[1:], val)
+        else:
+            data[key] = dictify({}, keys[1:], val)
+    return data
+
+def join_enumeration(lst):
+    for i, l in enumerate(lst):
+        if any([str(j) in l for j in range(10)]):
+            lst[i-1:i+1] = ["".join(lst[i-1:i+1])]
+    return lst
+
+def dict_to_doc(d):
+    s = ""
+    for k, v in d.items():
+        s += f"* {k}:\n\t{v}\n\n"
+    return s
