@@ -1,8 +1,16 @@
-from .ZIBaseInstrument import ZIBaseInstrument, ZIAWG
+from .ZIBaseInstrument import ZIBaseInstrument
+from .ZIAWG import ZIAWG
 
 
 
 class UHFQA(ZIBaseInstrument):
+    """
+    QCoDeS driver for ZI UHFQA.
+
+    Inherits from ZIBaseInstrument. Initializes some submodules 
+    from the nodetree and a 'sequencer' submodule for high level 
+    control of the AWG sequence program.
+    """
     def __init__(self, name: str, serial: str, **kwargs) -> None:
         super().__init__(name, "uhfqa", serial)
 

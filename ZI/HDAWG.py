@@ -1,9 +1,17 @@
-from .ZIBaseInstrument import ZIBaseInstrument, ZIAWG
+from .ZIBaseInstrument import ZIBaseInstrument
+from .ZIAWG import ZIAWG
 from qcodes.instrument.channel import ChannelList
 
 
 
 class HDAWG(ZIBaseInstrument):
+    """
+    QCoDeS driver for ZI HDAWG.
+
+    Inherits from ZIBaseInstrument. Initializes some submodules 
+    from the nodetree and a ChannelList of 'sequencers' for high 
+    level control of the AWG sequence program.
+    """
     def __init__(self, name: str, serial: str, **kwargs) -> None:
         super().__init__(name, "hdawg", serial, interface=kwargs.get("interface", "1gbe"))
 
