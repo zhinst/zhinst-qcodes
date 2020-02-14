@@ -1,10 +1,9 @@
-from ziDrivers import Controller
 from functools import partial
 
 from qcodes.instrument.base import Instrument
-from qcodes.instrument.channel import InstrumentChannel, ChannelList
+from qcodes.instrument.channel import ChannelList, InstrumentChannel
 from qcodes.utils import validators as validators
-
+from ziDrivers import Controller
 
 
 class ZINode(InstrumentChannel):
@@ -86,7 +85,7 @@ class ZIBaseInstrument(Instrument):
         self.nodetree_dict = dict()
         for key, value in tree.items():
             key = key.replace(f"/{self._serial.upper()}/", "")
-            hirarchy = key.split("/") #join_enumeration(key.split("/"))
+            hirarchy = key.split("/")
             dictify(self.nodetree_dict, hirarchy, value)
     
     def __add_submodules_recursively(self, parent, treedict: dict):
@@ -113,7 +112,6 @@ class ZIBaseInstrument(Instrument):
                         ch_name = f"{key}{k}"
                         ch = ZINode(parent, ch_name)
                         channel_list.append(ch)
-                        # parent.add_submodule(ch_name, ch)
                         self.__add_submodules_recursively(ch, treedict[key][k])
                     channel_list.lock()
                     parent.add_submodule(key, channel_list)
@@ -190,6 +188,15 @@ class ZIBaseInstrument(Instrument):
 Helper functions used to process the nodetree dictionary in ZIBaseInstrument.
 """
 def dictify(data, keys, val):
+    """
+    Helper function to generate nested dictionarz from list of keys and value. 
+    Calls itself recursively.
+    
+    Arguments:
+        data  -- dictionary to add value to with keys
+        keys  -- list of keys to traverse along tree and place value
+        val   -- value for innermost layer of nested dict
+    """
     key = keys[0]
     key = int(key) if key.isdecimal() else key.lower()
     if len(keys) == 1:
@@ -201,14 +208,18 @@ def dictify(data, keys, val):
             data[key] = dictify({}, keys[1:], val)
     return data
 
-def join_enumeration(lst):
-    for i, l in enumerate(lst):
-        if any([str(j) in l for j in range(10)]):
-            lst[i-1:i+1] = ["".join(lst[i-1:i+1])]
-    return lst
-
 def dict_to_doc(d):
+    """
+    Turn dictionary into pretty doc string.
+    """
     s = ""
     for k, v in d.items():
         s += f"* {k}:\n\t{v}\n\n"
     return s
+
+# def join_enumeration(lst):
+#     for i, l in enumerate(lst):
+#         if any([str(j) in l for j in range(10)]):
+#             lst[i-1:i+1] = ["".join(lst[i-1:i+1])]
+#     return lst
+
