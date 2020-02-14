@@ -4,6 +4,17 @@ from qcodes.instrument.channel import ChannelList
 
 
 
+class AWG(ZIAWG):
+    def set_sequence_params(self, **kwargs):
+        if "sequence_type" in kwargs.keys():
+            t = kwargs["sequence_type"]
+            allowed_sequences = ["Simple", "Rabi", "T1", "T2*", "Custom"]
+            if t not in allowed_sequences:
+                raise Exception(f"Sequence type {t} must be one of {allowed_sequences}!")
+        super().set_sequence_params(**kwargs)
+
+
+
 class HDAWG(ZIBaseInstrument):
     """
     QCoDeS driver for ZI HDAWG.
@@ -31,9 +42,9 @@ class HDAWG(ZIBaseInstrument):
             self._init_submodule(key)
         
         # init sequencer ChannelList
-        channel_list = ChannelList(self, "sequencers", ZIAWG)
+        channel_list = ChannelList(self, "sequencers", AWG)
         for i in self.nodetree_dict["awgs"].keys():
-            module = ZIAWG(self, i)
+            module = AWG(self, i)
             channel_list.append(module)
         channel_list.lock()
         self.add_submodule("sequencers", channel_list)
