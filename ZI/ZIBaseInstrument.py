@@ -61,8 +61,23 @@ class ZIBaseInstrument(Instrument):
         self._controller = Controller()        
         self._controller.setup(f"connection-{type}.json")
         self._controller.connect_device(self._dev, serial, interface)
+        self.connect_message()
         self.__get_nodetree_dict()
 
+    def _init_submodule(self, key):
+        """
+        Recursively initialize submodules from highest layer keys in nodetree dictionary.
+        For e.g. 'dev8030/sigouts/...' one would call this method with 'sigouts'.
+        
+        Arguments:
+            key  -- dictionary key in the highest layer of nodetree_dict
+        """
+        if key in self.nodetree_dict.keys():
+            self.__add_submodules_recursively(self, {key: self.nodetree_dict[key]})
+        else:
+            print(f"Key {key} not in nodetree: {list(self.nodetree_dict.keys())}")
+
+    
     def __get_nodetree_dict(self):
         """
         Retrieve the nodetree from the device as a nested dict and process it accordingly.
@@ -149,18 +164,24 @@ class ZIBaseInstrument(Instrument):
             set_cmd=setter
         )
     
-    def init_submodule(self, key):
-        """
-        Recursively initialize submodules from highest layer keys in nodetree dictionary.
-        For e.g. 'dev8030/sigouts/...' one would call this method with 'sigouts'.
+    def __repr__(self):
+        s = super().__repr__()
+        s += f"\n     submodules: \n"
+        for m in self.submodules.keys():
+            s += f"         * {m}\n"
+        s += f"     parameters: \n"
+        for p in self.parameters.keys():
+            s += f"         * {p}\n"  
+        return s
+
+    def get_idn(self):
+        return dict(
+            vendor="Zurich Instruments",
+            model=self._type.upper(),
+            serial=self._serial,
+            firmware=self._controller.get(self._dev, "system/fwrevision")
+        )
         
-        Arguments:
-            key  -- dictionary key in the highest layer of nodetree_dict
-        """
-        if key in self.nodetree_dict.keys():
-            self.__add_submodules_recursively(self, {key: self.nodetree_dict[key]})
-        else:
-            print(f"Key {key} not in nodetree: {list(self.nodetree_dict.keys())}")
 
 
         
