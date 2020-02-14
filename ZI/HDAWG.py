@@ -17,15 +17,18 @@ class HDAWG(ZIBaseInstrument):
 
         # init submodules recursively from nodetree
         submodules = [
+            "system",
             "oscs", 
+            "sines",
             "triggers", 
             "dios", 
             "sigouts", 
             "awgs", 
-            "clockbase", 
+            "clockbase",
+            "cnts"
         ]
         for key in submodules:
-            self.init_submodule(key)
+            self._init_submodule(key)
         
         # init sequencer ChannelList
         channel_list = ChannelList(self, "sequencers", ZIAWG)

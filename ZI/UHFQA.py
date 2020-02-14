@@ -16,6 +16,7 @@ class UHFQA(ZIBaseInstrument):
 
         # init submodules recursively from nodetree
         submodules = [
+            "system",
             "oscs", 
             "triggers", 
             "dios", 
@@ -26,7 +27,7 @@ class UHFQA(ZIBaseInstrument):
             "qas"
         ]
         for key in submodules:
-            self.init_submodule(key)
+            self._init_submodule(key)
         
         # init sequencer submodule
         module = ZIAWG(self, 0)
