@@ -6,6 +6,26 @@ class ZIAWG(InstrumentChannel):
     ZIAWG class that represents on AWG sequencer. It wraps around the 
     functionality of ziDrivers.Controller() for a high level control of 
     the AWG sequence program.
+
+    Possible sequence types are:
+        
+        (for HDAWG and UHFQA):
+        - Simple     : queue, upload and replace arbitrary waveforms
+        - Rabi       : Rabi sequence
+        - T1         : T1 sequence
+        - T2*        : T2 Ramsey sequence
+        
+        (only for UHFQA):
+        - Readout    : Sequence for multiplexed readout 
+        - Pulsed Spectroscopy
+        - CW Spectroscopy
+
+    Most important sequence parameters:
+        - sequence_type
+        - period
+        - trigger_mode
+        - repetitions
+ 
     """
     def __init__(self, parent, index, **kwargs) -> None: 
         self.index = index
