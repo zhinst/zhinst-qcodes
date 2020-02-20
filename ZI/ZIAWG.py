@@ -27,7 +27,8 @@ class ZIAWG(InstrumentChannel):
         - repetitions
  
     """
-    def __init__(self, parent, index, **kwargs) -> None: 
+
+    def __init__(self, parent, index, **kwargs) -> None:
         self.index = index
         self._controller = parent._controller
         self._dev = parent._dev
@@ -44,10 +45,12 @@ class ZIAWG(InstrumentChannel):
         for i in params.items():
             s += f"            {i}\n"
         return s
-    
-    def print_readable_snapshot(self, update: bool = False, max_chars: int = 80) -> None:
+
+    def print_readable_snapshot(
+        self, update: bool = False, max_chars: int = 80
+    ) -> None:
         print(f"{self}")
-    
+
     def run(self):
         self._controller.awg_run(self._dev, self.index)
 
@@ -56,54 +59,31 @@ class ZIAWG(InstrumentChannel):
 
     def compile(self):
         self._controller.awg_compile(self._dev, self.index)
-    
+
     def reset_queue(self):
         self._controller.awg_reset_queue(self._dev, self.index)
 
     def queue_waveform(self, wave1, wave2):
-        self._controller.awg_queue_waveform(
-            self._dev,
-            self.index,
-            data=(wave1, wave2)
-        )
+        self._controller.awg_queue_waveform(self._dev, self.index, data=(wave1, wave2))
 
     def replace_waveform(self, wave1, wave2, i=0):
         self._controller.awg_replace_waveform(
-            self._dev,
-            self.index,
-            data=(wave1, wave2),
-            index=i
+            self._dev, self.index, data=(wave1, wave2), index=i
         )
 
     def upload_waveforms(self):
-        self._controller.awg_upload_waveforms(
-            self._dev,
-            self.index
-        )
+        self._controller.awg_upload_waveforms(self._dev, self.index)
 
     def compile_and_upload_waveforms(self):
-        self._controller.awg_compile_and_upload_waveforms(
-            self._dev,
-            self.index
-        )
+        self._controller.awg_compile_and_upload_waveforms(self._dev, self.index)
 
     def set_sequence_params(self, **kwargs):
-        self._controller.awg_set_sequence_params(
-            self._dev,
-            self.index,
-            **kwargs
-        )
-    
+        self._controller.awg_set_sequence_params(self._dev, self.index, **kwargs)
+
     @property
     def is_running(self):
-        return self._controller.awg_is_running(
-            self._dev, 
-            self.index
-        )
+        return self._controller.awg_is_running(self._dev, self.index)
 
     @property
     def sequence_params(self):
-        return self._controller.awg_list_params(
-            self._dev,
-            self.index
-        )
+        return self._controller.awg_list_params(self._dev, self.index)

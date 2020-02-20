@@ -2,7 +2,6 @@ from functools import partial
 
 from qcodes.instrument.base import Instrument
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
-from qcodes.utils import validators as validators
 from ziDrivers import Controller
 
 
@@ -12,13 +11,16 @@ class ZINode(InstrumentChannel):
     and parameters to represent the hirarchy of the ZI node tree in QCoDeS. 
     It inherits from InstrumentChannel and overrides the __repr__ and snapshot methods
     """
-    def print_readable_snapshot(self, update: bool = False, max_chars: int = 80) -> None:
+
+    def print_readable_snapshot(
+        self, update: bool = False, max_chars: int = 80
+    ) -> None:
         if self.parameters:
             super().print_readable_snapshot(update=update, max_chars=max_chars)
         else:
             print(self.name + ":")
             print("{0:<{1}}".format("\tparameter ", 50) + "value")
-            print("-"*max_chars)
+            print("-" * max_chars)
             print("no parameters")
             for submodule in self.submodules.values():
                 submodule.print_readable_snapshot(update=update, max_chars=max_chars)
@@ -30,10 +32,8 @@ class ZINode(InstrumentChannel):
             s += f"         * {m}\n"
         s += f"     parameters: \n"
         for p in self.parameters.keys():
-            s += f"         * {p}\n"  
+            s += f"         * {p}\n"
         return s
- 
-
 
 
 class ZIBaseInstrument(Instrument):
@@ -42,7 +42,10 @@ class ZIBaseInstrument(Instrument):
     around ziDrivers.Controller() and translates the ZI node tree 
     to a QCoDeS hirarchy of ZINodes
     """
-    def __init__(self, name: str, type: str, serial: str, interface="1gbe", **kwargs) -> None:
+
+    def __init__(
+        self, name: str, type: str, serial: str, interface="1gbe", **kwargs
+    ) -> None:
         """
         Create an instance of the instrument.
 
@@ -53,14 +56,20 @@ class ZIBaseInstrument(Instrument):
         super().__init__(name, **kwargs)
         self._serial = serial
         self._type = type
-        if type not in ["hdawg", "uhfqa"]:
-            raise Exception()
+        supported_types = ["hdawg", "uhfqa"]
+        if type not in supported_types:
+            raise Exception(
+                f"Device type {type} is currently not supported. Supported types are {supported_types}"
+            )
         self._dev = f"{type}0"
 
-        self._controller = Controller()        
+        # use ziDrivers.Controller() to interface the device
+        self._controller = Controller()
         self._controller.setup(f"connection-{type}.json")
         self._controller.connect_device(self._dev, serial, interface)
         self.connect_message()
+
+        # get the nodetree from the device as a nested dict
         self.__get_nodetree_dict()
 
     def _init_submodule(self, key):
@@ -76,7 +85,6 @@ class ZIBaseInstrument(Instrument):
         else:
             print(f"Key {key} not in nodetree: {list(self.nodetree_dict.keys())}")
 
-    
     def __get_nodetree_dict(self):
         """
         Retrieve the nodetree from the device as a nested dict and process it accordingly.
@@ -87,7 +95,7 @@ class ZIBaseInstrument(Instrument):
             key = key.replace(f"/{self._serial.upper()}/", "")
             hirarchy = key.split("/")
             dictify(self.nodetree_dict, hirarchy, value)
-    
+
     def __add_submodules_recursively(self, parent, treedict: dict):
         """
         Recursively add submodules (ZINodes) for each node in the ZI node tree.
@@ -102,11 +110,11 @@ class ZIBaseInstrument(Instrument):
             if all(isinstance(k, int) for k in value.keys()):
                 # if enumerated node
                 if "Node" in value[0].keys():
-                    # if at leave, don't create ChannelList     
-                    for k in value.keys(): 
+                    # if at leave, don't create ChannelList but parameter with "{key}{i}"
+                    for k in value.keys():
                         self.__add_parameter_from_dict(parent, f"{key}{k}", value[k])
                 else:
-                    # else, create ChannelList
+                    # else, create ChannelList to hold all enumerated ZINodes
                     channel_list = ChannelList(parent, key, ZINode)
                     for k in value.keys():
                         ch_name = f"{key}{k}"
@@ -116,16 +124,15 @@ class ZIBaseInstrument(Instrument):
                     channel_list.lock()
                     parent.add_submodule(key, channel_list)
             else:
-                # if not enumerated node
+                # if not enumerated ZINode
                 if "Node" in value.keys():
-                    # if at leave create parameter
+                    # if at leave add a parameter to the node
                     self.__add_parameter_from_dict(parent, key, value)
                 else:
-                    # if not at leave, create node
+                    # if not at leave, create ZINode as submodule
                     module = ZINode(parent, key)
                     parent.add_submodule(key, module)
                     self.__add_submodules_recursively(module, treedict[key])
-            
 
     def __add_parameter_from_dict(self, instr, name, params):
         """
@@ -137,21 +144,15 @@ class ZIBaseInstrument(Instrument):
             name   -- parameter name
             params -- dictionary describing the parameter, innermost layer of nodetree_dict
         """
-        node = params["Node"].lower().replace(f"/{self._serial}/" ,"")
+        node = params["Node"].lower().replace(f"/{self._serial}/", "")
         if "Read" in params["Properties"]:
-            getter = partial(
-                self._controller.get,
-                self._dev,
-                node             
-            )
+            # use controller.get("device name", "node") as getter
+            getter = partial(self._controller.get, self._dev, node)
         else:
             getter = None
         if "Write" in params["Properties"]:
-            setter = partial(
-                self._controller.set,
-                self._dev,
-                node             
-            )
+            # use controller.set("device name", "node", value) as setter
+            setter = partial(self._controller.set, self._dev, node)
         else:
             setter = None
         instr.add_parameter(
@@ -159,9 +160,9 @@ class ZIBaseInstrument(Instrument):
             docstring=dict_to_doc(params),
             unit=params["Unit"] if params["Unit"] != "None" else None,
             get_cmd=getter,
-            set_cmd=setter
+            set_cmd=setter,
         )
-    
+
     def __repr__(self):
         s = super().__repr__()
         s += f"\n     submodules: \n"
@@ -169,7 +170,7 @@ class ZIBaseInstrument(Instrument):
             s += f"         * {m}\n"
         s += f"     parameters: \n"
         for p in self.parameters.keys():
-            s += f"         * {p}\n"  
+            s += f"         * {p}\n"
         return s
 
     def get_idn(self):
@@ -177,19 +178,18 @@ class ZIBaseInstrument(Instrument):
             vendor="Zurich Instruments",
             model=self._type.upper(),
             serial=self._serial,
-            firmware=self._controller.get(self._dev, "system/fwrevision")
+            firmware=self._controller.get(self._dev, "system/fwrevision"),
         )
-        
 
-
-        
 
 """
 Helper functions used to process the nodetree dictionary in ZIBaseInstrument.
 """
+
+
 def dictify(data, keys, val):
     """
-    Helper function to generate nested dictionarz from list of keys and value. 
+    Helper function to generate nested dictionary from list of keys and value. 
     Calls itself recursively.
     
     Arguments:
@@ -208,6 +208,7 @@ def dictify(data, keys, val):
             data[key] = dictify({}, keys[1:], val)
     return data
 
+
 def dict_to_doc(d):
     """
     Turn dictionary into pretty doc string.
@@ -216,10 +217,3 @@ def dict_to_doc(d):
     for k, v in d.items():
         s += f"* {k}:\n\t{v}\n\n"
     return s
-
-# def join_enumeration(lst):
-#     for i, l in enumerate(lst):
-#         if any([str(j) in l for j in range(10)]):
-#             lst[i-1:i+1] = ["".join(lst[i-1:i+1])]
-#     return lst
-

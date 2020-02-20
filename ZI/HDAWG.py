@@ -5,6 +5,9 @@ from qcodes.instrument.channel import ChannelList
 
 
 class AWG(ZIAWG):
+    """
+    Subclass the ZIAWG to make sure only HDAWG sequences are allowed to be set.
+    """
     def set_sequence_params(self, **kwargs):
         if "sequence_type" in kwargs.keys():
             t = kwargs["sequence_type"]
