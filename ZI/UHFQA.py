@@ -69,6 +69,7 @@ class UHFQA(ZIBaseInstrument):
             "awgs",
             "clockbase",
             "qas",
+            "scopes",
         ]
         for key in submodules:
             self._init_submodule(key)
