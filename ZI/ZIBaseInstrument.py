@@ -2,7 +2,7 @@ from functools import partial
 
 from qcodes.instrument.base import Instrument
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
-from ziDrivers import Controller
+import zhinst.toolkit as tk
 
 
 class ZINode(InstrumentChannel):
@@ -54,23 +54,26 @@ class ZIBaseInstrument(Instrument):
             device_ID: The device name as listed in the web server.
         """
         super().__init__(name, **kwargs)
-        self._serial = serial
         self._type = type
-        supported_types = ["hdawg", "uhfqa"]
+        self._serial = serial
+        self._interface = interface
+        supported_types = ["hdawg", "uhfqa", "uhfli"]
         if type not in supported_types:
             raise Exception(
-                f"Device type {type} is currently not supported. Supported types are {supported_types}"
+                f"Device type {type} is currently not supported in ziQCoDeS. Supported types are {supported_types}"
             )
-        self._dev = f"{type}0"
+        self.connect()
 
-        # use ziDrivers.Controller() to interface the device
-        self._controller = Controller()
-        self._controller.setup(f"connection-{type}.json")
-        self._controller.connect_device(self._dev, serial, interface)
+    def connect(self):
+        # use zhinst.toolkit.tools.BaseController() to interface the device
+        self._controller = tk.tools.BaseController()
+        self._controller.setup()
+        self._controller.connect_device(
+            self._name, self._type, self._serial, self._interface
+        )
         self.connect_message()
-
         # get the nodetree from the device as a nested dict
-        self.__get_nodetree_dict()
+        self._get_nodetree_dict()
 
     def _init_submodule(self, key):
         """
@@ -81,11 +84,11 @@ class ZIBaseInstrument(Instrument):
             key  -- dictionary key in the highest layer of nodetree_dict
         """
         if key in self.nodetree_dict.keys():
-            self.__add_submodules_recursively(self, {key: self.nodetree_dict[key]})
+            self._add_submodules_recursively(self, {key: self.nodetree_dict[key]})
         else:
             print(f"Key {key} not in nodetree: {list(self.nodetree_dict.keys())}")
 
-    def __get_nodetree_dict(self):
+    def _get_nodetree_dict(self):
         """
         Retrieve the nodetree from the device as a nested dict and process it accordingly.
         """
@@ -96,7 +99,7 @@ class ZIBaseInstrument(Instrument):
             hirarchy = key.split("/")
             dictify(self.nodetree_dict, hirarchy, value)
 
-    def __add_submodules_recursively(self, parent, treedict: dict):
+    def _add_submodules_recursively(self, parent, treedict: dict):
         """
         Recursively add submodules (ZINodes) for each node in the ZI node tree.
         At the leaves create a parameter. Create a ChannelList as submodules
@@ -112,7 +115,7 @@ class ZIBaseInstrument(Instrument):
                 if "Node" in value[0].keys():
                     # if at leave, don't create ChannelList but parameter with "{key}{i}"
                     for k in value.keys():
-                        self.__add_parameter_from_dict(parent, f"{key}{k}", value[k])
+                        self._add_parameter_from_dict(parent, f"{key}{k}", value[k])
                 else:
                     # else, create ChannelList to hold all enumerated ZINodes
                     channel_list = ChannelList(parent, key, ZINode)
@@ -120,21 +123,21 @@ class ZIBaseInstrument(Instrument):
                         ch_name = f"{key}{k}"
                         ch = ZINode(parent, ch_name)
                         channel_list.append(ch)
-                        self.__add_submodules_recursively(ch, treedict[key][k])
+                        self._add_submodules_recursively(ch, treedict[key][k])
                     channel_list.lock()
                     parent.add_submodule(key, channel_list)
             else:
                 # if not enumerated ZINode
                 if "Node" in value.keys():
                     # if at leave add a parameter to the node
-                    self.__add_parameter_from_dict(parent, key, value)
+                    self._add_parameter_from_dict(parent, key, value)
                 else:
                     # if not at leave, create ZINode as submodule
                     module = ZINode(parent, key)
                     parent.add_submodule(key, module)
-                    self.__add_submodules_recursively(module, treedict[key])
+                    self._add_submodules_recursively(module, treedict[key])
 
-    def __add_parameter_from_dict(self, instr, name, params):
+    def _add_parameter_from_dict(self, instr, name, params):
         """
         Add a QCoDeS parameter associated to a ZI noe from a dict describing 
         the parameter with e.g. 'Node', 'Properties', 'Description', 'Options' etc.
@@ -147,12 +150,12 @@ class ZIBaseInstrument(Instrument):
         node = params["Node"].lower().replace(f"/{self._serial}/", "")
         if "Read" in params["Properties"]:
             # use controller.get("device name", "node") as getter
-            getter = partial(self._controller.get, self._dev, node)
+            getter = partial(self._controller.get, self._name, node)
         else:
             getter = None
         if "Write" in params["Properties"]:
             # use controller.set("device name", "node", value) as setter
-            setter = partial(self._controller.set, self._dev, node)
+            setter = partial(self._controller.set, self._name, node)
         else:
             setter = None
         instr.add_parameter(
@@ -178,7 +181,7 @@ class ZIBaseInstrument(Instrument):
             vendor="Zurich Instruments",
             model=self._type.upper(),
             serial=self._serial,
-            firmware=self._controller.get(self._dev, "system/fwrevision"),
+            firmware=self._controller.get(self._name, "system/fwrevision"),
         )
 
 

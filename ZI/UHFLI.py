@@ -2,7 +2,7 @@ from .ZIBaseInstrument import ZIBaseInstrument
 import zhinst.toolkit as tk
 
 
-class UHFQA(ZIBaseInstrument):
+class UHFLI(ZIBaseInstrument):
     """
     QCoDeS driver for ZI UHFQA.
 
@@ -12,12 +12,12 @@ class UHFQA(ZIBaseInstrument):
     """
 
     def __init__(self, name: str, serial: str, interface="1gbe", **kwargs) -> None:
-        super().__init__(name, "uhfqa", serial, interface)
+        super().__init__(name, "uhfli", serial, interface)
         submodules = [
             "system",
             "oscs",
             "triggers",
-            "dios",
+            # "dios",
             "sigins",
             "sigouts",
             # "awgs",
@@ -31,7 +31,7 @@ class UHFQA(ZIBaseInstrument):
 
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device
-        self._controller = tk.UHFQA(self._name)
+        self._controller = tk.UHFLI(self._name)
         self._controller.setup()
         self._controller.connect_device(self._serial, self._interface)
         self.connect_message()
