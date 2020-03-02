@@ -21,7 +21,6 @@ In this qcodes conda environment make sure you have `zhinst` and [`zhinst-toolki
 (qcodes) C:\Users\maxr>pip list
 ...
 zhinst                        20.1.1073
-zhinst-toolkit               0.1             
+zhinst-toolkit                0.1             
 ...
 ```
-

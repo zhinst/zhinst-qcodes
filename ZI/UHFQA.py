@@ -14,28 +14,29 @@ class UHFQA(ZIBaseInstrument):
     def __init__(self, name: str, serial: str, interface="1gbe", **kwargs) -> None:
         super().__init__(name, "uhfqa", serial, interface)
         submodules = [
-            "system",
+            # "system",
             "oscs",
             "triggers",
-            "dios",
+            # "dios",
             "sigins",
             "sigouts",
             # "awgs",
-            "clockbase",
+            # "clockbase",
             # "qas",
-            "scopes",
+            # "scopes",
         ]
         # init submodules recursively from nodetree
-        for key in submodules:
-            self._init_submodule(key)
+        [self._init_submodule(key) for key in submodules]
+        # init custom ZI submodules
+        [self.add_submodule(f"channels[{i}]", self.channels[i]) for i in range(10)]
+        self.add_submodule("awg", self.awg)
 
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device
-        self._controller = tk.UHFQA(self._name)
+        self._controller = tk.UHFQA(self._name, self._serial, interface=self._interface)
         self._controller.setup()
-        self._controller.connect_device(self._serial, self._interface)
+        self._controller.connect_device(nodetree=False)
         self.connect_message()
-        # get the nodetree from the device as a nested dict
         self._get_nodetree_dict()
 
     def get_idn(self):
@@ -43,15 +44,13 @@ class UHFQA(ZIBaseInstrument):
             vendor="Zurich Instruments",
             model=self._type.upper(),
             serial=self._serial,
-            firmware=self._controller.get("system/fwrevision"),
+            firmware=self._controller._get("system/fwrevision"),
         )
 
     @property
     def awg(self):
-        # add this as InstrumentChannel ?
         return self._controller.awg
 
     @property
     def channels(self):
-        # add this as ChannelList ?
         return self._controller.channels

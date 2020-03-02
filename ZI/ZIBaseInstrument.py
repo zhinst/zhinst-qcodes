@@ -5,6 +5,10 @@ from qcodes.instrument.channel import ChannelList, InstrumentChannel
 import zhinst.toolkit as tk
 
 
+class ZIQcodesException(Exception):
+    pass
+
+
 class ZINode(InstrumentChannel):
     """
     ZINode class collects submodules (which can be again ZINodes) 
@@ -57,20 +61,21 @@ class ZIBaseInstrument(Instrument):
         self._type = type
         self._serial = serial
         self._interface = interface
+        self.zi_submodules = {}
         supported_types = ["hdawg", "uhfqa", "uhfli"]
         if type not in supported_types:
-            raise Exception(
+            raise ZIQcodesException(
                 f"Device type {type} is currently not supported in ziQCoDeS. Supported types are {supported_types}"
             )
         self.connect()
 
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device
-        self._controller = tk.tools.BaseController()
-        self._controller.setup()
-        self._controller.connect_device(
-            self._name, self._type, self._serial, self._interface
+        self._controller = tk.BaseInstrument(
+            self._name, self._type, self._serial, interface=self._interface
         )
+        self._controller.setup()
+        self._controller.connect_device(nodetree=False)
         self.connect_message()
         # get the nodetree from the device as a nested dict
         self._get_nodetree_dict()
@@ -92,7 +97,7 @@ class ZIBaseInstrument(Instrument):
         """
         Retrieve the nodetree from the device as a nested dict and process it accordingly.
         """
-        tree = self._controller.get_nodetree(f"{self._serial}/*")
+        tree = self._controller._get_nodetree(f"{self._serial}/*")
         self.nodetree_dict = dict()
         for key, value in tree.items():
             key = key.replace(f"/{self._serial.upper()}/", "")
@@ -150,12 +155,12 @@ class ZIBaseInstrument(Instrument):
         node = params["Node"].lower().replace(f"/{self._serial}/", "")
         if "Read" in params["Properties"]:
             # use controller.get("device name", "node") as getter
-            getter = partial(self._controller.get, self._name, node)
+            getter = partial(self._controller._get, node)
         else:
             getter = None
         if "Write" in params["Properties"]:
             # use controller.set("device name", "node", value) as setter
-            setter = partial(self._controller.set, self._name, node)
+            setter = partial(self._controller._set, node)
         else:
             setter = None
         instr.add_parameter(
@@ -174,6 +179,10 @@ class ZIBaseInstrument(Instrument):
         s += f"     parameters: \n"
         for p in self.parameters.keys():
             s += f"         * {p}\n"
+        s += f"___________________\n"
+        s += f"  zi submodules: \n"
+        for m in self.zi_submodules.keys():
+            s += f"         * {m}\n"
         return s
 
     def get_idn(self):
@@ -181,8 +190,34 @@ class ZIBaseInstrument(Instrument):
             vendor="Zurich Instruments",
             model=self._type.upper(),
             serial=self._serial,
-            firmware=self._controller.get(self._name, "system/fwrevision"),
+            firmware=self._controller._get("system/fwrevision"),
         )
+
+    def add_submodule(self, name: str, submodule):
+        if isinstance(submodule, (InstrumentChannel, ChannelList)):
+            super().add_submodule(name, submodule)
+        else:
+            # add custom ZI submodule
+            self.zi_submodules[name] = submodule
+
+    def snapshot_base(self, *args, **kwargs):
+        snap = super().snapshot_base(*args, **kwargs)
+        zi_snap = {}
+        for name, subm in self.zi_submodules.items():
+            zi_snap[name] = {param[1:]: val for param, val in subm.__dict__.items()}
+        snap["zi_submodules"] = zi_snap
+        return snap
+
+    def print_readable_snapshot(self, *args, **kwargs):
+        super().print_readable_snapshot(*args, **kwargs)
+        print("")
+        print("_" * 80)
+        print(f"ZI Submodules:")
+        for name, subm in self.zi_submodules.items():
+            print(f"\n{name}:")
+            print("-" * 80)
+            for param, val in subm.__dict__.items():
+                print(f"{param[1:]}\t:\t{val}")
 
 
 """
