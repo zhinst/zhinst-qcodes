@@ -1,4 +1,4 @@
-from .ZIBaseInstrument import ZIBaseInstrument
+from .base import ZIBaseInstrument
 import zhinst.toolkit as tk
 
 

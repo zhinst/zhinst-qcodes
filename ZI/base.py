@@ -202,6 +202,7 @@ class ZIBaseInstrument(Instrument):
 
     def snapshot_base(self, *args, **kwargs):
         snap = super().snapshot_base(*args, **kwargs)
+        # append zi submodules to snapshot
         zi_snap = {}
         for name, subm in self.zi_submodules.items():
             zi_snap[name] = {param[1:]: val for param, val in subm.__dict__.items()}
@@ -210,6 +211,7 @@ class ZIBaseInstrument(Instrument):
 
     def print_readable_snapshot(self, *args, **kwargs):
         super().print_readable_snapshot(*args, **kwargs)
+        # append zi submodules to print snapshot
         print("")
         print("_" * 80)
         print(f"ZI Submodules:")
