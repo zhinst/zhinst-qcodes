@@ -1,26 +1,20 @@
-## QCoDeS drivers for UHFQA and HDAWG 
+# QCoDeS drivers for Zurich Instruents (zhinst-qcodes)
+The QCoDeS drivers for Zurich Instruents (zhinst-qcodes) is a package of instrument drivers for devices produced by [Zurich Instruments](https://wwzhinst.com) for QCoDeS. [QCoDeS](http://qcodes.github.io/Qcodes) is a Python-based data acquisition framework developed to serve the needs of nanoelectronic device
+experiments, but not limited to that. It is intended to be used within QCoDeS and not as standalone package.
 
-See examples for more info.
+## Status
+The zhinst-qcodes is well tested and considered stable enough for general usage. The interfaces may have some incompatible changes between releases. Please check the changelog if you are upgrading.
 
-### Getting started
+## Install
+See [INSTALL](INSTALL.md) for more information.
 
-Get QCoDeS from [here](https://github.com/QCoDeS/Qcodes).
+## Documentation
+See the examples for more information in the folder 'examples'
 
-Install e.g. by cloning the repository from github. Then create a QCoDeS conda environment with
-```
-conda env create -f <path-to-environment.yml>
-activate qcodes
-```
-and in that environment install QCoDeS with
-```
-pip install -e <path-to-environment>
-```
+## Contributing
+We welcome contributions by the community, either as bug reports, fixes and new code. Please use the GitHub issue tracker. Before developing something new, please get in contact with us. 
 
-In this qcodes conda environment make sure you have `zhinst` and [`zhinst-toolkit`](https://gitlab.zhinst.com/labone/zhinst-toolkit) installed!
-```
-(qcodes) C:\Users\maxr>pip list
-...
-zhinst                        20.1.1073
-zhinst-toolkit                0.1             
-...
-```
+## License
+This software is licensed under the terms of the MIT license. See [LICENSE](LICENSE) for more detail.
+
+
