@@ -29,16 +29,6 @@ class ZINode(InstrumentChannel):
             for submodule in self.submodules.values():
                 submodule.print_readable_snapshot(update=update, max_chars=max_chars)
 
-    def __repr__(self):
-        s = f"ZINode: \n"
-        s += f"     submodules: \n"
-        for m in self.submodules.keys():
-            s += f"         * {m}\n"
-        s += f"     parameters: \n"
-        for p in self.parameters.keys():
-            s += f"         * {p}\n"
-        return s
-
 
 class ZIBaseInstrument(Instrument):
     """
@@ -171,20 +161,6 @@ class ZIBaseInstrument(Instrument):
             set_cmd=setter,
         )
 
-    def __repr__(self):
-        s = super().__repr__()
-        s += f"\n     submodules: \n"
-        for m in self.submodules.keys():
-            s += f"         * {m}\n"
-        s += f"     parameters: \n"
-        for p in self.parameters.keys():
-            s += f"         * {p}\n"
-        s += f"___________________\n"
-        s += f"  zi submodules: \n"
-        for m in self.zi_submodules.keys():
-            s += f"         * {m}\n"
-        return s
-
     def get_idn(self):
         return dict(
             vendor="Zurich Instruments",
@@ -192,34 +168,6 @@ class ZIBaseInstrument(Instrument):
             serial=self._serial,
             firmware=self._controller._get("system/fwrevision"),
         )
-
-    def add_submodule(self, name: str, submodule):
-        if isinstance(submodule, (InstrumentChannel, ChannelList)):
-            super().add_submodule(name, submodule)
-        else:
-            # add custom ZI submodule
-            self.zi_submodules[name] = submodule
-
-    def snapshot_base(self, *args, **kwargs):
-        snap = super().snapshot_base(*args, **kwargs)
-        # append zi submodules to snapshot
-        zi_snap = {}
-        for name, subm in self.zi_submodules.items():
-            zi_snap[name] = {param[1:]: val for param, val in subm.__dict__.items()}
-        snap["zi_submodules"] = zi_snap
-        return snap
-
-    def print_readable_snapshot(self, *args, **kwargs):
-        super().print_readable_snapshot(*args, **kwargs)
-        # append zi submodules to print snapshot
-        print("")
-        print("_" * 80)
-        print(f"ZI Submodules:")
-        for name, subm in self.zi_submodules.items():
-            print(f"\n{name}:")
-            print("-" * 80)
-            for param, val in subm.__dict__.items():
-                print(f"{param[1:]}\t:\t{val}")
 
 
 """

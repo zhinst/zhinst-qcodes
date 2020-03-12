@@ -1,5 +1,152 @@
 from .base import ZIBaseInstrument
 import zhinst.toolkit as tk
+from zhinst.toolkit.uhfqa import AWG as UHFQA_AWG
+from zhinst.toolkit.uhfqa import ReadoutChannel
+from qcodes.instrument.channel import ChannelList, InstrumentChannel
+
+
+class AWG(InstrumentChannel):
+    def __init__(self, name, parent_instr, parent_contr):
+        InstrumentChannel.__init__(self, parent_instr, name)
+        self._awg = UHFQA_AWG(parent_contr, 0)
+        self.add_parameter(
+            "outputs",
+            unit=None,
+            docstring="maybe add something here ...",
+            get_cmd=self._awg.outputs,
+            set_cmd=self._awg.outputs,
+            label="Output Ch 1&2",
+        )
+        self.add_parameter(
+            "output1",
+            unit=self._awg.output1._unit,
+            docstring=self._awg.output1.__repr__(),
+            get_cmd=self._awg.output1,
+            set_cmd=self._awg.output1,
+            label="Output Ch 1",
+        )
+        self.add_parameter(
+            "output2",
+            unit=self._awg.output2._unit,
+            docstring=self._awg.output2.__repr__(),
+            get_cmd=self._awg.output2,
+            set_cmd=self._awg.output2,
+            label="Output Ch 2",
+        )
+        self.add_parameter(
+            "gain1",
+            unit=self._awg.gain1._unit,
+            docstring=self._awg.gain1.__repr__(),
+            get_cmd=self._awg.gain1,
+            set_cmd=self._awg.gain1,
+            label="Gain Ch 1",
+        )
+        self.add_parameter(
+            "gain2",
+            unit=self._awg.gain2._unit,
+            docstring=self._awg.gain2.__repr__(),
+            get_cmd=self._awg.gain2,
+            set_cmd=self._awg.gain2,
+            label="Gain Ch 2",
+        )
+
+    def run(self):
+        self._awg.run()
+
+    def stop(self):
+        self._awg.stop()
+
+    def wait_done(self, timeout=10):
+        self._awg.wait_done(timeout=timeout)
+
+    def compile(self):
+        self._awg.compile()
+
+    def reset_queue(self):
+        self._awg.reset_queue()
+
+    def queue_waveform(self, wave1, wave2, delay=0):
+        self._awg.queue_waveform(wave1, wave2, delay=delay)
+
+    def replace_waveform(self, wave1, wave2, i=0, delay=0):
+        self._awg.replace_waveform(wave1, wave2, i=i, delay=delay):
+
+    def upload_waveforms(self):
+        self._awg.upload_waveforms()
+
+    def compile_and_upload_waveforms(self):
+        self._awg.compile_and_upload_waveforms()
+
+    def set_sequence_params(self, **kwargs):
+        self._awg.set_sequence_params(**kwargs)
+
+
+
+class Channel(InstrumentChannel):
+    def __init__(self, name, index, parent_instr, parent_contr):
+        InstrumentChannel.__init__(self, parent_instr, name)
+        self._channel = ReadoutChannel(parent_contr, 0)
+        self.add_parameter(
+            "rotation",
+            unit=self._channel.rotation._unit,
+            docstring=self._channel.rotation.__repr__(),
+            get_cmd=self._channel.rotation,
+            set_cmd=self._channel.rotation,
+            label="Rotation",
+        )
+        self.add_parameter(
+            "threshold",
+            unit=self._channel.threshold._unit,
+            docstring=self._channel.threshold.__repr__(),
+            get_cmd=self._channel.threshold,
+            set_cmd=self._channel.threshold,
+            label="Threshold",
+        )
+        self.add_parameter(
+            "readout_frequency",
+            unit="Hz",
+            docstring="maybe add something here....",
+            get_cmd=self._channel.readout_frequency,
+            set_cmd=self._channel.readout_frequency,
+            label="Readout Frequency",
+        )
+        self.add_parameter(
+            "readout_amplitude",
+            unit="Hz",
+            docstring="maybe add something here....",
+            get_cmd=self._channel.readout_amplitude,
+            set_cmd=self._channel.readout_amplitude,
+            label="Readout Amplitude",
+        )
+        self.add_parameter(
+            "phase_shift",
+            unit="Hz",
+            docstring="maybe add something here....",
+            get_cmd=self._channel.phase_shift,
+            set_cmd=self._channel.phase_shift,
+            label="Readout Phase Shift",
+        )
+        self.add_parameter(
+            "result",
+            # parameter_class = Array ??
+            unit=self._channel.result._unit,
+            docstring=self._channel.result.__repr__(),
+            get_cmd=self._channel.result,
+            label="Result",
+        )
+        self.add_parameter(
+            "enabled",
+            unit="Boolean",
+            docstring="is the weighted integration enabled??",
+            get_cmd=self._channel.enabled,
+            label="Enabled",
+        )
+
+    def enable(self):
+        self._channel.enable()
+
+    def disable(self):
+        self._channel.disable()
 
 
 class UHFQA(ZIBaseInstrument):
@@ -20,8 +167,13 @@ class UHFQA(ZIBaseInstrument):
         ]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
         # init custom ZI submodules
-        [self.add_submodule(f"channels[{i}]", self.channels[i]) for i in range(10)]
-        self.add_submodule("awg", self.awg)
+        # [self.add_submodule(f"channels[{i}]", self.channels[i]) for i in range(10)]
+        channel_list = ChannelList(self, "channels", Channel)
+        for i in range(10):
+            channel_list.append(Channel(f"ch-{i}", i, self, self._controller))
+        channel_list.lock()
+        self.add_submodule("channels", channel_list)
+        self.add_submodule("awg", AWG("awg", self, self._controller))
 
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device
@@ -39,10 +191,10 @@ class UHFQA(ZIBaseInstrument):
             firmware=self._controller._get("system/fwrevision"),
         )
 
-    @property
-    def awg(self):
-        return self._controller.awg
+    # @property
+    # def awg(self):
+    #     return self._controller.awg
 
-    @property
-    def channels(self):
-        return self._controller.channels
+    # @property
+    # def channels(self):
+    #     return self._controller.channels
