@@ -69,7 +69,7 @@ class AWG(InstrumentChannel):
         self._awg.queue_waveform(wave1, wave2, delay=delay)
 
     def replace_waveform(self, wave1, wave2, i=0, delay=0):
-        self._awg.replace_waveform(wave1, wave2, i=i, delay=delay):
+        self._awg.replace_waveform(wave1, wave2, i=i, delay=delay)
 
     def upload_waveforms(self):
         self._awg.upload_waveforms()
@@ -79,7 +79,6 @@ class AWG(InstrumentChannel):
 
     def set_sequence_params(self, **kwargs):
         self._awg.set_sequence_params(**kwargs)
-
 
 
 class Channel(InstrumentChannel):
