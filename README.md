@@ -9,7 +9,7 @@ The zhinst-qcodes is well tested and considered stable enough for general usage.
 See [INSTALL](INSTALL.md) for more information.
 
 ## Documentation
-See the examples for more information in the folder 'examples'
+See the examples for more information in the folder `examples`
 
 ## Contributing
 We welcome contributions by the community, either as bug reports, fixes and new code. Please use the GitHub issue tracker. Before developing something new, please get in contact with us. 
