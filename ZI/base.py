@@ -62,7 +62,7 @@ class ZIBaseInstrument(Instrument):
         self._serial = serial
         self._interface = interface
         self.zi_submodules = {}
-        supported_types = ["hdawg", "uhfqa", "uhfli"]
+        supported_types = ["hdawg", "uhfqa", "uhfli", "mfli"]
         if type not in supported_types:
             raise ZIQcodesException(
                 f"Device type {type} is currently not supported in ziQCoDeS. Supported types are {supported_types}"
@@ -117,7 +117,7 @@ class ZIBaseInstrument(Instrument):
         for key, value in treedict.items():
             if all(isinstance(k, int) for k in value.keys()):
                 # if enumerated node
-                if "Node" in value[0].keys():
+                if "Node" in list(value.values())[0].keys():
                     # if at leave, don't create ChannelList but parameter with "{key}{i}"
                     for k in value.keys():
                         self._add_parameter_from_dict(parent, f"{key}{k}", value[k])
