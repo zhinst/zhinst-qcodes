@@ -13,19 +13,9 @@ class HDAWG(ZIBaseInstrument):
 
     def __init__(self, name: str, serial: str, interface="1gbe", **kwargs) -> None:
         super().__init__(name, "hdawg", serial, interface)
-        submodules = [
-            "system",
-            "oscs",
-            "sines",
-            "triggers",
-            "dios",
-            "sigouts",
-            # "awgs",
-            "clockbase",
-            "cnts",
-        ]
-        # init submodules recursively from nodetree
-        [self._init_submodule(key) for key in submodules]
+        submodules = self.nodetree_dict.keys()
+        blacklist = ["awgs"]
+        [self._init_submodule(key) for key in submodules if key not in blacklist]
         # init custom ZI submodules
         [self.add_submodule(f"awgs[{i}]", self.awgs[i]) for i in range(4)]
 

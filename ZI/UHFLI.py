@@ -13,20 +13,12 @@ class UHFLI(ZIBaseInstrument):
 
     def __init__(self, name: str, serial: str, interface="1gbe", **kwargs) -> None:
         super().__init__(name, "uhfli", serial, interface)
-        submodules = [
-            "system",
-            "oscs",
-            "triggers",
-            # "dios",
-            "sigins",
-            "sigouts",
-            # "awgs",
-            "clockbase",
-            # "qas",
+        submodules = self.nodetree_dict.keys()
+        blacklist = [
+            "awgs",
             "scopes",
         ]
-        # init submodules recursively from nodetree
-        [self._init_submodule(key) for key in submodules]
+        [self._init_submodule(key) for key in submodules if key not in blacklist]
         # init custom ZI submodules
         self.add_submodule("awg", self.awg)
 
