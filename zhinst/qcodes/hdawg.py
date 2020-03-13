@@ -1,7 +1,9 @@
 from .base import ZIBaseInstrument
 import zhinst.toolkit as tk
 from zhinst.toolkit.hdawg import AWG as HDAWG_AWG
+
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
+import qcodes.utils.validators as vals
 
 
 class AWG(InstrumentChannel):
@@ -23,6 +25,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.output1,
             set_cmd=self._awg.output1,
             label="Output Ch 1",
+            vals=vals.OnOff(),
         )
         self.add_parameter(
             "output2",
@@ -31,6 +34,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.output2,
             set_cmd=self._awg.output2,
             label="Output Ch 2",
+            vals=vals.OnOff(),
         )
         self.add_parameter(
             "gain1",
@@ -39,6 +43,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.gain1,
             set_cmd=self._awg.gain1,
             label="Gain Ch 1",
+            vals=vals.Numbers(-1, 1),
         )
         self.add_parameter(
             "gain2",
@@ -47,6 +52,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.gain2,
             set_cmd=self._awg.gain2,
             label="Gain Ch 2",
+            vals=vals.Numbers(-1, 1),
         )
         self.add_parameter(
             "modulation_phase_shift",
@@ -55,6 +61,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.modulation_phase_shift,
             set_cmd=self._awg.modulation_phase_shift,
             label="Modulation Phase Shift",
+            vals=vals.Numbers(),
         )
         self.add_parameter(
             "modulation_freq",
@@ -63,6 +70,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.modulation_freq,
             set_cmd=self._awg.modulation_freq,
             label="Modulation Frequency",
+            vals=vals.Numbers(),
         )
 
     def enable_iq_modulation(self):
@@ -116,16 +124,14 @@ class HDAWG(ZIBaseInstrument):
         submodules = self.nodetree_dict.keys()
         blacklist = ["awgs"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
-        # init custom ZI submodules
+        # init submodules for awg
         channel_list = ChannelList(self, "awgs", AWG)
         for i in range(4):
             channel_list.append(AWG(f"awg-{i}", i, self, self._controller))
         channel_list.lock()
         self.add_submodule("awgs", channel_list)
-        # [self.add_submodule(f"awgs[{i}]", self.awgs[i]) for i in range(4)]
 
     def connect(self):
-        # use zhinst.toolkit.tools.BaseController() to interface the device
         self._controller = tk.HDAWG(self._name, self._serial, interface=self._interface)
         self._controller.setup()
         self._controller.connect_device(nodetree=False)
