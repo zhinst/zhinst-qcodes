@@ -109,6 +109,9 @@ class AWG(InstrumentChannel):
     def set_sequence_params(self, **kwargs):
         self._awg.set_sequence_params(**kwargs)
 
+    def sequence_params(self):
+        return self._awg.sequence_params
+
 
 class HDAWG(ZIBaseInstrument):
     """
