@@ -14,7 +14,7 @@ class AWG(InstrumentChannel):
         self.add_parameter(
             "outputs",
             unit=None,
-            docstring="maybe add something here ...",
+            docstring="Expects a tuple with 'on' and 'off' values for the two channels of the AWG, e.g. ('on', 'off').",
             get_cmd=self._awg.outputs,
             set_cmd=self._awg.outputs,
             label="Output Ch 1&2",
@@ -112,7 +112,7 @@ class Channel(InstrumentChannel):
         self.add_parameter(
             "readout_frequency",
             unit="Hz",
-            docstring="maybe add something here....",
+            docstring="Readout frequency of the channel. Is used to create a readout tone and to set the integration weights.",
             get_cmd=self._channel.readout_frequency,
             set_cmd=self._channel.readout_frequency,
             label="Readout Frequency",
@@ -121,7 +121,7 @@ class Channel(InstrumentChannel):
         self.add_parameter(
             "readout_amplitude",
             unit="Hz",
-            docstring="maybe add something here....",
+            docstring="The amplitude of the readout tone associated with this channel. Used in a 'Readout' sequence.",
             get_cmd=self._channel.readout_amplitude,
             set_cmd=self._channel.readout_amplitude,
             label="Readout Amplitude",
@@ -130,7 +130,7 @@ class Channel(InstrumentChannel):
         self.add_parameter(
             "phase_shift",
             unit="Hz",
-            docstring="maybe add something here....",
+            docstring="The phase shift of the readout tone associated with this channel. Used in a 'Readout' sequence.",
             get_cmd=self._channel.phase_shift,
             set_cmd=self._channel.phase_shift,
             label="Readout Phase Shift",
@@ -146,7 +146,7 @@ class Channel(InstrumentChannel):
         self.add_parameter(
             "enabled",
             unit="Boolean",
-            docstring="is the weighted integration enabled??",
+            docstring="Enable or disable the weighted integration for this readout channel with 'channel.enable()' or 'channel.disable()'.",
             get_cmd=self._channel.enabled,
             label="Enabled",
             vals=vals.Bool(),
@@ -185,29 +185,30 @@ class UHFQA(ZIBaseInstrument):
         self.add_submodule("awg", AWG("awg", self, self._controller))
         self.add_parameter(
             "crosstalk_matrix",
-            docstring="the 10x10 crosstalk matrix",
+            docstring="The 10x10 crosstalk suppression matrix that multiplies the 10 signal paths. Can be set only partially.",
             get_cmd=self._controller.crosstalk_matrix,
             set_cmd=self._controller.crosstalk_matrix,
             label="Crosstalk Matrix",
         )
+        sources = [
+            "Crosstalk",
+            "Integration",
+            "Threshold",
+            "Crosstalk Correlation",
+            "Threshold Correlation",
+            "Rotation",
+        ]
         self.add_parameter(
             "result_source",
-            docstring="The signal source for the QA Results.",
+            docstring=f"The signal source for QA Results. Has to be one of {sources}.",
             get_cmd=self._controller.crosstalk_matrix,
             set_cmd=self._controller.crosstalk_matrix,
             label="Result Source",
-            vals=vals.Enum(
-                "Crosstalk",
-                "Integration",
-                "Threshold",
-                "Crosstalk Correlation",
-                "Threshold Correlation",
-                "Rotation",
-            ),
+            vals=vals.Enum(*sources),
         )
         self.add_parameter(
             "integration_time",
-            docstring="The integration time.",
+            docstring="The integration time used for demodulation in seconds. Can be up to 2.27 us when using weighted integration and up to 50 us in spectroscopy mode.",
             get_cmd=self._controller.integration_time,
             set_cmd=self._controller.integration_time,
             label="Integration Time",
@@ -215,7 +216,6 @@ class UHFQA(ZIBaseInstrument):
         )
 
     def connect(self):
-        # use zhinst.toolkit.tools.BaseController() to interface the device
         self._controller = tk.UHFQA(self._name, self._serial, interface=self._interface)
         self._controller.setup()
         self._controller.connect_device(nodetree=False)

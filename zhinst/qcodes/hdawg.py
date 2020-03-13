@@ -13,7 +13,7 @@ class AWG(InstrumentChannel):
         self.add_parameter(
             "outputs",
             unit=None,
-            docstring="maybe add something here ...",
+            docstring="Expects a tuple with 'on' and 'off' values for the two channels of the AWG, e.g. ('on', 'off').",
             get_cmd=self._awg.outputs,
             set_cmd=self._awg.outputs,
             label="Output Ch 1&2",
