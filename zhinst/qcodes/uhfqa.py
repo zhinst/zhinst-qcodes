@@ -2,7 +2,9 @@ from .base import ZIBaseInstrument
 import zhinst.toolkit as tk
 from zhinst.toolkit.uhfqa import AWG as UHFQA_AWG
 from zhinst.toolkit.uhfqa import ReadoutChannel
+
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
+import qcodes.utils.validators as vals
 
 
 class AWG(InstrumentChannel):
@@ -24,6 +26,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.output1,
             set_cmd=self._awg.output1,
             label="Output Ch 1",
+            vals=vals.OnOff(),
         )
         self.add_parameter(
             "output2",
@@ -32,6 +35,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.output2,
             set_cmd=self._awg.output2,
             label="Output Ch 2",
+            vals=vals.OnOff(),
         )
         self.add_parameter(
             "gain1",
@@ -40,6 +44,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.gain1,
             set_cmd=self._awg.gain1,
             label="Gain Ch 1",
+            vals=vals.Numbers(-1, 1),
         )
         self.add_parameter(
             "gain2",
@@ -48,6 +53,7 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.gain2,
             set_cmd=self._awg.gain2,
             label="Gain Ch 2",
+            vals=vals.Numbers(-1, 1),
         )
 
     def run(self):
@@ -92,6 +98,7 @@ class Channel(InstrumentChannel):
             get_cmd=self._channel.rotation,
             set_cmd=self._channel.rotation,
             label="Rotation",
+            vals=vals.Numbers(),
         )
         self.add_parameter(
             "threshold",
@@ -100,6 +107,7 @@ class Channel(InstrumentChannel):
             get_cmd=self._channel.threshold,
             set_cmd=self._channel.threshold,
             label="Threshold",
+            vals=vals.Numbers(),
         )
         self.add_parameter(
             "readout_frequency",
@@ -108,6 +116,7 @@ class Channel(InstrumentChannel):
             get_cmd=self._channel.readout_frequency,
             set_cmd=self._channel.readout_frequency,
             label="Readout Frequency",
+            vals=vals.Numbers(0),
         )
         self.add_parameter(
             "readout_amplitude",
@@ -116,6 +125,7 @@ class Channel(InstrumentChannel):
             get_cmd=self._channel.readout_amplitude,
             set_cmd=self._channel.readout_amplitude,
             label="Readout Amplitude",
+            vals=vals.Numbers(),
         )
         self.add_parameter(
             "phase_shift",
@@ -124,10 +134,10 @@ class Channel(InstrumentChannel):
             get_cmd=self._channel.phase_shift,
             set_cmd=self._channel.phase_shift,
             label="Readout Phase Shift",
+            vals=vals.Numbers(),
         )
         self.add_parameter(
             "result",
-            # parameter_class = Array ??
             unit=self._channel.result._unit,
             docstring=self._channel.result.__repr__(),
             get_cmd=self._channel.result,
@@ -139,6 +149,7 @@ class Channel(InstrumentChannel):
             docstring="is the weighted integration enabled??",
             get_cmd=self._channel.enabled,
             label="Enabled",
+            vals=vals.Bool(),
         )
 
     def enable(self):
@@ -165,14 +176,43 @@ class UHFQA(ZIBaseInstrument):
             "scopes",
         ]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
-        # init custom ZI submodules
-        # [self.add_submodule(f"channels[{i}]", self.channels[i]) for i in range(10)]
+        # init submodules for channels and awg
         channel_list = ChannelList(self, "channels", Channel)
         for i in range(10):
             channel_list.append(Channel(f"ch-{i}", i, self, self._controller))
         channel_list.lock()
         self.add_submodule("channels", channel_list)
         self.add_submodule("awg", AWG("awg", self, self._controller))
+        self.add_parameter(
+            "crosstalk_matrix",
+            docstring="the 10x10 crosstalk matrix",
+            get_cmd=self._controller.crosstalk_matrix,
+            set_cmd=self._controller.crosstalk_matrix,
+            label="Crosstalk Matrix",
+        )
+        self.add_parameter(
+            "result_source",
+            docstring="The signal source for the QA Results.",
+            get_cmd=self._controller.crosstalk_matrix,
+            set_cmd=self._controller.crosstalk_matrix,
+            label="Result Source",
+            vals=vals.Enum(
+                "Crosstalk",
+                "Integration",
+                "Threshold",
+                "Crosstalk Correlation",
+                "Threshold Correlation",
+                "Rotation",
+            ),
+        )
+        self.add_parameter(
+            "integration_time",
+            docstring="The integration time.",
+            get_cmd=self._controller.integration_time,
+            set_cmd=self._controller.integration_time,
+            label="Integration Time",
+            vals=vals.Number(0, 50e-6),
+        )
 
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device
@@ -190,10 +230,3 @@ class UHFQA(ZIBaseInstrument):
             firmware=self._controller._get("system/fwrevision"),
         )
 
-    # @property
-    # def awg(self):
-    #     return self._controller.awg
-
-    # @property
-    # def channels(self):
-    #     return self._controller.channels
