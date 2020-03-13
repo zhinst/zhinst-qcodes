@@ -1,4 +1,5 @@
 from .base import ZIBaseInstrument
+from .uhfqa import AWG
 import zhinst.toolkit as tk
 
 
@@ -19,8 +20,8 @@ class UHFLI(ZIBaseInstrument):
             "scopes",
         ]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
-        # init custom ZI submodules
-        self.add_submodule("awg", self.awg)
+        # init submodule for awg
+        self.add_submodule("awg", AWG("awg", self, self._controller))
 
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device
@@ -38,6 +39,3 @@ class UHFLI(ZIBaseInstrument):
             firmware=self._controller._get("system/fwrevision"),
         )
 
-    @property
-    def awg(self):
-        return self._controller.awg
