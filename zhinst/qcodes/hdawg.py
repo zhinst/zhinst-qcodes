@@ -1,6 +1,6 @@
 from .base import ZIBaseInstrument
 import zhinst.toolkit as tk
-from zhinst.toolkit.hdawg import AWG as HDAWG_AWG
+from zhinst.toolkit.control.drivers.hdawg import AWG as HDAWG_AWG
 
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
 import qcodes.utils.validators as vals

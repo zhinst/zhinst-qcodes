@@ -1,7 +1,6 @@
 from .base import ZIBaseInstrument
 import zhinst.toolkit as tk
-from zhinst.toolkit.uhfqa import AWG as UHFQA_AWG
-from zhinst.toolkit.uhfqa import ReadoutChannel
+from zhinst.toolkit.control.drivers.uhfqa import ReadoutChannel, AWG as UHFQA_AWG
 
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
 import qcodes.utils.validators as vals
