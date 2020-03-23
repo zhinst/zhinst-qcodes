@@ -38,7 +38,13 @@ class ZIBaseInstrument(Instrument):
     """
 
     def __init__(
-        self, name: str, type: str, serial: str, interface="1gbe", **kwargs
+        self,
+        name: str,
+        type: str,
+        serial: str,
+        interface="1gbe",
+        host="localhost",
+        **kwargs,
     ) -> None:
         """
         Create an instance of the instrument.
@@ -51,6 +57,7 @@ class ZIBaseInstrument(Instrument):
         self._type = type
         self._serial = serial
         self._interface = interface
+        self._host = host
         self.zi_submodules = {}
         supported_types = ["hdawg", "uhfqa", "uhfli", "mfli"]
         if type not in supported_types:
@@ -62,7 +69,11 @@ class ZIBaseInstrument(Instrument):
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device
         self._controller = tk.BaseInstrument(
-            self._name, self._type, self._serial, interface=self._interface
+            self._name,
+            self._type,
+            self._serial,
+            interface=self._interface,
+            host=self._host,
         )
         self._controller.setup()
         self._controller.connect_device(nodetree=False)

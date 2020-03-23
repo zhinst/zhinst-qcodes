@@ -8,7 +8,7 @@ import qcodes.utils.validators as vals
 
 class AWG(InstrumentChannel):
     def __init__(self, name, parent_instr, parent_contr):
-        InstrumentChannel.__init__(self, parent_instr, name)
+        super().__init__(self, parent_instr, name)
         self._awg = UHFQA_AWG(parent_contr, 0)
         self.add_parameter(
             "outputs",
@@ -170,8 +170,10 @@ class UHFQA(ZIBaseInstrument):
     control of the AWG sequence program.
     """
 
-    def __init__(self, name: str, serial: str, interface="1gbe", **kwargs) -> None:
-        super().__init__(name, "uhfqa", serial, interface)
+    def __init__(
+        self, name: str, serial: str, interface="1gbe", host="localhost", **kwargs
+    ) -> None:
+        super().__init__(name, "uhfqa", serial, interface, host)
         submodules = self.nodetree_dict.keys()
         blacklist = [
             "awgs",
@@ -203,8 +205,8 @@ class UHFQA(ZIBaseInstrument):
         self.add_parameter(
             "result_source",
             docstring=f"The signal source for QA Results. Has to be one of {sources}.",
-            get_cmd=self._controller.crosstalk_matrix,
-            set_cmd=self._controller.crosstalk_matrix,
+            get_cmd=self._controller.result_source,
+            set_cmd=self._controller.result_source,
             label="Result Source",
             vals=vals.Enum(*sources),
         )
@@ -218,7 +220,9 @@ class UHFQA(ZIBaseInstrument):
         )
 
     def connect(self):
-        self._controller = tk.UHFQA(self._name, self._serial, interface=self._interface)
+        self._controller = tk.UHFQA(
+            self._name, self._serial, interface=self._interface, host=self._host
+        )
         self._controller.setup()
         self._controller.connect_device(nodetree=False)
         self.connect_message()
