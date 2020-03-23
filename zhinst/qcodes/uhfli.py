@@ -12,8 +12,10 @@ class UHFLI(ZIBaseInstrument):
     control of the AWG sequence program.
     """
 
-    def __init__(self, name: str, serial: str, interface="1gbe", **kwargs) -> None:
-        super().__init__(name, "uhfli", serial, interface)
+    def __init__(
+        self, name: str, serial: str, interface="1gbe", host="localhost", **kwargs
+    ) -> None:
+        super().__init__(name, "uhfli", serial, interface, host)
         submodules = self.nodetree_dict.keys()
         blacklist = [
             "awgs",
@@ -25,7 +27,9 @@ class UHFLI(ZIBaseInstrument):
 
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device
-        self._controller = tk.UHFLI(self._name, self._serial, interface=self._interface)
+        self._controller = tk.UHFLI(
+            self._name, self._serial, interface=self._interface, host=self._host
+        )
         self._controller.setup()
         self._controller.connect_device(nodetree=False)
         self.connect_message()
