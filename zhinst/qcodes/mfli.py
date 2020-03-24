@@ -27,6 +27,9 @@ class DAQ(InstrumentChannel):
                     val_mapping=val_mapping,
                 )
 
+    def trigger(self, *args):
+        self._daq_module.trigger(*args)
+
     def signals_add(self, *args, **kwargs):
         return self._daq_module.signals_add(*args, **kwargs)
 
@@ -84,4 +87,3 @@ class MFLI(ZIBaseInstrument):
             serial=self._serial,
             firmware=self._controller._get("system/fwrevision"),
         )
-
