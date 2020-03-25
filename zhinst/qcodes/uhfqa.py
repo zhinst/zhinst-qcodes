@@ -171,9 +171,16 @@ class UHFQA(ZIBaseInstrument):
     """
 
     def __init__(
-        self, name: str, serial: str, interface="1gbe", host="localhost", **kwargs
+        self,
+        name: str,
+        serial: str,
+        interface="1gbe",
+        host="localhost",
+        port=8004,
+        api=6,
+        **kwargs,
     ) -> None:
-        super().__init__(name, "uhfqa", serial, interface, host)
+        super().__init__(name, "uhfqa", serial, interface, host, port, api, **kwargs)
         submodules = self.nodetree_dict.keys()
         blacklist = [
             "awgs",
@@ -235,4 +242,3 @@ class UHFQA(ZIBaseInstrument):
             serial=self._serial,
             firmware=self._controller._get("system/fwrevision"),
         )
-
