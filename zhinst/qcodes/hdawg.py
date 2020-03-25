@@ -122,8 +122,17 @@ class HDAWG(ZIBaseInstrument):
     level control of the AWG sequence program.
     """
 
-    def __init__(self, name: str, serial: str, interface="1gbe", **kwargs) -> None:
-        super().__init__(name, "hdawg", serial, interface)
+    def __init__(
+        self,
+        name: str,
+        serial: str,
+        interface="1gbe",
+        host="localhost",
+        port=8004,
+        api=6,
+        **kwargs,
+    ) -> None:
+        super().__init__(name, "hdawg", serial, interface, host, port, api, **kwargs)
         submodules = self.nodetree_dict.keys()
         blacklist = ["awgs"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
@@ -141,4 +150,3 @@ class HDAWG(ZIBaseInstrument):
         self.connect_message()
         # get the nodetree from the device as a nested dict
         self._get_nodetree_dict()
-
