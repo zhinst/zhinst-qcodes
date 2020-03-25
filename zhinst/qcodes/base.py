@@ -44,6 +44,8 @@ class ZIBaseInstrument(Instrument):
         serial: str,
         interface="1gbe",
         host="localhost",
+        port=8004,
+        api=6,
         **kwargs,
     ) -> None:
         """
@@ -58,6 +60,8 @@ class ZIBaseInstrument(Instrument):
         self._serial = serial
         self._interface = interface
         self._host = host
+        self._port = port
+        self._api = api
         self.zi_submodules = {}
         supported_types = ["hdawg", "uhfqa", "uhfli", "mfli"]
         if type not in supported_types:
@@ -74,6 +78,8 @@ class ZIBaseInstrument(Instrument):
             self._serial,
             interface=self._interface,
             host=self._host,
+            port=self._port,
+            api=self._api,
         )
         self._controller.setup()
         self._controller.connect_device(nodetree=False)
