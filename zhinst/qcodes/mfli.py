@@ -8,7 +8,11 @@ from zhinst.toolkit.control.drivers.mfli import DAQModule, SweeperModule
 
 class DAQ(InstrumentChannel):
     """
-    test docstring here
+    Data Acquisition Module for MFLI
+
+    properties:
+        signals (list)
+        results (dict)
     
     """
 
@@ -31,22 +35,93 @@ class DAQ(InstrumentChannel):
                     val_mapping=val_mapping,
                 )
 
-    def trigger(self, *args):
-        self._daq_module.trigger(*args)
+    def trigger(self, trigger_source, trigger_type):
+        """
+        Set the trigger signal of the DAQ module. Specified by the trigger 
+        source (e.g. 'demod1') and the type (e.g. 'trigin1').
+        
+        Arguments:
+            trigger_source (str)
+            trigger_type (str)
+        """
+        self._daq_module.trigger(trigger_source, trigger_type)
 
-    def signals_add(self, *args, **kwargs):
-        return self._daq_module.signals_add(*args, **kwargs)
+    def signals_add(
+        self,
+        signal_source,
+        signal_type="",
+        operation="avg",
+        fft=False,
+        complex_selector="abs",
+    ):
+        """
+        Add a singal to measure with the DAQ module. The specified signal is added 
+        to the property 'signals' list. On 'measure()' the DAQ module subscribes to
+        all the signal nodes in the list. 
+        
+        Arguments:
+            signal_source (str): specifies the signal source, e.g. 'demod1'
+        
+        Keyword Arguments:
+            signal_type (str): specifies the type of the signal, e.g. "x" or "r"
+            operation (str): the operation performed on the signal, e.g. "avg" 
+                or "std" (default: "avg")
+            fft (bool): selects the fourier transform of the signal (default: False)
+            complex_selector (str): only used with FFT, selects the operation on the 
+                complex value, e.g. "abs" or "real" (default: {"abs"})
+        
+        Returns:
+            a string with the exact signal node, to be used as a key in the 
+            results dictionary, e.g.
+                
+                > signal = mfli.daq.signal_add("demod1", "r")
+                > mfli.daq.measure()
+                > result = mfli.daq.results[signal]
+
+        """
+        return self._daq_module.signals_add(
+            signal_source, signal_type, operation, fft, complex_selector
+        )
+
+    def signals_list(self):
+        """
+        Returns a list of the available signals.
+        
+        """
+        return self._daq_module.signals_list()
 
     def signals_clear(self):
+        """
+        Clears the signals list.
+
+        """
         self._daq_module.signals_clear()
 
-    def measure(self, **kwargs):
-        self._daq_module.measure(**kwargs)
+    def measure(self, verbose=True, timeout=20):
+        """
+        Performs a measurement and stores the result in 'daq.results'. This 
+        method subscribes to all the paths previously added to 'daq.signals', 
+        then starts the measurement, waits until the measurement in finished 
+        and eventually reads the result. 
+        
+        Keyword Arguments:
+            verbose (bool): flag to select a verbose print output (default: True)
+            timeout {int}: a maximum time after which the measurement stops (default: 20)
+        """
+        self._daq_module.measure(verbose, timeout)
 
     def _set(self, *args):
+        """
+        Sets a given node of the module to a given value.
+
+        """
         self._daq_module._set(*args)
 
     def _get(self, *args, valueonly=True):
+        """
+        Gets the value of a given node of the module.
+        
+        """
         return self._daq_module._get(*args)
 
     @property
@@ -60,7 +135,11 @@ class DAQ(InstrumentChannel):
 
 class Sweeper(InstrumentChannel):
     """
-    sweeper docstring here
+    Sweeper module for MFLI.
+
+    properties:
+        signals (list)
+        results (dict)
     
     """
 
@@ -84,27 +163,94 @@ class Sweeper(InstrumentChannel):
                 )
 
     def signals_add(self, signal_source):
+        """
+        Add a singal to measure with the DAQ module. The specified signal is added 
+        to the property 'signals' list. On 'measure()' the DAQ module subscribes to
+        all the signal nodes in the list. In contrast to the DAQ module, the 
+        sweeper records all data from the given node.
+        
+        Arguments:
+            signal_source (str): specifies the signal source, e.g. 'demod1'
+        
+        Returns:
+            a string with the exact signal node, to be used as a key in the 
+            results dictionary, e.g.
+                
+                > signal = mfli.sweeper.signal_add("demod1")
+                > mfli.sweeper.measure()
+                > result = mfli.sweeper.results[signal]
+
+        """
         return self._sweeper_module.signals_add(signal_source)
 
     def signals_clear(self):
+        """
+        Clears the signals list.
+
+        """
         self._sweeper_module.signals_clear()
 
     def signals_list(self):
+        """
+        Returns a list of the available signals.
+        
+        """
         return self._sweeper_module.signals_list()
 
-    def sweep_parameter(self, param):
-        self._sweeper_module.sweep_parameter(param)
+    def sweep_parameter_list(self):
+        """
+        Lists available parameters that support sweeping.
 
-    def measure(self, **kwargs):
-        self._sweeper_module.measure(**kwargs)
+        """
+        return self._sweeper_module.sweep_parameter_list()
+
+    def sweep_parameter(self, param):
+        """
+        Selects a parameter to sweep. The parameter is specified as a string 
+        that has to match the avaliable parameters that support sweeping. See 
+        available parameters with 'sweeper.sweep_parameter_list()'.
+        
+        Arguments:
+            param (str)
+
+        """
+        return self._sweeper_module.sweep_parameter(param)
+
+    def measure(self, verbose=True, timeout=20):
+        """
+        Performs a measurement and stores the result in 'sweeper.results'. This 
+        method subscribes to all the paths previously added to 'daq.signals', 
+        then starts the measurement, waits until the measurement in finished 
+        and eventually reads the result. 
+        
+        Keyword Arguments:
+            verbose (bool): flag to select a verbose print output (default: True)
+            timeout {int}: a maximum time after which the measurement stops (default: 20)
+        """
+        self._sweeper_module.measure(verbose, timeout)
 
     def application(self, application):
+        """
+        Selects an application specific preset.
+        
+        Arguments:
+            application (str)
+
+        """
         self._sweeper_module.application(application)
 
     def _set(self, *args):
+        """
+        Sets a given node of the module to a given value.
+
+        """
         self._sweeper_module._set(*args)
 
     def _get(self, *args, valueonly=True):
+        """
+        Gets the value of a given node of the module.
+        
+        """
         return self._sweeper_module._get(*args)
 
     @property
