@@ -8,7 +8,18 @@ from zhinst.toolkit.control.drivers.mfli import DAQModule, SweeperModule
 
 class DAQ(InstrumentChannel):
     """
-    test docstring here
+    Data Acquisition Module for MFLI. Inherits from InstrumentChannel and wraps 
+    around the DAQ module of a MFLI from zhinst-toolkit.
+
+    Arguments:
+        name (str): name of the submodule
+        parent_instr: qcodes parent instrument of InstrumentChannel
+        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
+            get and set
+    
+    Properties:
+        signals (list)
+        results (dict)
     
     """
 
@@ -31,22 +42,93 @@ class DAQ(InstrumentChannel):
                     val_mapping=val_mapping,
                 )
 
-    def trigger(self, *args):
-        self._daq_module.trigger(*args)
+    def trigger(self, trigger_source, trigger_type):
+        """
+        Set the trigger signal of the DAQ module. Specified by the trigger 
+        source (e.g. 'demod1') and the type (e.g. 'trigin1').
+        
+        Arguments:
+            trigger_source (str)
+            trigger_type (str)
 
-    def signals_add(self, *args, **kwargs):
-        return self._daq_module.signals_add(*args, **kwargs)
+        """
+        self._daq_module.trigger(trigger_source, trigger_type)
+
+    def signals_add(
+        self,
+        signal_source,
+        signal_type="",
+        operation="avg",
+        fft=False,
+        complex_selector="abs",
+    ):
+        """
+        Add a singal to measure with the DAQ module. The specified signal is added 
+        to the property 'signals' list. On 'measure()' the DAQ module subscribes to
+        all the signal nodes in the list. 
+        
+        Arguments:
+            signal_source (str): specifies the signal source, e.g. 'demod1'
+            signal_type (str): specifies the type of the signal, e.g. "x" or "r"
+            operation (str): the operation performed on the signal, e.g. "avg" 
+                or "std" (default: "avg")
+            fft (bool): selects the fourier transform of the signal (default: False)
+            complex_selector (str): only used with FFT, selects the operation on the 
+                complex value, e.g. "abs" or "real" (default: {"abs"})
+        
+        Returns:
+            a string with the exact signal node, to be used as a key in the 
+            results dictionary, e.g.
+                
+                > signal = mfli.daq.signal_add("demod1", "r")
+                > mfli.daq.measure()
+                > result = mfli.daq.results[signal]
+
+        """
+        return self._daq_module.signals_add(
+            signal_source, signal_type, operation, fft, complex_selector
+        )
+
+    def signals_list(self):
+        """
+        Returns a list of the available signals.
+        
+        """
+        return self._daq_module.signals_list()
 
     def signals_clear(self):
+        """
+        Clears the signals list.
+
+        """
         self._daq_module.signals_clear()
 
-    def measure(self, **kwargs):
-        self._daq_module.measure(**kwargs)
+    def measure(self, verbose=True, timeout=20):
+        """
+        Performs a measurement and stores the result in 'daq.results'. This 
+        method subscribes to all the paths previously added to 'daq.signals', 
+        then starts the measurement, waits until the measurement in finished 
+        and eventually reads the result. 
+        
+        Keyword Arguments:
+            verbose (bool): flag to select a verbose print output (default: True)
+            timeout (int): a maximum time after which the measurement stops (default: 20)
+
+        """
+        self._daq_module.measure(verbose, timeout)
 
     def _set(self, *args):
+        """
+        Sets a given node of the module to a given value.
+
+        """
         self._daq_module._set(*args)
 
     def _get(self, *args, valueonly=True):
+        """
+        Gets the value of a given node of the module.
+        
+        """
         return self._daq_module._get(*args)
 
     @property
@@ -60,7 +142,18 @@ class DAQ(InstrumentChannel):
 
 class Sweeper(InstrumentChannel):
     """
-    sweeper docstring here
+    Sweeper module for MFLI. Inherits from InstrumentChannel and wraps around 
+    the Sweeper module of a MFLI from zhinst-toolkit.
+
+    Arguments:
+        name (str): name of the submodule
+        parent_instr: qcodes parent instrument of InstrumentChannel
+        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
+            get and set
+
+    Properties:
+        signals (list)
+        results (dict)
     
     """
 
@@ -84,27 +177,95 @@ class Sweeper(InstrumentChannel):
                 )
 
     def signals_add(self, signal_source):
+        """
+        Add a singal to measure with the DAQ module. The specified signal is added 
+        to the property 'signals' list. On 'measure()' the DAQ module subscribes to
+        all the signal nodes in the list. In contrast to the DAQ module, the 
+        sweeper records all data from the given node.
+        
+        Arguments:
+            signal_source (str): specifies the signal source, e.g. 'demod1'
+        
+        Returns:
+            a string with the exact signal node, to be used as a key in the 
+            results dictionary, e.g.
+                
+                > signal = mfli.sweeper.signal_add("demod1")
+                > mfli.sweeper.measure()
+                > result = mfli.sweeper.results[signal]
+
+        """
         return self._sweeper_module.signals_add(signal_source)
 
     def signals_clear(self):
+        """
+        Clears the signals list.
+
+        """
         self._sweeper_module.signals_clear()
 
     def signals_list(self):
+        """
+        Returns a list of the available signals.
+        
+        """
         return self._sweeper_module.signals_list()
 
-    def sweep_parameter(self, param):
-        self._sweeper_module.sweep_parameter(param)
+    def sweep_parameter_list(self):
+        """
+        Lists available parameters that support sweeping.
 
-    def measure(self, **kwargs):
-        self._sweeper_module.measure(**kwargs)
+        """
+        return self._sweeper_module.sweep_parameter_list()
+
+    def sweep_parameter(self, param):
+        """
+        Selects a parameter to sweep. The parameter is specified as a string 
+        that has to match the avaliable parameters that support sweeping. See 
+        available parameters with 'sweeper.sweep_parameter_list()'.
+        
+        Arguments:
+            param (str)
+
+        """
+        return self._sweeper_module.sweep_parameter(param)
+
+    def measure(self, verbose=True, timeout=20):
+        """
+        Performs a measurement and stores the result in 'sweeper.results'. This 
+        method subscribes to all the paths previously added to 'daq.signals', 
+        then starts the measurement, waits until the measurement in finished 
+        and eventually reads the result. 
+        
+        Keyword Arguments:
+            verbose (bool): flag to select a verbose print output (default: True)
+            timeout (int): a maximum time after which the measurement stops (default: 20)
+
+        """
+        self._sweeper_module.measure(verbose, timeout)
 
     def application(self, application):
+        """
+        Selects an application specific preset.
+        
+        Arguments:
+            application (str)
+
+        """
         self._sweeper_module.application(application)
 
     def _set(self, *args):
+        """
+        Sets a given node of the module to a given value.
+
+        """
         self._sweeper_module._set(*args)
 
     def _get(self, *args, valueonly=True):
+        """
+        Gets the value of a given node of the module.
+        
+        """
         return self._sweeper_module._get(*args)
 
     @property
@@ -120,7 +281,18 @@ class MFLI(ZIBaseInstrument):
     """
     QCoDeS driver for ZI MFLI.
 
-    Inherits from ZIBaseInstrument.
+    Inherits from ZIBaseInstrument. Initializes some submodules 
+    from the nodetree and a DAQ and Sweeper submodule.
+
+    Arguments:
+        name (str): The internal QCoDeS name of the instrument
+        serial (str): The device name as listed in the web server
+        interface (str): The interface used to connect to the 
+            device (default: '1gbe')
+        host (str): Address of the data server (default: 'localhost')
+        port (int): Port used to connect to the data server (default: 8004)
+        api (int): Api level used (default: 6)
+
     """
 
     def __init__(
@@ -132,14 +304,20 @@ class MFLI(ZIBaseInstrument):
         port=8004,
         api=6,
         **kwargs
-    ) -> None:
+    ):
         super().__init__(name, "mfli", serial, interface, host, port, api, **kwargs)
         submodules = self.nodetree_dict.keys()
+        # initialize submodules from nodetree with blacklist
         blacklist = ["scopes"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
-    def connect(self):
-        # use zhinst.toolkit.tools.BaseController() to interface the device
+    def _connect(self):
+        """
+        Instantiates the device controller from zhinst-toolkit, sets up the data 
+        server and connects the device the data server. This method is called 
+        from __init__ of the base instruemnt class.
+        
+        """
         self._controller = tk.MFLI(
             self._name, self._serial, interface=self._interface, host=self._host
         )
@@ -147,13 +325,6 @@ class MFLI(ZIBaseInstrument):
         self._controller.connect_device(nodetree=False)
         self.connect_message()
         self._get_nodetree_dict()
+        # initialize DAQ and Sweeper submodules
         self.add_submodule("daq", DAQ("daq", self, self._controller))
         self.add_submodule("sweeper", Sweeper("sweeper", self, self._controller))
-
-    def get_idn(self):
-        return dict(
-            vendor="Zurich Instruments",
-            model=self._type.upper(),
-            serial=self._serial,
-            firmware=self._controller._get("system/fwrevision"),
-        )

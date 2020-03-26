@@ -14,6 +14,7 @@ class ZINode(InstrumentChannel):
     ZINode class collects submodules (which can be again ZINodes) 
     and parameters to represent the hirarchy of the ZI node tree in QCoDeS. 
     It inherits from InstrumentChannel and overrides the __repr__ and snapshot methods
+
     """
 
     def print_readable_snapshot(
@@ -35,12 +36,23 @@ class ZIBaseInstrument(Instrument):
     Base class for all ZI Instruments. Implements basic wrapper 
     around ziDrivers.Controller() and translates the ZI node tree 
     to a QCoDeS hirarchy of ZINodes
+
+    Arguments:
+        name (str): The internal QCoDeS name of the instrument
+        device_type (str): The device type, e.g. 'mfli'
+        serial (str): The device name as listed in the web server
+        interface (str): The interface used to connect to the 
+            device (default: '1gbe')
+        host (str): Address of the data server (default: 'localhost')
+        port (int): Port used to connect to the data server (default: 8004)
+        api (int): Api level used (default: 6)
+
     """
 
     def __init__(
         self,
         name: str,
-        type: str,
+        device_type: str,
         serial: str,
         interface="1gbe",
         host="localhost",
@@ -48,15 +60,8 @@ class ZIBaseInstrument(Instrument):
         api=6,
         **kwargs,
     ) -> None:
-        """
-        Create an instance of the instrument.
-
-        Args:
-            name: The internal QCoDeS name of the instrument
-            device_ID: The device name as listed in the web server.
-        """
         super().__init__(name, **kwargs)
-        self._type = type
+        self._type = device_type
         self._serial = serial
         self._interface = interface
         self._host = host
@@ -64,11 +69,11 @@ class ZIBaseInstrument(Instrument):
         self._api = api
         self.zi_submodules = {}
         supported_types = ["hdawg", "uhfqa", "uhfli", "mfli"]
-        if type not in supported_types:
+        if device_type not in supported_types:
             raise ZIQcodesException(
-                f"Device type {type} is currently not supported in ziQCoDeS. Supported types are {supported_types}"
+                f"Device type {device_type} is currently not supported in ziQCoDeS. Supported types are {supported_types}"
             )
-        self.connect()
+        self._connect()
 
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device
@@ -93,7 +98,8 @@ class ZIBaseInstrument(Instrument):
         For e.g. 'dev8030/sigouts/...' one would call this method with 'sigouts'.
         
         Arguments:
-            key  -- dictionary key in the highest layer of nodetree_dict
+            key (str): dictionary key in the highest layer of nodetree_dict
+
         """
         if key in self.nodetree_dict.keys():
             self._add_submodules_recursively(self, {key: self.nodetree_dict[key]})
@@ -103,6 +109,7 @@ class ZIBaseInstrument(Instrument):
     def _get_nodetree_dict(self):
         """
         Retrieve the nodetree from the device as a nested dict and process it accordingly.
+
         """
         tree = self._controller._get_nodetree(f"{self._serial}/*")
         self.nodetree_dict = dict()
@@ -118,8 +125,9 @@ class ZIBaseInstrument(Instrument):
         whenever a node is enumerated, e.g. 'dev8030/sigouts/*/on'.
         
         Arguments:
-            parent   -- parent QCoDeS object, either Instrument(-Channel) or ZINode
-            treedict -- dictionary specifying the (sub-)tree of the ZI node hirarchy
+            parent: parent QCoDeS object, either Instrument(-Channel) or ZINode
+            treedict (dict): dictionary specifying the (sub-)tree of the ZI node hirarchy
+
         """
         for key, value in treedict.items():
             if all(isinstance(k, int) for k in value.keys()):
@@ -155,9 +163,10 @@ class ZIBaseInstrument(Instrument):
         the parameter with e.g. 'Node', 'Properties', 'Description', 'Options' etc.
         
         Arguments:
-            instr  -- instrument/submodule the parameter is associated with
-            name   -- parameter name
-            params -- dictionary describing the parameter, innermost layer of nodetree_dict
+            instr: instrument/submodule the parameter is associated with
+            name (str): parameter name
+            params (dict): dictionary describing the parameter, innermost layer of nodetree_dict
+
         """
         node = params["Node"].lower().replace(f"/{self._serial}/", "")
         if "Read" in params["Properties"]:
@@ -189,6 +198,7 @@ class ZIBaseInstrument(Instrument):
 
 """
 Helper functions used to process the nodetree dictionary in ZIBaseInstrument.
+
 """
 
 
@@ -198,9 +208,10 @@ def dictify(data, keys, val):
     Calls itself recursively.
     
     Arguments:
-        data  -- dictionary to add value to with keys
-        keys  -- list of keys to traverse along tree and place value
-        val   -- value for innermost layer of nested dict
+        data (dict): dictionary to add value to with keys
+        keys (list): list of keys to traverse along tree and place value
+        val (dict): value for innermost layer of nested dict
+
     """
     key = keys[0]
     key = int(key) if key.isdecimal() else key.lower()
@@ -217,6 +228,10 @@ def dictify(data, keys, val):
 def dict_to_doc(d):
     """
     Turn dictionary into pretty doc string.
+
+    Arguments:
+        d (dict)
+
     """
     s = ""
     for k, v in d.items():
