@@ -62,8 +62,6 @@ class DAQ(InstrumentChannel):
         
         Arguments:
             signal_source (str): specifies the signal source, e.g. 'demod1'
-        
-        Keyword Arguments:
             signal_type (str): specifies the type of the signal, e.g. "x" or "r"
             operation (str): the operation performed on the signal, e.g. "avg" 
                 or "std" (default: "avg")
@@ -266,12 +264,22 @@ class Sweeper(InstrumentChannel):
 
 
 class MFLI(ZIBaseInstrument):
-    """
+       """
     QCoDeS driver for ZI MFLI.
 
-    Inherits from ZIBaseInstrument.
-    """
+    Inherits from ZIBaseInstrument. Initializes some submodules 
+    from the nodetree and a DAQ and Sweeper submodule.
 
+    Arguments:
+        name (str): The internal QCoDeS name of the instrument
+        serial (str): The device name as listed in the web server
+        interface (str): The interface used to connect to the 
+            device (default: '1gbe')
+        host (str): Address of the data server (default: 'localhost')
+        port (int): Port used to connect to the data server (default: 8004)
+        api (int): Api level used (default: 6)
+
+    """
     def __init__(
         self,
         name: str,
@@ -289,7 +297,6 @@ class MFLI(ZIBaseInstrument):
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
     def connect(self):
-        # use zhinst.toolkit.tools.BaseController() to interface the device
         self._controller = tk.MFLI(
             self._name, self._serial, interface=self._interface, host=self._host
         )
@@ -301,10 +308,3 @@ class MFLI(ZIBaseInstrument):
         self.add_submodule("daq", DAQ("daq", self, self._controller))
         self.add_submodule("sweeper", Sweeper("sweeper", self, self._controller))
 
-    def get_idn(self):
-        return dict(
-            vendor="Zurich Instruments",
-            model=self._type.upper(),
-            serial=self._serial,
-            firmware=self._controller._get("system/fwrevision"),
-        )

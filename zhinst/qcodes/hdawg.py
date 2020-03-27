@@ -7,6 +7,11 @@ import qcodes.utils.validators as vals
 
 
 class AWG(InstrumentChannel):
+    """
+    Documentation missing here...
+    
+    """
+
     def __init__(self, name, index, parent_instr, parent_contr):
         InstrumentChannel.__init__(self, parent_instr, name)
         self._awg = HDAWG_AWG(parent_contr, index)
@@ -73,6 +78,7 @@ class AWG(InstrumentChannel):
             vals=vals.Numbers(),
         )
 
+    # documentation missing here
     def enable_iq_modulation(self):
         self._awg.enable_iq_modulation()
 

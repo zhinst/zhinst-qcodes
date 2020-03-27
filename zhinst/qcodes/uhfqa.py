@@ -248,11 +248,3 @@ class UHFQA(ZIBaseInstrument):
         self._controller.connect_device(nodetree=False)
         self.connect_message()
         self._get_nodetree_dict()
-
-    def get_idn(self):
-        return dict(
-            vendor="Zurich Instruments",
-            model=self._type.upper(),
-            serial=self._serial,
-            firmware=self._controller._get("system/fwrevision"),
-        )
