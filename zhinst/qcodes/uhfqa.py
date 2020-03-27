@@ -10,6 +10,7 @@ class AWG(InstrumentChannel):
     def __init__(self, name, parent_instr, parent_contr):
         super().__init__(self, parent_instr, name)
         self._awg = UHFQA_AWG(parent_contr, 0)
+        # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "outputs",
             unit=None,
@@ -55,6 +56,7 @@ class AWG(InstrumentChannel):
             vals=vals.Numbers(-1, 1),
         )
 
+    # documentation missing here!
     def run(self):
         self._awg.run()
 
@@ -93,6 +95,7 @@ class Channel(InstrumentChannel):
     def __init__(self, name, index, parent_instr, parent_contr):
         InstrumentChannel.__init__(self, parent_instr, name)
         self._channel = ReadoutChannel(parent_contr, 0)
+        # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "rotation",
             unit=self._channel.rotation._unit,
@@ -168,6 +171,16 @@ class UHFQA(ZIBaseInstrument):
     Inherits from ZIBaseInstrument. Initializes some submodules 
     from the nodetree and a 'sequencer' submodule for high level 
     control of the AWG sequence program.
+
+    Arguments:
+        name (str): The internal QCoDeS name of the instrument
+        serial (str): The device name as listed in the web server
+        interface (str): The interface used to connect to the 
+            device (default: '1gbe')
+        host (str): Address of the data server (default: 'localhost')
+        port (int): Port used to connect to the data server (default: 8004)
+        api (int): Api level used (default: 6)
+
     """
 
     def __init__(
@@ -187,13 +200,14 @@ class UHFQA(ZIBaseInstrument):
             "scopes",
         ]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
-        # init submodules for channels and awg
+        # init submodules for ReadoutChannels and AWG
         channel_list = ChannelList(self, "channels", Channel)
         for i in range(10):
             channel_list.append(Channel(f"ch-{i}", i, self, self._controller))
         channel_list.lock()
         self.add_submodule("channels", channel_list)
         self.add_submodule("awg", AWG("awg", self, self._controller))
+        # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "crosstalk_matrix",
             docstring="The 10x10 crosstalk suppression matrix that multiplies the 10 signal paths. Can be set only partially.",

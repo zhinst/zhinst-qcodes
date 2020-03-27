@@ -118,8 +118,18 @@ class HDAWG(ZIBaseInstrument):
     QCoDeS driver for ZI HDAWG.
 
     Inherits from ZIBaseInstrument. Initializes some submodules 
-    from the nodetree and a ChannelList of 'sequencers' for high 
+    from the nodetree and a ChannelList of 'awgs' for high 
     level control of the AWG sequence program.
+
+    Arguments:
+        name (str): The internal QCoDeS name of the instrument
+        serial (str): The device name as listed in the web server
+        interface (str): The interface used to connect to the 
+            device (default: '1gbe')
+        host (str): Address of the data server (default: 'localhost')
+        port (int): Port used to connect to the data server (default: 8004)
+        api (int): Api level used (default: 6)
+
     """
 
     def __init__(
@@ -134,9 +144,10 @@ class HDAWG(ZIBaseInstrument):
     ) -> None:
         super().__init__(name, "hdawg", serial, interface, host, port, api, **kwargs)
         submodules = self.nodetree_dict.keys()
+        # initialize submodules from nodetree with blacklist
         blacklist = ["awgs"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
-        # init submodules for awg
+        # initialize ChannelList of AWGs
         channel_list = ChannelList(self, "awgs", AWG)
         for i in range(4):
             channel_list.append(AWG(f"awg-{i}", i, self, self._controller))
@@ -148,5 +159,4 @@ class HDAWG(ZIBaseInstrument):
         self._controller.setup()
         self._controller.connect_device(nodetree=False)
         self.connect_message()
-        # get the nodetree from the device as a nested dict
         self._get_nodetree_dict()

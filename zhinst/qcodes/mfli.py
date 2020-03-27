@@ -43,6 +43,7 @@ class DAQ(InstrumentChannel):
         Arguments:
             trigger_source (str)
             trigger_type (str)
+
         """
         self._daq_module.trigger(trigger_source, trigger_type)
 
@@ -106,7 +107,8 @@ class DAQ(InstrumentChannel):
         
         Keyword Arguments:
             verbose (bool): flag to select a verbose print output (default: True)
-            timeout {int}: a maximum time after which the measurement stops (default: 20)
+            timeout (int): a maximum time after which the measurement stops (default: 20)
+
         """
         self._daq_module.measure(verbose, timeout)
 
@@ -225,7 +227,8 @@ class Sweeper(InstrumentChannel):
         
         Keyword Arguments:
             verbose (bool): flag to select a verbose print output (default: True)
-            timeout {int}: a maximum time after which the measurement stops (default: 20)
+            timeout (int): a maximum time after which the measurement stops (default: 20)
+
         """
         self._sweeper_module.measure(verbose, timeout)
 
@@ -281,6 +284,7 @@ class MFLI(ZIBaseInstrument):
     ) -> None:
         super().__init__(name, "mfli", serial, interface, host, port, api, **kwargs)
         submodules = self.nodetree_dict.keys()
+        # initialize submodules from nodetree with blacklist
         blacklist = ["scopes"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
@@ -293,6 +297,7 @@ class MFLI(ZIBaseInstrument):
         self._controller.connect_device(nodetree=False)
         self.connect_message()
         self._get_nodetree_dict()
+        # initialize DAQ and Sweeper submodules
         self.add_submodule("daq", DAQ("daq", self, self._controller))
         self.add_submodule("sweeper", Sweeper("sweeper", self, self._controller))
 

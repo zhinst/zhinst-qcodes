@@ -113,6 +113,16 @@ class UHFLI(ZIBaseInstrument):
     Inherits from ZIBaseInstrument. Initializes some submodules 
     from the nodetree and a 'sequencer' submodule for high level 
     control of the AWG sequence program.
+
+    Arguments:
+        name (str): The internal QCoDeS name of the instrument
+        serial (str): The device name as listed in the web server
+        interface (str): The interface used to connect to the 
+            device (default: '1gbe')
+        host (str): Address of the data server (default: 'localhost')
+        port (int): Port used to connect to the data server (default: 8004)
+        api (int): Api level used (default: 6)
+
     """
 
     def __init__(
@@ -127,6 +137,7 @@ class UHFLI(ZIBaseInstrument):
     ) -> None:
         super().__init__(name, "uhfli", serial, interface, host, port, api, **kwargs)
         submodules = self.nodetree_dict.keys()
+        # initialize submodules from nodetree with blacklist
         blacklist = [
             "awgs",
             "scopes",
@@ -142,7 +153,9 @@ class UHFLI(ZIBaseInstrument):
         self._controller.connect_device(nodetree=False)
         self.connect_message()
         self._get_nodetree_dict()
-        # self.add_submodule("awg", AWG("awg", self, self._controller))
+        # initialize AWG, DAQ and Sweeper submodules
+        if "AWG" in self._controller.options:
+            self.add_submodule("awg", AWG("awg", self, self._controller))
         self.add_submodule("daq", DAQ("daq", self, self._controller))
         self.add_submodule("sweeper", Sweeper("sweeper", self, self._controller))
 
