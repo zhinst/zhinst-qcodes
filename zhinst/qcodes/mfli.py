@@ -89,12 +89,12 @@ class DAQ(InstrumentChannel):
             signal_source, signal_type, operation, fft, complex_selector
         )
 
-    def signals_list(self):
+    def signals_list(self, source=None):
         """
         Returns a list of the available signals.
         
         """
-        return self._daq_module.signals_list()
+        return self._daq_module.signals_list(source=source)
 
     def signals_clear(self):
         """
@@ -243,6 +243,13 @@ class Sweeper(InstrumentChannel):
 
         """
         self._sweeper_module.measure(verbose, timeout)
+
+    def application_list(self):
+        """
+        Lists the names of available application presets.
+        
+        """
+        self._sweeper_module.application_list()
 
     def application(self, application):
         """
