@@ -261,12 +261,6 @@ class HDAWG(ZIBaseInstrument):
         # initialize submodules from nodetree with blacklist
         blacklist = ["awgs"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
-        # initialize ChannelList of AWGs
-        channel_list = ChannelList(self, "awgs", AWG)
-        for i in range(4):
-            channel_list.append(AWG(f"awg-{i}", i, self, self._controller))
-        channel_list.lock()
-        self.add_submodule("awgs", channel_list)
 
     def _connect(self):
         """
@@ -280,3 +274,9 @@ class HDAWG(ZIBaseInstrument):
         self._controller.connect_device(nodetree=False)
         self.connect_message()
         self._get_nodetree_dict()
+        # initialize ChannelList of AWGs
+        channel_list = ChannelList(self, "awgs", AWG)
+        for i in range(4):
+            channel_list.append(AWG(f"awg-{i}", i, self, self._controller))
+        channel_list.lock()
+        self.add_submodule("awgs", channel_list)
