@@ -24,7 +24,7 @@ class ZINode(InstrumentChannel):
             super().print_readable_snapshot(update=update, max_chars=max_chars)
         else:
             print(self.name + ":")
-            print("{0:<{1}}".format("\tparameter ", 50) + "value")
+            print("{0:<{1}}".format("\tparameter ", max_chars) + "value")
             print("-" * max_chars)
             print("no parameters")
             for submodule in self.submodules.values():
@@ -244,5 +244,5 @@ def dict_to_doc(d):
     """
     s = ""
     for k, v in d.items():
-        s += f"* {k}:\n\t{v}\n\n"
+        s += f"* `{k}`: {v}\n"
     return s
