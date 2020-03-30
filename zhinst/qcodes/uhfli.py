@@ -8,13 +8,21 @@ from zhinst.toolkit.control.drivers.uhfli import DAQModule, SweeperModule
 
 class DAQ(InstrumentChannel):
     """
-    Data Acquisition Module for UHFLI
+    Data Acquisition Module for UHFLI. Inherits from InstrumentChanne and wraps 
+    around a UHFLI DAQModule from zhinst-toolkit.
 
-    properties:
+    Arguments:
+        name (str): name of the submodule
+        parent_instr: qcodes parent instrument of InstrumentChannel
+        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
+            get and set
+
+    Properties:
         signals (list)
         results (dict)
-    
+
     """
+
     def __init__(self, name, parent_instr, parent_contr):
         super().__init__(parent_instr, name)
         self._daq_module = DAQModule(parent_contr)
@@ -23,6 +31,7 @@ class DAQ(InstrumentChannel):
             if not k.startswith("_"):
                 val_mapping = None
                 if param._map:
+                    # invert the value map in case there is one
                     val_mapping = dict(map(reversed, param._map.items()))
                     param._map = None
                 self.add_parameter(
@@ -54,7 +63,7 @@ class DAQ(InstrumentChannel):
         fft=False,
         complex_selector="abs",
     ):
-         """
+        """
         Add a singal to measure with the DAQ module. The specified signal is added 
         to the property 'signals' list. On 'measure()' the DAQ module subscribes to
         all the signal nodes in the list. 
@@ -87,9 +96,9 @@ class DAQ(InstrumentChannel):
         
         """
         return self._daq_module.signals_list()
-    
+
     def signals_clear(self):
-         """
+        """
         Clears the signals list.
 
         """
@@ -134,13 +143,21 @@ class DAQ(InstrumentChannel):
 
 class Sweeper(InstrumentChannel):
     """
-    Sweeper module for UHFLI.
+    Sweeper module for UHFLI. Inherits from InstrumentChannel and wraps around 
+    a UHFLI SweeperModule from zhinst-toolkit.
 
-    properties:
+    Arguments:
+        name (str): name of the submodule
+        parent_instr: qcodes parent instrument of InstrumentChannel
+        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
+            get and set
+    
+    Properties:
         signals (list)
         results (dict)
     
     """
+
     def __init__(self, name, parent_instr, parent_contr):
         super().__init__(parent_instr, name)
         self._sweeper_module = SweeperModule(parent_contr)
@@ -215,7 +232,7 @@ class Sweeper(InstrumentChannel):
         self._sweeper_module.sweep_parameter(param)
 
     def measure(self, verbose=True, timeout=20):
-         """
+        """
         Performs a measurement and stores the result in 'sweeper.results'. This 
         method subscribes to all the paths previously added to 'daq.signals', 
         then starts the measurement, waits until the measurement in finished 
@@ -279,6 +296,7 @@ class UHFLI(ZIBaseInstrument):
         api (int): Api level used (default: 6)
 
     """
+
     def __init__(
         self,
         name: str,
@@ -298,7 +316,13 @@ class UHFLI(ZIBaseInstrument):
         ]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
-    def connect(self):
+    def _connect(self):
+        """
+        Instantiate the device controller from zhinst-toolkit, set up the data 
+        server and connect the device the data server. This method is called 
+        from __init__ of the base instruemnt class.
+        
+        """
         self._controller = tk.UHFLI(
             self._name, self._serial, interface=self._interface, host=self._host
         )

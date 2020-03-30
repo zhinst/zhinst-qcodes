@@ -69,11 +69,11 @@ class ZIBaseInstrument(Instrument):
         self._api = api
         self.zi_submodules = {}
         supported_types = ["hdawg", "uhfqa", "uhfli", "mfli"]
-        if type not in supported_types:
+        if device_type not in supported_types:
             raise ZIQcodesException(
-                f"Device type {type} is currently not supported in ziQCoDeS. Supported types are {supported_types}"
+                f"Device type {device_type} is currently not supported in ziQCoDeS. Supported types are {supported_types}"
             )
-        self.connect()
+        self._connect()
 
     def connect(self):
         # use zhinst.toolkit.tools.BaseController() to interface the device

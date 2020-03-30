@@ -7,6 +7,25 @@ import qcodes.utils.validators as vals
 
 
 class AWG(InstrumentChannel):
+    """
+    AWG module for the UHFQA. Inherits from InstrumentChannel and wraps around 
+    a AWGCore for UHFQA from zhinst-toolkit. 
+
+    Arguments:
+        name (str): name of the submodule
+        parent_instr: qcodes parent instrument of InstrumentChannel
+        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
+            get and set
+
+    Parameters:
+        outputs
+        output1
+        output2
+        gain1
+        gain2     
+    
+    """
+
     def __init__(self, name, parent_instr, parent_contr):
         super().__init__(self, parent_instr, name)
         self._awg = UHFQA_AWG(parent_contr, 0)
@@ -92,6 +111,27 @@ class AWG(InstrumentChannel):
 
 
 class Channel(InstrumentChannel):
+    """
+    ReadoutChannel module for the UHFQA. Inherits from InstrumentChannel and 
+    wraps around a ReadoutChannel for UHFQA from zhinst-toolkit. 
+
+    Arguments:
+        name (str): name of the submodule
+        parent_instr: qcodes parent instrument of InstrumentChannel
+        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
+            get and set
+
+    Parameters:
+        rotation
+        threshold
+        readout_frequency
+        readout_amplitude
+        phase_shift
+        enabled
+        result     
+    
+    """
+
     def __init__(self, name, index, parent_instr, parent_contr):
         InstrumentChannel.__init__(self, parent_instr, name)
         self._channel = ReadoutChannel(parent_contr, 0)
@@ -158,9 +198,21 @@ class Channel(InstrumentChannel):
         )
 
     def enable(self):
+        """
+        Enables the readout channel. This enables weighted integration mode, 
+        sets the itnegration time to its default (2 us) and sets the 
+        corresponding integration weights to demodulate at the given readout 
+        frequency.
+
+        """
         self._channel.enable()
 
     def disable(self):
+        """
+        Disables the readout channel and resets the integration weigths 
+        corresponding to this channel.
+        
+        """
         self._channel.disable()
 
 
@@ -241,6 +293,12 @@ class UHFQA(ZIBaseInstrument):
         )
 
     def connect(self):
+        """
+        Instantiate the device controller from zhinst-toolkit, set up the data 
+        server and connect the device the data server. This method is called 
+        from __init__ of the base instruemnt class.
+
+        """
         self._controller = tk.UHFQA(
             self._name, self._serial, interface=self._interface, host=self._host
         )

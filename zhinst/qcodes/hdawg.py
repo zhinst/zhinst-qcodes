@@ -8,7 +8,23 @@ import qcodes.utils.validators as vals
 
 class AWG(InstrumentChannel):
     """
-    Documentation missing here...
+    AWG module for the HDAWG. Inherits from InstrumentChannel and wraps around 
+    a AWGCore for HDAWG from zhinst-toolkit. 
+
+    Arguments:
+        name (str): name of the submodule
+        parent_instr: qcodes parent instrument of InstrumentChannel
+        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
+            get and set
+
+    Parameters:
+        outputs
+        output1
+        output2
+        gain1
+        gain2
+        modulation_phase_shift
+        modulation_freq       
     
     """
 
@@ -160,7 +176,13 @@ class HDAWG(ZIBaseInstrument):
         channel_list.lock()
         self.add_submodule("awgs", channel_list)
 
-    def connect(self):
+    def _connect(self):
+        """
+        Instantiate the device controller from zhinst-toolkit, set up the data 
+        server and connect the device the data server. This method is called 
+        from __init__ of the base instruemnt class.
+
+        """
         self._controller = tk.HDAWG(self._name, self._serial, interface=self._interface)
         self._controller.setup()
         self._controller.connect_device(nodetree=False)

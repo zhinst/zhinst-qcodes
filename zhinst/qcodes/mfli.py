@@ -8,9 +8,16 @@ from zhinst.toolkit.control.drivers.mfli import DAQModule, SweeperModule
 
 class DAQ(InstrumentChannel):
     """
-    Data Acquisition Module for MFLI
+    Data Acquisition Module for MFLI. Inherits from InstrumentChannel and wraps 
+    around the DAQ module of a MFLI from zhinst-toolkit.
 
-    properties:
+    Arguments:
+        name (str): name of the submodule
+        parent_instr: qcodes parent instrument of InstrumentChannel
+        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
+            get and set
+    
+    Properties:
         signals (list)
         results (dict)
     
@@ -135,9 +142,16 @@ class DAQ(InstrumentChannel):
 
 class Sweeper(InstrumentChannel):
     """
-    Sweeper module for MFLI.
+    Sweeper module for MFLI. Inherits from InstrumentChannel and wraps around 
+    the Sweeper module of a MFLI from zhinst-toolkit.
 
-    properties:
+    Arguments:
+        name (str): name of the submodule
+        parent_instr: qcodes parent instrument of InstrumentChannel
+        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
+            get and set
+
+    Properties:
         signals (list)
         results (dict)
     
@@ -264,7 +278,7 @@ class Sweeper(InstrumentChannel):
 
 
 class MFLI(ZIBaseInstrument):
-       """
+    """
     QCoDeS driver for ZI MFLI.
 
     Inherits from ZIBaseInstrument. Initializes some submodules 
@@ -280,6 +294,7 @@ class MFLI(ZIBaseInstrument):
         api (int): Api level used (default: 6)
 
     """
+
     def __init__(
         self,
         name: str,
@@ -289,14 +304,20 @@ class MFLI(ZIBaseInstrument):
         port=8004,
         api=6,
         **kwargs
-    ) -> None:
+    ):
         super().__init__(name, "mfli", serial, interface, host, port, api, **kwargs)
         submodules = self.nodetree_dict.keys()
         # initialize submodules from nodetree with blacklist
         blacklist = ["scopes"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
-    def connect(self):
+    def _connect(self):
+        """
+        Instantiate the device controller from zhinst-toolkit, set up the data 
+        server and connect the device the data server. This method is called 
+        from __init__ of the base instruemnt class.
+        
+        """
         self._controller = tk.MFLI(
             self._name, self._serial, interface=self._interface, host=self._host
         )
@@ -307,4 +328,3 @@ class MFLI(ZIBaseInstrument):
         # initialize DAQ and Sweeper submodules
         self.add_submodule("daq", DAQ("daq", self, self._controller))
         self.add_submodule("sweeper", Sweeper("sweeper", self, self._controller))
-
