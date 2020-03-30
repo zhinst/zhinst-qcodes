@@ -269,7 +269,14 @@ class HDAWG(ZIBaseInstrument):
         from __init__ of the base instruemnt class.
 
         """
-        self._controller = tk.HDAWG(self._name, self._serial, interface=self._interface)
+        self._controller = tk.HDAWG(
+            self._name,
+            self._serial,
+            interface=self._interface,
+            host=self._host,
+            port=self._port,
+            api=self._api,
+        )
         self._controller.setup()
         self._controller.connect_device(nodetree=False)
         self.connect_message()
