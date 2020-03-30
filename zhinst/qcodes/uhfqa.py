@@ -353,7 +353,12 @@ class UHFQA(ZIBaseInstrument):
 
         """
         self._controller = tk.UHFQA(
-            self._name, self._serial, interface=self._interface, host=self._host
+            self._name,
+            self._serial,
+            interface=self._interface,
+            host=self._host,
+            port=self._port,
+            api=self._api,
         )
         self._controller.setup()
         self._controller.connect_device(nodetree=False)
