@@ -76,6 +76,12 @@ class ZIBaseInstrument(Instrument):
         self._connect()
 
     def connect(self):
+        """
+        Instantiates the device controller from zhinst-toolkit, sets up the data 
+        server and connects the device the data server. This method is called 
+        from __init__ of the base instruemnt class.
+        
+        """
         # use zhinst.toolkit.tools.BaseController() to interface the device
         self._controller = tk.BaseInstrument(
             self._name,
@@ -94,8 +100,9 @@ class ZIBaseInstrument(Instrument):
 
     def _init_submodule(self, key):
         """
-        Recursively initialize submodules from highest layer keys in nodetree dictionary.
-        For e.g. 'dev8030/sigouts/...' one would call this method with 'sigouts'.
+        Recursively initialize submodules from highest layer keys in nodetree 
+        dictionary.For e.g. 'dev8030/sigouts/...' one would call this method 
+        with 'sigouts'.
         
         Arguments:
             key (str): dictionary key in the highest layer of nodetree_dict
@@ -125,8 +132,10 @@ class ZIBaseInstrument(Instrument):
         whenever a node is enumerated, e.g. 'dev8030/sigouts/*/on'.
         
         Arguments:
-            parent: parent QCoDeS object, either Instrument(-Channel) or ZINode
-            treedict (dict): dictionary specifying the (sub-)tree of the ZI node hirarchy
+            parent (InstrumentChannel): parent QCoDeS object, either 
+                Instrument(-Channel) or ZINode
+            treedict (dict): dictionary specifying the (sub-)tree of the ZI 
+                node hirarchy
 
         """
         for key, value in treedict.items():

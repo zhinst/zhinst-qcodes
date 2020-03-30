@@ -344,6 +344,21 @@ class UHFQA(ZIBaseInstrument):
             "scopes",
         ]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
+
+    def connect(self):
+        """
+        Instantiates the device controller from zhinst-toolkit, sets up the data 
+        server and connects the device the data server. This method is called 
+        from __init__ of the base instruemnt class.
+
+        """
+        self._controller = tk.UHFQA(
+            self._name, self._serial, interface=self._interface, host=self._host
+        )
+        self._controller.setup()
+        self._controller.connect_device(nodetree=False)
+        self.connect_message()
+        self._get_nodetree_dict()
         # init submodules for ReadoutChannels and AWG
         channel_list = ChannelList(self, "channels", Channel)
         for i in range(10):
@@ -383,18 +398,3 @@ class UHFQA(ZIBaseInstrument):
             label="Integration Time",
             vals=vals.Number(0, 50e-6),
         )
-
-    def connect(self):
-        """
-        Instantiates the device controller from zhinst-toolkit, sets up the data 
-        server and connects the device the data server. This method is called 
-        from __init__ of the base instruemnt class.
-
-        """
-        self._controller = tk.UHFQA(
-            self._name, self._serial, interface=self._interface, host=self._host
-        )
-        self._controller.setup()
-        self._controller.connect_device(nodetree=False)
-        self.connect_message()
-        self._get_nodetree_dict()
