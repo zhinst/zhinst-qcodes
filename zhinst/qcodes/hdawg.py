@@ -94,7 +94,6 @@ class AWG(InstrumentChannel):
             vals=vals.Numbers(),
         )
 
-    # documentation missing here
     def enable_iq_modulation(self):
         self._awg.enable_iq_modulation()
 
@@ -102,36 +101,129 @@ class AWG(InstrumentChannel):
         self._awg.disable_iq_modulation()
 
     def run(self):
+        """
+        Starts the AWG Core.
+
+        """
         self._awg.run()
 
     def stop(self):
+        """
+        Stops the AWG Core.
+        
+        """
         self._awg.stop()
 
     def wait_done(self, timeout=10):
+        """
+        Waits until the AWG Core is finished running. 
+        
+        Keyword Arguments:
+            timeout (int): A timeout in seconds after which the AWG is stopped 
+                (default: 100)
+
+        """
         self._awg.wait_done(timeout=timeout)
 
     def compile(self):
+        """
+        Compiles the current AWG sequence program.
+
+        """
         self._awg.compile()
 
     def reset_queue(self):
+        """
+        Resets the waveform queue of the AWG Core to an empty list.
+
+        """
         self._awg.reset_queue()
 
     def queue_waveform(self, wave1, wave2, delay=0):
+        """
+        Queues up a waveform to the AWG Core. Uploading custom waveforms is only 
+        possible when using the 'Simple' sequence type. The waveform is 
+        specified with two numpy arrays for the two channels of the AWG Core. 
+        The waveform will then automatically align them to the correct minimum 
+        waveform length, sample granularity and scaling. An individual delay can 
+        be specified to shift the individual waveform with respect to the time 
+        origin of the period.
+        
+        Arguments:
+            wave1 (array like): list or array of samples in the waveform to be 
+                queued for channel 1, an empty list '[]' will upload zeros of 
+                the minimum waveform length
+            wave2 (array like): list or array of samples in the waveform to be 
+                queued for channel 2, an empty list '[]' will upload zeros of 
+                the minimum waveform length
+        
+        Keyword Arguments:
+            delay (float): an individual delay for the queued sequence with 
+                respect to the time origin, positive values shift the start of 
+                the waveform forwards in time (default: 0)
+
+        """
         self._awg.queue_waveform(wave1, wave2, delay=delay)
 
     def replace_waveform(self, wave1, wave2, i=0, delay=0):
+        """
+        Replaces the data in a waveform in the queue. The new data must have the 
+        same length as the previous data s.t. the waveform data can be replaced 
+        without recompilation of the sequence program.
+        
+        Arguments:
+            wave1 (array like): list or array of samples to replace the waveform  
+                 for channel 1
+            wave2 (array like): list or array of samples to replace the waveform  
+                 for channel 2
+        
+        Keyword Arguments:
+            i (int): index of the waveform to be replaced in the queue (default: 0)
+            delay (float): individual delay for the for the waveform to be 
+                repalced (default: 0)
+        
+        """
         self._awg.replace_waveform(wave1, wave2, i=i, delay=delay)
 
     def upload_waveforms(self):
+        """
+        Uploads all waveforms in the waveform queue to the AWG Core. This is 
+        only possible in 'Simple' sequence type and the sequence program must 
+        first be compiled before the waveforms can be uploaded.
+        
+        """
         self._awg.upload_waveforms()
 
     def compile_and_upload_waveforms(self):
+        """
+        Combines compilation and upload of queued waveforms when using a 
+        'Simple' sequence to make sure the correct program is compiled before 
+        the waveforms are uplaoded. 
+        
+        """
         self._awg.compile_and_upload_waveforms()
 
     def set_sequence_params(self, **kwargs):
+        """
+        Sets the parameters of the sequence with keyword arguments. Possible 
+        paramters include
+
+            sequence_type
+            trigger_type
+            period
+            repetitions
+            ...
+
+        """
         self._awg.set_sequence_params(**kwargs)
 
     def sequence_params(self):
+        """
+        Returns the current seuence parameters.
+        
+        Returns:
+            A dictionary with the current sequence parameters.
+        """
         return self._awg.sequence_params
 
 
@@ -178,8 +270,8 @@ class HDAWG(ZIBaseInstrument):
 
     def _connect(self):
         """
-        Instantiate the device controller from zhinst-toolkit, set up the data 
-        server and connect the device the data server. This method is called 
+        Instantiates the device controller from zhinst-toolkit, sets up the data 
+        server and connects the device the data server. This method is called 
         from __init__ of the base instruemnt class.
 
         """

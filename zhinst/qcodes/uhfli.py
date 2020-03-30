@@ -318,8 +318,8 @@ class UHFLI(ZIBaseInstrument):
 
     def _connect(self):
         """
-        Instantiate the device controller from zhinst-toolkit, set up the data 
-        server and connect the device the data server. This method is called 
+        Instantiates the device controller from zhinst-toolkit, sets up the data 
+        server and connects the device the data server. This method is called 
         from __init__ of the base instruemnt class.
         
         """
