@@ -27,7 +27,7 @@ class AWG(InstrumentChannel):
     """
 
     def __init__(self, name, parent_instr, parent_contr):
-        super().__init__(self, parent_instr, name)
+        super().__init__(parent_instr, name)
         self._awg = UHFQA_AWG(parent_contr, 0)
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
@@ -225,7 +225,7 @@ class Channel(InstrumentChannel):
     """
 
     def __init__(self, name, index, parent_instr, parent_contr):
-        InstrumentChannel.__init__(self, parent_instr, name)
+        super().__init__(parent_instr, name)
         self._channel = ReadoutChannel(parent_contr, 0)
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
@@ -289,6 +289,10 @@ class Channel(InstrumentChannel):
             vals=vals.Bool(),
         )
 
+    def enabled(self):
+        """Returns if weighted integration is enabled."""
+        return self._channel.enabled()
+
     def enable(self):
         """
         Enables the readout channel. This enables weighted integration mode, 
@@ -345,7 +349,7 @@ class UHFQA(ZIBaseInstrument):
         ]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
-    def connect(self):
+    def _connect(self):
         """
         Instantiates the device controller from zhinst-toolkit, sets up the data 
         server and connects the device the data server. This method is called 
@@ -403,3 +407,64 @@ class UHFQA(ZIBaseInstrument):
             label="Integration Time",
             vals=vals.Number(0, 50e-6),
         )
+        self.add_parameter(
+            "averaging_mode",
+            docstring=self._controller.averaging_mode._description,
+            get_cmd=self._controller.averaging_mode,
+            set_cmd=self._controller.averaging_mode,
+            label="Averaging Mode",
+        )
+
+    def arm(self, length=None, averages=None):
+        """Prepare UHFQA for result acquisition.
+
+        This method enables the QA Results Acquisition and resets the acquired 
+        points. Optionally, the *result length* and *result averages* can be set 
+        when specified as keyword arguments. If they are not specified, they are 
+        not changed.  
+
+        Keyword Arguments:
+            length (int): If specified, the length of the result vector will be 
+                set before arming the UHFQA readout. (default: None)
+            averages (int): If specified, the result averages will be set before 
+                arming the UHFQA readout. (default: None)
+
+        """
+        self._controller.arm(length=length, averages=averages)
+
+    def crosstalk_matrix(self, matrix=None):
+        """Sets or gets the crosstalk matrix of the UHFQA as a 2D array.
+        
+        Keyword Arguments:
+            matrix (2D array): The 2D matrix used in the digital signal 
+                processing path to compensate for crosstalk between the 
+                different channels. The given matrix can also be a part of the 
+                entire 10 x 10 matrix. Its maximum dimensions are 10 x 10. 
+                (default: None)
+
+        Returns:
+            If no argument is given the method returns the current crosstalk 
+            matrix as a 2D numpy array.
+        
+        """
+        return self._controller.crosstalk_matrix(matrix=matrix)
+
+    def enable_readout_channels(self, channels=range(10)):
+        """Enables weighted integration on the specified readout channels.
+        
+        Keyword Arguments:
+            channels (list): A list of indices of channels to enable. 
+                (default: range(10))
+        
+        """
+        self._controller.enable_readout_channels(channels=channels)
+
+    def disable_readout_channels(self, channels=range(10)):
+        """Disables weighted integration on the specified readout channels.
+        
+        Keyword Arguments:
+            channels (list): A list of indices of channels to disable. 
+                (default: range(10))
+        
+        """
+        self._controller.disable_readout_channels(channels=channels)
