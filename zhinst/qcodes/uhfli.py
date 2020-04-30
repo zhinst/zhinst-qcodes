@@ -43,7 +43,7 @@ class DAQ(InstrumentChannel):
                     val_mapping=val_mapping,
                 )
 
-    def trigger(self, *args):
+    def trigger(self, trigger_source, trigger_type):
         """
         Set the trigger signal of the DAQ module. Specified by the trigger 
         source (e.g. 'demod1') and the type (e.g. 'trigin1').
@@ -53,7 +53,14 @@ class DAQ(InstrumentChannel):
             trigger_type (str)
 
         """
-        self._daq_module.trigger(*args)
+        self._daq_module.trigger(trigger_source, trigger_type)
+
+    def trigger_list(self, source=None):
+        """
+        TODO
+
+        """
+        return self._daq_module.trigger_list(source)
 
     def signals_add(
         self,
@@ -95,7 +102,7 @@ class DAQ(InstrumentChannel):
         Returns a list of the available signals.
         
         """
-        return self._sweeper_module.signals_list(source=source)
+        return self._daq_module.signals_list(source=source)
 
     def signals_clear(self):
         """
@@ -210,7 +217,7 @@ class Sweeper(InstrumentChannel):
         Returns a list of the available signals.
         
         """
-        return self._daq_module.signals_list()
+        return self._sweeper_module.signals_list()
 
     def sweep_parameter_list(self):
         """

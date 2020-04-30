@@ -54,6 +54,13 @@ class DAQ(InstrumentChannel):
         """
         self._daq_module.trigger(trigger_source, trigger_type)
 
+    def trigger_list(self, source=None):
+        """
+        TODO
+
+        """
+        return self._daq_module.trigger_list(source)
+
     def signals_add(
         self,
         signal_source,
