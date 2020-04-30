@@ -75,7 +75,7 @@ class ZIBaseInstrument(Instrument):
             )
         self._connect()
 
-    def connect(self):
+    def _connect(self):
         """
         Instantiates the device controller from zhinst-toolkit, sets up the data 
         server and connects the device the data server. This method is called 
