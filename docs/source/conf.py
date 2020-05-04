@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = "zhinst-toolkit"
+project = "zhinst-qcodes"
 copyright = "2020, Zurich Instruments AG"
 author = "Max J. Ruckriegel"
 
