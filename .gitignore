@@ -1,3 +1,4 @@
 *.json
 *.ipynb_checkpoints
 *.pyc
+*.egg-info/
