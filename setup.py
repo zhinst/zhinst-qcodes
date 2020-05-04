@@ -12,9 +12,9 @@ requirements = [
     "numpy>=1.13",
     "setuptools>=40.1.0",
     "zhinst>=20.01",
-    "zhinst-toolkit",
+    # "zhinst-toolkit",
     "qcodes",
-    "attrs"
+    "attrs",
 ]
 
 
@@ -49,7 +49,7 @@ setuptools.setup(
         exclude=["test*"], include=["zhinst.*"]
     ),
     use_scm_version=True,
-    setup_requires=['setuptools_scm'],
+    setup_requires=["setuptools_scm"],
     install_requires=requirements,
     include_package_data=True,
     python_requires=">=3.6",
