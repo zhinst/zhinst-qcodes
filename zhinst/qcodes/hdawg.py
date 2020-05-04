@@ -280,6 +280,10 @@ class HDAWG(ZIBaseInstrument):
         port (int): Port used to connect to the data server (default: 8004)
         api (int): Api level used (default: 6)
 
+    Attributes:
+        awgs (:class:`ChannelList`): A list of four HDAWG specific AWG Cores 
+            (:class:`zhinst.qcodes.hdawg.AWG`).
+
     """
 
     def __init__(
