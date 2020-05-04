@@ -405,7 +405,7 @@ class UHFQA(ZIBaseInstrument):
             get_cmd=self._controller.integration_time,
             set_cmd=self._controller.integration_time,
             label="Integration Time",
-            vals=vals.Number(0, 50e-6),
+            vals=vals.Numbers(0, 50e-6),
         )
         self.add_parameter(
             "averaging_mode",
@@ -413,6 +413,7 @@ class UHFQA(ZIBaseInstrument):
             get_cmd=self._controller.averaging_mode,
             set_cmd=self._controller.averaging_mode,
             label="Averaging Mode",
+            vals=vals.Enum("Cyclic", "Sequential"),
         )
 
     def arm(self, length=None, averages=None):
@@ -431,23 +432,6 @@ class UHFQA(ZIBaseInstrument):
 
         """
         self._controller.arm(length=length, averages=averages)
-
-    def crosstalk_matrix(self, matrix=None):
-        """Sets or gets the crosstalk matrix of the UHFQA as a 2D array.
-        
-        Keyword Arguments:
-            matrix (2D array): The 2D matrix used in the digital signal 
-                processing path to compensate for crosstalk between the 
-                different channels. The given matrix can also be a part of the 
-                entire 10 x 10 matrix. Its maximum dimensions are 10 x 10. 
-                (default: None)
-
-        Returns:
-            If no argument is given the method returns the current crosstalk 
-            matrix as a 2D numpy array.
-        
-        """
-        return self._controller.crosstalk_matrix(matrix=matrix)
 
     def enable_readout_channels(self, channels=range(10)):
         """Enables weighted integration on the specified readout channels.
