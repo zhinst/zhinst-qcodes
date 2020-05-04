@@ -6,6 +6,9 @@ Welcome to the Documentation for :mod:`zhinst-qcodes`!
    :maxdepth: 2
    :caption: Contents:
 
+   start/index
+   about/index
+   toolkit/index
    zhinst-qcodes/index
 
 
