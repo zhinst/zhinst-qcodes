@@ -1,0 +1,49 @@
+
+
+stages:
+  - build
+  - docs
+
+    
+build:linux:
+  image: python:3.7-buster
+  stage: build
+  script:
+    - pip install .
+    
+pages:
+  image: docker-registry.zhinst.com/devops/dockerfiles/sphinxdoc:latest
+  stage: docs
+  script:
+   - pip install .
+   - pip install ipython
+   - cd docs
+   - make html
+   - cd ..
+   - mv docs/build/html public
+  artifacts:
+      paths:
+       - public
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
