@@ -10,10 +10,13 @@ class ZIQcodesException(Exception):
 
 
 class ZINode(InstrumentChannel):
-    """
-    ZINode class collects submodules (which can be again ZINodes) 
-    and parameters to represent the hirarchy of the ZI node tree in QCoDeS. 
-    It inherits from InstrumentChannel and overrides the __repr__ and snapshot methods
+    """Implements a node in the instrument nodetree as a 
+    :class:`InstrumentChannel`.
+    
+    :class:`ZINode` class collects *submodules* (which may again be *ZINodes*) 
+    and *parameters* to represent the hirarchy of the Zurich Instruments node 
+    tree in *QCoDeS*. It inherits from :class:`InstrumentChannel` and overrides 
+    the snapshot method.
 
     """
 
@@ -32,20 +35,21 @@ class ZINode(InstrumentChannel):
 
 
 class ZIBaseInstrument(Instrument):
-    """
-    Base class for all ZI Instruments. Implements basic wrapper 
-    around ziDrivers.Controller() and translates the ZI node tree 
-    to a QCoDeS hirarchy of ZINodes
+    """Base class for all Zurich Instruments QCoDeS drivers. 
+    
+    Implements basic wrapper around :mod:`zhinst-toolkit` deice drivers and 
+    translates the nodetree to a hirarchy of *QCoDeS submodules* 
+    (:class:`ZINodes`) and *parameters*.
 
     Arguments:
-        name (str): The internal QCoDeS name of the instrument
-        device_type (str): The device type, e.g. 'mfli'
-        serial (str): The device name as listed in the web server
+        name (str): The *QCoDeS* name of the instrument
+        device_type (str): The device type, e.g. *'mfli'*.
+        serial (str): The device serial number.
         interface (str): The interface used to connect to the 
-            device (default: '1gbe')
-        host (str): Address of the data server (default: 'localhost')
-        port (int): Port used to connect to the data server (default: 8004)
-        api (int): Api level used (default: 6)
+            device (default: *'1GbE'*).
+        host (str): Address of the data server. (default: 'localhost')
+        port (int): Port used to connect to the data server. (default: 8004)
+        api (int): Api level used. (default: 6)
 
     """
 
@@ -168,8 +172,9 @@ class ZIBaseInstrument(Instrument):
 
     def _add_parameter_from_dict(self, instr, name, params):
         """
-        Add a QCoDeS parameter associated to a ZI noe from a dict describing 
-        the parameter with e.g. 'Node', 'Properties', 'Description', 'Options' etc.
+        Add a QCoDeS parameter associated to a ZI node from a dict describing 
+        the parameter with e.g. 'Node', 'Properties', 'Description', 'Options' 
+        etc.
         
         Arguments:
             instr: instrument/submodule the parameter is associated with

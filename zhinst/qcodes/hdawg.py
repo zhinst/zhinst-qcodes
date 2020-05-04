@@ -7,9 +7,10 @@ import qcodes.utils.validators as vals
 
 
 class AWG(InstrumentChannel):
-    """
-    AWG module for the HDAWG. Inherits from InstrumentChannel and wraps around 
-    a AWGCore for HDAWG from zhinst-toolkit. 
+    """Device-specific AWG Core for the *HDAWG*. 
+    
+    Inherits from :class:`InstrumentChannel` and wraps around a `AWGCore` for 
+    *HDAWG* from :mod:`zhinst-toolkit`. 
 
     Arguments:
         name (str): name of the submodule
@@ -17,14 +18,22 @@ class AWG(InstrumentChannel):
         parent_contr: zhinst-toolkit device of the parent isntrument, used for 
             get and set
 
-    Parameters:
-        outputs
-        output1
-        output2
-        gain1
-        gain2
-        modulation_phase_shift
-        modulation_freq       
+    Attributes:
+        outputs (:class:`Parameter`): Stat of *both* outputs. A tuple of values 
+            {'on', 'off'} for channel 1 and 2.
+        output1 (:class:`Parameter`): State of the output 1, i.e. one of 
+            {'on', 'off'}.
+        output2 (:class:`Parameter`): State of the output 2, i.e. one of 
+            {'on', 'off'}.
+        modulation_freq (:class:`Parameter`): Frequency of the modulation in 
+            Hz if IQ modulation is enabled. 
+        modulation_phase_shift (:class:`Parameter`): Phase shift in degrees 
+            between I and Q quadratures if IQ modulation is enabled 
+            (default: 90).
+        gain1 (:class:`Parameter`): Gain of the output channel 1 if IQ 
+            modulation is enabled. Must be between -1 and +1 (default: +1).
+        gain2 (:class:`Parameter`): Gain of the output channel 2 if IQ 
+            modulation is enabled. Must be between -1 and +1 (default: +1).
     
     """
 
@@ -95,28 +104,35 @@ class AWG(InstrumentChannel):
         )
 
     def enable_iq_modulation(self):
+        """Enables IQ Modulation by on the AWG Core.
+        
+        This method applies the corresponding settings for IQ modulation using 
+        one of the internal oscillators and two sine generators. The sines are 
+        used to modulate the AWG output channels. The *parameters*
+        `modulation_freq`, `modulation_phase_shift` and `gain1`, `gain2` 
+        correspond to the settings of the oscillator and the sine generators. 
+        
+        """
         self._awg.enable_iq_modulation()
 
     def disable_iq_modulation(self):
+        """Disables IQ modulation on the AWG Core.
+
+        Resets the settings of the sine generators and the AWG modulation.
+
+        """
         self._awg.disable_iq_modulation()
 
     def run(self):
-        """
-        Starts the AWG Core.
-
-        """
+        """Runs the AWG Core."""
         self._awg.run()
 
     def stop(self):
-        """
-        Stops the AWG Core.
-        
-        """
+        """Stops the AWG Core."""
         self._awg.stop()
 
     def wait_done(self, timeout=10):
-        """
-        Waits until the AWG Core is finished running. 
+        """Waits until the AWG Core is finished running. 
         
         Keyword Arguments:
             timeout (int): A timeout in seconds after which the AWG is stopped 
@@ -126,17 +142,18 @@ class AWG(InstrumentChannel):
         self._awg.wait_done(timeout=timeout)
 
     def compile(self):
-        """
-        Compiles the current AWG sequence program.
+        """Compiles the current SequenceProgram on the AWG Core.
+        
+        Raises:
+            ToolkitError: If the AWG Core has not been set up yet.
+            ToolkitError: If the compilation has failed.
+            Warning: If the compilation has finished with a warning.
 
         """
         self._awg.compile()
 
     def reset_queue(self):
-        """
-        Resets the waveform queue of the AWG Core to an empty list.
-
-        """
+        """Resets the waveform queue to an empty list."""
         self._awg.reset_queue()
 
     def queue_waveform(self, wave1, wave2, delay=0):
@@ -172,57 +189,76 @@ class AWG(InstrumentChannel):
         without recompilation of the sequence program.
         
         Arguments:
-            wave1 (array like): list or array of samples to replace the waveform  
-                 for channel 1
-            wave2 (array like): list or array of samples to replace the waveform  
-                 for channel 2
+            wave1 (array): Waveform to replace current wave for Channel 1.
+            wave2 (array): Waveform to replace current wave for Channel 2.
         
         Keyword Arguments:
-            i (int): index of the waveform to be replaced in the queue (default: 0)
-            delay (float): individual delay for the for the waveform to be 
-                repalced (default: 0)
+            i (int): The index of the waveform in the queue to be replaced.
+            delay (int): An individual delay in seconds for this waveform w.r.t. 
+                the time origin of the sequence. (default: 0)
         
         """
         self._awg.replace_waveform(wave1, wave2, i=i, delay=delay)
 
     def upload_waveforms(self):
-        """
-        Uploads all waveforms in the waveform queue to the AWG Core. This is 
-        only possible in 'Simple' sequence type and the sequence program must 
-        first be compiled before the waveforms can be uploaded.
+        """Uploads all waveforms in the queue to the AWG Core.
+
+        This method only works as expected if the Sequence Program is in 
+        'Simple' mode and has been compiled beforehand.
         
         """
         self._awg.upload_waveforms()
 
     def compile_and_upload_waveforms(self):
-        """
-        Combines compilation and upload of queued waveforms when using a 
-        'Simple' sequence to make sure the correct program is compiled before 
-        the waveforms are uplaoded. 
+        """Compiles the Sequence Program and uploads the queued waveforms.
+
+        Simply combines the two methods to make sure the sequence is compiled 
+        before the waveform queue is uplaoded.
         
         """
         self._awg.compile_and_upload_waveforms()
 
     def set_sequence_params(self, **kwargs):
-        """
-        Sets the parameters of the sequence with keyword arguments. Possible 
-        paramters include
+        """Sets the parameters of the Sequence Program.
 
-            sequence_type
-            trigger_type
-            period
-            repetitions
-            ...
+        Passes all the keyword arguments to the `set_param(...)` method of the 
+        Sequence Program. The available sequence parameters may vary between 
+        different sequences. For a list of all current sequence parameters see 
+        the property `sequence_params`. 
 
+        They include:
+            'sequence_type', 'period', 'repetitions', 'trigger_mode', 
+            'trigger_delay', ...
+
+            >>> hdawg.awgs[0]
+            <zhinst.toolkit.hdawg.AWG object at 0x0000021E467D3320>
+                parent  : <zhinst.toolkit.hdawg.HDAWG object at 0x0000021E467D3198>
+                index   : 0
+                sequence:
+                        type: None
+                        ('target', 'hdawg')
+                        ('clock_rate', 2400000000.0)
+                        ('period', 0.0001)
+                        ('trigger_mode', 'None')
+                        ('repetitions', 1)
+                        ('alignment', 'End with Trigger')
+                        ...
+            >>> hdawg.awgs[0].set_sequence_params(
+            >>>     sequence_type="Simple",
+            >>>     trigger_mode="Send Trigger",
+            >>>     repetitions=1e6,
+            >>>     alignemnt="Start with Trigger"
+            >>> )
+              
         """
         self._awg.set_sequence_params(**kwargs)
 
     def sequence_params(self):
-        """
-        Returns the current seuence parameters.
+        """Returns the current seuence parameters.
         
         Returns:
             A dictionary with the current sequence parameters.
+            
         """
         return self._awg.sequence_params
 
