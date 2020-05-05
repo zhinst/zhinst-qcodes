@@ -269,24 +269,24 @@ class AWG(InstrumentChannel):
 
 
 class HDAWG(ZIBaseInstrument):
-    """QCoDeS driver for the Zurich Instruments HDAWG.
+    """QCoDeS driver for the *Zurich Instruments HDAWG*.
 
     Inherits from :class:`ZIBaseInstrument`. Initializes some *submodules* 
     from the device's nodetree and a :class:`ChannelList` of device-specific 
     `AWGs` for high-level control of the *AWG Cores*. 
 
     Arguments:
-        name (str): The internal QCoDeS name of the instrument
-        serial (str): The device name as listed in the web server
+        name (str): The internal QCoDeS name of the instrument.
+        serial (str): The device serial number, e.g. *'dev1234'*.
         interface (str): The interface used to connect to the 
-            device (default: '1gbe')
-        host (str): Address of the data server (default: 'localhost')
-        port (int): Port used to connect to the data server (default: 8004)
-        api (int): Api level used (default: 6)
+            device. (default: '1gbe')
+        host (str): Address of the data server. (default: 'localhost')
+        port (int): Port used to connect to the data server. (default: 8004)
+        api (int): Api level used for the data server. (default: 6)
 
     Attributes:
-        awgs (:class:`ChannelList`): A list of four HDAWG specific AWG Cores 
-            (:class:`zhinst.qcodes.hdawg.AWG`).
+        awgs (:class:`ChannelList`): A list of four *HDAWG* specific 
+            *AWG Cores* (:class:`zhinst.qcodes.hdawg.AWG`).
 
     """
 
@@ -307,10 +307,11 @@ class HDAWG(ZIBaseInstrument):
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
     def _connect(self):
-        """
-        Instantiates the device controller from zhinst-toolkit, sets up the data 
-        server and connects the device the data server. This method is called 
-        from __init__ of the base instruemnt class.
+        """Connects the device to the data server.
+
+        Instantiates the device controller from :mod:`zhinst-toolkit`, sets up 
+        the data server and connects the device the data server. This method is 
+        called from `__init__` of the :class:`BaseInstrument` class.
 
         """
         self._controller = tk.HDAWG(
