@@ -11,6 +11,8 @@ Welcome to the Documentation for :mod:`zhinst-qcodes`!
    toolkit/index
    zhinst-qcodes/index
    examples/index
+   changelog/index
+   license/index
 
 
 
