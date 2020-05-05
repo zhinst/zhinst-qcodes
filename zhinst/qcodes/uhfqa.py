@@ -7,22 +7,30 @@ import qcodes.utils.validators as vals
 
 
 class AWG(InstrumentChannel):
-    """
-    AWG module for the UHFQA. Inherits from InstrumentChannel and wraps around 
-    a AWGCore for UHFQA from zhinst-toolkit. 
+    """Device-specific *AWG Core* for the *UHFQA*. 
+    
+    Inherits from :class:`InstrumentChannel` and wraps around a `AWGCore` for 
+    *HDAWG* from :mod:`zhinst-toolkit`. This class adds Parameters from the 
+    :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of the 
+    *toolkit's* `AWGCore`. 
 
     Arguments:
-        name (str): name of the submodule
-        parent_instr: qcodes parent instrument of InstrumentChannel
-        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
-            get and set
+        name (str): The name of the `AWG` submodule.
+        parent_instr (:class:`qcodes.instrument.base.Instrument`): The QCoDeS 
+            parent instrument of the `InstrumentChannel`.
+        parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller` 
+            of the parent instrument that is used for getting and setting 
+            parameters. 
 
-    Parameters:
-        outputs
-        output1
-        output2
-        gain1
-        gain2     
+    Attributes:
+        output1 (:class:`Parameter`): The state 
+            of the output of channel 1. Can be one of {'on', 'off'}.
+        output2 (:class:`Parameter`): The state 
+            of the output of channel 2. Can be one of {'on', 'off'}.
+        gain1 (:class:`Parameter`): Gain of the 
+            output channel 1. The value must be between -1 and +1 (default: +1).
+        gain2 (:class:`Parameter`): Gain of the 
+            output channel 2. The value must be between -1 and +1 (default: +1).
     
     """
 
@@ -76,22 +84,15 @@ class AWG(InstrumentChannel):
         )
 
     def run(self):
-        """
-        Starts the AWG Core.
-
-        """
+        """Runs the *AWG Core*."""
         self._awg.run()
 
     def stop(self):
-        """
-        Stops the AWG Core.
-        
-        """
+        """Stops the *AWG Core*."""
         self._awg.stop()
 
     def wait_done(self, timeout=100):
-        """
-        Waits until the AWG Core is finished running. 
+        """Waits until the *AWG Core* is finished running. 
         
         Keyword Arguments:
             timeout (int): A timeout in seconds after which the AWG is stopped 
@@ -101,127 +102,164 @@ class AWG(InstrumentChannel):
         self._awg.wait_done(timeout=timeout)
 
     def compile(self):
-        """
-        Compiles the current AWG sequence program.
+        """Compiles the current *Sequence Program* on the *AWG Core*.
+        
+        Raises:
+            `ToolkitError`: If the *AWG Core* has not been set up yet.
+            `ToolkitError`: If the compilation has failed.
+            `Warning`: If the compilation has finished with a warning.
 
         """
         self._awg.compile()
 
     def reset_queue(self):
-        """
-        Resets the waveform queue of the AWG Core to an empty list.
-
-        """
+        """Resets the waveform queue to an empty list."""
         self._awg.reset_queue()
 
     def queue_waveform(self, wave1, wave2, delay=0):
-        """
-        Queues up a waveform to the AWG Core. Uploading custom waveforms is only 
-        possible when using the 'Simple' sequence type. The waveform is 
-        specified with two numpy arrays for the two channels of the AWG Core. 
-        The waveform will then automatically align them to the correct minimum 
-        waveform length, sample granularity and scaling. An individual delay can 
-        be specified to shift the individual waveform with respect to the time 
-        origin of the period.
+        """Queues up a waveform to the *AWG Core*. 
+        
+        Uploading custom waveforms is only possible when using the *'Simple'* 
+        sequence type. The waveform is specified with two numpy arrays for the 
+        two channels of the *AWG Core*. The waveform will then automatically 
+        align them to the correct minimum waveform length, sample granularity 
+        and scaling. An individual delay can be specified to shift the 
+        individual waveform with respect to the time origin of the period.
         
         Arguments:
-            wave1 (array like): list or array of samples in the waveform to be 
-                queued for channel 1, an empty list '[]' will upload zeros of 
-                the minimum waveform length
-            wave2 (array like): list or array of samples in the waveform to be 
-                queued for channel 2, an empty list '[]' will upload zeros of 
-                the minimum waveform length
+            wave1 (array like): A list or array of samples in the waveform to be 
+                queued for channel 1. An empty list '[]' will upload zeros of 
+                the minimum waveform length.
+            wave2 (array like): A list or array of samples in the waveform to be 
+                queued for channel 2. An empty list '[]' will upload zeros of 
+                the minimum waveform length.
         
         Keyword Arguments:
-            delay (float): an individual delay for the queued sequence with 
-                respect to the time origin, positive values shift the start of 
-                the waveform forwards in time (default: 0)
+            delay (float): An individual delay for the queued sequence with 
+                respect to the time origin. Positive values shift the start of 
+                the waveform forwards in time. (default: 0)
 
         """
         self._awg.queue_waveform(wave1, wave2, delay=delay)
 
     def replace_waveform(self, wave1, wave2, i=0, delay=0):
-        """
-        Replaces the data in a waveform in the queue. The new data must have the 
-        same length as the previous data s.t. the waveform data can be replaced 
-        without recompilation of the sequence program.
+        """Replaces the data in a waveform in the queue. 
+        
+        The new data must have the same length as the previous data s.t. the 
+        waveform data can be replaced without recompilation of the sequence 
+        program.
         
         Arguments:
-            wave1 (array like): list or array of samples to replace the waveform  
-                 for channel 1
-            wave2 (array like): list or array of samples to replace the waveform  
-                 for channel 2
+            wave1 (array): Waveform to replace current wave for Channel 1.
+            wave2 (array): Waveform to replace current wave for Channel 2.
         
         Keyword Arguments:
-            i (int): index of the waveform to be replaced in the queue (default: 0)
-            delay (float): individual delay for the for the waveform to be 
-                repalced (default: 0)
+            i (int): The index of the waveform in the queue to be replaced.
+            delay (int): An individual delay in seconds for this waveform w.r.t. 
+                the time origin of the sequence. (default: 0)
         
         """
         self._awg.replace_waveform(wave1, wave2, i=i, delay=delay)
 
     def upload_waveforms(self):
-        """
-        Uploads all waveforms in the waveform queue to the AWG Core. This is 
-        only possible in 'Simple' sequence type and the sequence program must 
-        first be compiled before the waveforms can be uploaded.
+        """Uploads all waveforms in the queue to the AWG Core.
+
+        This method only works as expected if the Sequence Program is in 
+        'Simple' mode and has been compiled beforehand.
         
         """
         self._awg.upload_waveforms()
 
     def compile_and_upload_waveforms(self):
-        """
-        Combines compilation and upload of queued waveforms when using a 
-        'Simple' sequence to make sure the correct program is compiled before 
-        the waveforms are uplaoded. 
+        """Compiles the Sequence Program and uploads the queued waveforms.
+
+        Simply combines the two methods to make sure the sequence is compiled 
+        before the waveform queue is uplaoded.
         
         """
         self._awg.compile_and_upload_waveforms()
 
     def set_sequence_params(self, **kwargs):
-        """
-        Sets the parameters of the sequence with keyword arguments. Possible 
-        paramters include
+        """Sets the parameters of the *Sequence Program*.
 
-            sequence_type
-            trigger_type
-            period
-            repetitions
-            ...
+        Passes all the keyword arguments to the `set_param(...)` method of the 
+        *Sequence Program*. The available sequence parameters may vary between 
+        different sequences. For a list of all current sequence parameters see 
+        the method `sequence_params()`. 
 
+        They include:
+            *'sequence_type', 'period', 'repetitions', 'trigger_mode', 
+            'trigger_delay', ...*
+
+            >>> hdawg.awgs[0].set_sequence_params(
+            >>>     sequence_type="Simple",
+            >>>     trigger_mode="Send Trigger",
+            >>>     repetitions=1e6,
+            >>>     alignemnt="Start with Trigger"
+            >>> )
+              
         """
         self._awg.set_sequence_params(**kwargs)
 
     def sequence_params(self):
-        """
-        Returns the current seuence parameters.
+        """Returns the current seuence parameters.
         
         Returns:
             A dictionary with the current sequence parameters.
+            
         """
         return self._awg.sequence_params
 
 
 class Channel(InstrumentChannel):
-    """
-    ReadoutChannel module for the UHFQA. Inherits from InstrumentChannel and 
-    wraps around a ReadoutChannel for UHFQA from zhinst-toolkit. 
+    """Implements a *Readout Channel* for the *UHFQA*. 
+
+    Inherits from :class:`InstrumentChannel` and wraps around a `ReadoutChannel` 
+    for *UHFQA* from :mod:`zhinst-toolkit`. This class adds *Parameters* from 
+    the :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of 
+    the *toolkit's* `ReadoutChannel`. 
+
+    This class represents the signal processing chain for one of the ten 
+    :class:`ReadoutChannels` of a UHFQA. One channel is typically used for 
+    dispersive resonator readout of a superconducting Qubit.
+
+        >>> ch = uhfqa.channels[0]
+        >>> uhfqa.result_source("Threshold")
+        >>> ...
+        >>> ch.enable()
+        >>> ch.readout_frequency(85.6e6)
+        >>> ch.rotation(123.4)
+        >>> ch.threshold(-56.78)
+        >>> ...
+        >>> ch.result()
+        array([0.0, 1.0, 1.0, 1.0, 0.0, ...])
+
+    The readout channel can be enabled with `enable()` which means that the 
+    weighted integration mode is activated and integration weights are set to 
+    demodulate the signal at the given readout frequency. If the channel is 
+    enabled, the readout parameters are also used for signal generation in the 
+    :class:`AWGCore` if the sequence type is set to "Readout". 
 
     Arguments:
-        name (str): name of the submodule
-        parent_instr: qcodes parent instrument of InstrumentChannel
-        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
-            get and set
+        name (str): The name of the `Channel` submodule.
+        parent_instr (:class:`qcodes.instrument.base.Instrument`): The QCoDeS 
+            parent instrument of the `InstrumentChannel`.
+        parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller` 
+            of the parent instrument that is used for getting and setting 
+            parameters. 
 
-    Parameters:
-        rotation
-        threshold
-        readout_frequency
-        readout_amplitude
-        phase_shift
-        enabled
-        result     
-    
+    Attributes:
+        index (int): The index of the Readout Channel from 1 - 10.
+        rotation (:class:`Parameter`): The 
+            rotation applied to the signal in IQ plane. The angle is specified 
+            in degrees.
+        threshold (:class:`Parameter`): The 
+            signal threshold used for state discrimination in the thresholding 
+            unit.
+        result (:class:`Parameter`): This 
+            read-only Parameter holds the result vector for the given readout 
+            channel as a 1D numpy array.            
+
     """
 
     def __init__(self, name, index, parent_instr, parent_contr):
@@ -313,21 +351,26 @@ class Channel(InstrumentChannel):
 
 
 class UHFQA(ZIBaseInstrument):
-    """
-    QCoDeS driver for ZI UHFQA.
+    """QCoDeS driver for the *Zurich Instruments UHFQA*.
 
-    Inherits from ZIBaseInstrument. Initializes some submodules 
-    from the nodetree and a 'sequencer' submodule for high level 
-    control of the AWG sequence program.
+    Inherits from :class:`ZIBaseInstrument`. Initializes some *submodules* 
+    from the device's nodetree and a device-specific *AWG Core*. It also 
+    features a :class:`ChannelList` of ten *Readout Channels* 
+    (:class:`Channel`).
 
     Arguments:
-        name (str): The internal QCoDeS name of the instrument
-        serial (str): The device name as listed in the web server
+        name (str): The internal QCoDeS name of the instrument.
+        serial (str): The device serial number, e.g. *'dev1234'*.
         interface (str): The interface used to connect to the 
-            device (default: '1gbe')
-        host (str): Address of the data server (default: 'localhost')
-        port (int): Port used to connect to the data server (default: 8004)
-        api (int): Api level used (default: 6)
+            device. (default: '1gbe')
+        host (str): Address of the data server. (default: 'localhost')
+        port (int): Port used to connect to the data server. (default: 8004)
+        api (int): Api level used for the data server. (default: 6)
+
+    Attributes:
+        awg (:class:`zhinst.qcodes.uhfqa.AWG`): A *UHFQA* specific *AWG Core*.
+        channels (:class:`ChannelList`): A list of ten *Readout Channels*
+            (:class:`zhinst.qcodes.uhfqa.Channel`).
 
     """
 
@@ -350,10 +393,11 @@ class UHFQA(ZIBaseInstrument):
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
     def _connect(self):
-        """
-        Instantiates the device controller from zhinst-toolkit, sets up the data 
-        server and connects the device the data server. This method is called 
-        from __init__ of the base instruemnt class.
+        """Connects the device to the data server.
+
+        Instantiates the device controller from :mod:`zhinst-toolkit`, sets up 
+        the data server and connects the device the data server. This method is 
+        called from `__init__` of the :class:`BaseInstrument` class.
 
         """
         self._controller = tk.UHFQA(

@@ -10,7 +10,7 @@ class AWG(InstrumentChannel):
     """Device-specific *AWG Core* for the *HDAWG*. 
     
     Inherits from :class:`InstrumentChannel` and wraps around a `AWGCore` for 
-    *HDAWG* from :mod:`zhinst-toolkit`. This class adds Parameters from the 
+    *HDAWG* from :mod:`zhinst-toolkit`. This class adds *Parameters* from the 
     :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of the 
     *toolkit's* `AWGCore`. 
 
@@ -235,19 +235,6 @@ class AWG(InstrumentChannel):
             *'sequence_type', 'period', 'repetitions', 'trigger_mode', 
             'trigger_delay', ...*
 
-            >>> hdawg.awgs[0]
-            <zhinst.toolkit.hdawg.AWG object at 0x0000021E467D3320>
-                parent  : <zhinst.toolkit.hdawg.HDAWG object at 0x0000021E467D3198>
-                index   : 0
-                sequence:
-                        type: None
-                        ('target', 'hdawg')
-                        ('clock_rate', 2400000000.0)
-                        ('period', 0.0001)
-                        ('trigger_mode', 'None')
-                        ('repetitions', 1)
-                        ('alignment', 'End with Trigger')
-                        ...
             >>> hdawg.awgs[0].set_sequence_params(
             >>>     sequence_type="Simple",
             >>>     trigger_mode="Send Trigger",
