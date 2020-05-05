@@ -354,6 +354,8 @@ class MFLI(ZIBaseInstrument):
     Arguments:
         name (str): The internal QCoDeS name of the instrument.
         serial (str): The device serial number, e.g. *'dev1234'*.
+
+    Keyword Arguments:
         interface (str): The interface used to connect to the 
             device. (default: '1gbe')
         host (str): Address of the data server. (default: 'localhost')

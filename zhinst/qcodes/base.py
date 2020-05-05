@@ -45,6 +45,8 @@ class ZIBaseInstrument(Instrument):
         name (str): The *QCoDeS* name of the instrument
         device_type (str): The device type, e.g. *'mfli'*.
         serial (str): The device serial number.
+
+    Keyword Arguments:
         interface (str): The interface used to connect to the 
             device (default: *'1GbE'*).
         host (str): Address of the data server. (default: 'localhost')
