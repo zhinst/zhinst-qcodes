@@ -16,8 +16,8 @@ class AWG(InstrumentChannel):
 
     Arguments:
         name (str): The name of the `AWG` submodule.
-        parent_instr (:class:`Instrument`): The QCoDeS parent instrument of the 
-            `InstrumentChannel`.
+        parent_instr (:class:`qcodes.instrument.base.Instrument`): The QCoDeS 
+            parent instrument of the `InstrumentChannel`.
         parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller` 
             of the parent instrument that is used for getting and setting 
             parameters. 
