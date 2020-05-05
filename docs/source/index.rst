@@ -10,6 +10,7 @@ Welcome to the Documentation for :mod:`zhinst-qcodes`!
    about/index
    toolkit/index
    zhinst-qcodes/index
+   examples/index
 
 
 
@@ -20,4 +21,3 @@ Index
 * :ref:`genindex`
 
 .. _QCoDeS: https://qcodes.github.io/Qcodes/index.html
-.. _Labber: https://labber.org/
