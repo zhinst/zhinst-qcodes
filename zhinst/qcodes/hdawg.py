@@ -7,16 +7,20 @@ import qcodes.utils.validators as vals
 
 
 class AWG(InstrumentChannel):
-    """Device-specific AWG Core for the *HDAWG*. 
+    """Device-specific *AWG Core* for the *HDAWG*. 
     
     Inherits from :class:`InstrumentChannel` and wraps around a `AWGCore` for 
-    *HDAWG* from :mod:`zhinst-toolkit`. 
+    *HDAWG* from :mod:`zhinst-toolkit`. This class adds Parameters from the 
+    :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of the 
+    *toolkit's* `AWGCore`. 
 
     Arguments:
-        name (str): name of the submodule
-        parent_instr: qcodes parent instrument of InstrumentChannel
-        parent_contr: zhinst-toolkit device of the parent isntrument, used for 
-            get and set
+        name (str): The name of the `AWG` submodule.
+        parent_instr (:class:`Instrument`): The QCoDeS parent instrument of the 
+            `InstrumentChannel`.
+        parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller` 
+            of the parent instrument that is used for getting and setting 
+            parameters. 
 
     Attributes:
         outputs (:class:`Parameter`): Stat of *both* outputs. A tuple of values 
@@ -104,7 +108,7 @@ class AWG(InstrumentChannel):
         )
 
     def enable_iq_modulation(self):
-        """Enables IQ Modulation by on the AWG Core.
+        """Enables IQ Modulation by on the *AWG Core*.
         
         This method applies the corresponding settings for IQ modulation using 
         one of the internal oscillators and two sine generators. The sines are 
@@ -116,7 +120,7 @@ class AWG(InstrumentChannel):
         self._awg.enable_iq_modulation()
 
     def disable_iq_modulation(self):
-        """Disables IQ modulation on the AWG Core.
+        """Disables IQ modulation on the *AWG Core*.
 
         Resets the settings of the sine generators and the AWG modulation.
 
@@ -124,15 +128,15 @@ class AWG(InstrumentChannel):
         self._awg.disable_iq_modulation()
 
     def run(self):
-        """Runs the AWG Core."""
+        """Runs the *AWG Core*."""
         self._awg.run()
 
     def stop(self):
-        """Stops the AWG Core."""
+        """Stops the *AWG Core*."""
         self._awg.stop()
 
     def wait_done(self, timeout=10):
-        """Waits until the AWG Core is finished running. 
+        """Waits until the *AWG Core* is finished running. 
         
         Keyword Arguments:
             timeout (int): A timeout in seconds after which the AWG is stopped 
@@ -142,12 +146,12 @@ class AWG(InstrumentChannel):
         self._awg.wait_done(timeout=timeout)
 
     def compile(self):
-        """Compiles the current SequenceProgram on the AWG Core.
+        """Compiles the current *Sequence Program* on the *AWG Core*.
         
         Raises:
-            ToolkitError: If the AWG Core has not been set up yet.
-            ToolkitError: If the compilation has failed.
-            Warning: If the compilation has finished with a warning.
+            `ToolkitError`: If the *AWG Core* has not been set up yet.
+            `ToolkitError`: If the compilation has failed.
+            `Warning`: If the compilation has finished with a warning.
 
         """
         self._awg.compile()
@@ -157,36 +161,37 @@ class AWG(InstrumentChannel):
         self._awg.reset_queue()
 
     def queue_waveform(self, wave1, wave2, delay=0):
-        """
-        Queues up a waveform to the AWG Core. Uploading custom waveforms is only 
-        possible when using the 'Simple' sequence type. The waveform is 
-        specified with two numpy arrays for the two channels of the AWG Core. 
-        The waveform will then automatically align them to the correct minimum 
-        waveform length, sample granularity and scaling. An individual delay can 
-        be specified to shift the individual waveform with respect to the time 
-        origin of the period.
+        """Queues up a waveform to the *AWG Core*. 
+        
+        Uploading custom waveforms is only possible when using the *'Simple'* 
+        sequence type. The waveform is specified with two numpy arrays for the 
+        two channels of the *AWG Core*. The waveform will then automatically 
+        align them to the correct minimum waveform length, sample granularity 
+        and scaling. An individual delay can be specified to shift the 
+        individual waveform with respect to the time origin of the period.
         
         Arguments:
-            wave1 (array like): list or array of samples in the waveform to be 
-                queued for channel 1, an empty list '[]' will upload zeros of 
-                the minimum waveform length
-            wave2 (array like): list or array of samples in the waveform to be 
-                queued for channel 2, an empty list '[]' will upload zeros of 
-                the minimum waveform length
+            wave1 (array like): A list or array of samples in the waveform to be 
+                queued for channel 1. An empty list '[]' will upload zeros of 
+                the minimum waveform length.
+            wave2 (array like): A list or array of samples in the waveform to be 
+                queued for channel 2. An empty list '[]' will upload zeros of 
+                the minimum waveform length.
         
         Keyword Arguments:
-            delay (float): an individual delay for the queued sequence with 
-                respect to the time origin, positive values shift the start of 
-                the waveform forwards in time (default: 0)
+            delay (float): An individual delay for the queued sequence with 
+                respect to the time origin. Positive values shift the start of 
+                the waveform forwards in time. (default: 0)
 
         """
         self._awg.queue_waveform(wave1, wave2, delay=delay)
 
     def replace_waveform(self, wave1, wave2, i=0, delay=0):
-        """
-        Replaces the data in a waveform in the queue. The new data must have the 
-        same length as the previous data s.t. the waveform data can be replaced 
-        without recompilation of the sequence program.
+        """Replaces the data in a waveform in the queue. 
+        
+        The new data must have the same length as the previous data s.t. the 
+        waveform data can be replaced without recompilation of the sequence 
+        program.
         
         Arguments:
             wave1 (array): Waveform to replace current wave for Channel 1.
@@ -219,16 +224,16 @@ class AWG(InstrumentChannel):
         self._awg.compile_and_upload_waveforms()
 
     def set_sequence_params(self, **kwargs):
-        """Sets the parameters of the Sequence Program.
+        """Sets the parameters of the *Sequence Program*.
 
         Passes all the keyword arguments to the `set_param(...)` method of the 
-        Sequence Program. The available sequence parameters may vary between 
+        *Sequence Program*. The available sequence parameters may vary between 
         different sequences. For a list of all current sequence parameters see 
-        the property `sequence_params`. 
+        the method `sequence_params()`. 
 
         They include:
-            'sequence_type', 'period', 'repetitions', 'trigger_mode', 
-            'trigger_delay', ...
+            *'sequence_type', 'period', 'repetitions', 'trigger_mode', 
+            'trigger_delay', ...*
 
             >>> hdawg.awgs[0]
             <zhinst.toolkit.hdawg.AWG object at 0x0000021E467D3320>
@@ -264,12 +269,11 @@ class AWG(InstrumentChannel):
 
 
 class HDAWG(ZIBaseInstrument):
-    """
-    QCoDeS driver for ZI HDAWG.
+    """QCoDeS driver for the Zurich Instruments HDAWG.
 
-    Inherits from ZIBaseInstrument. Initializes some submodules 
-    from the nodetree and a ChannelList of 'awgs' for high 
-    level control of the AWG sequence program.
+    Inherits from :class:`ZIBaseInstrument`. Initializes some *submodules* 
+    from the device's nodetree and a :class:`ChannelList` of device-specific 
+    `AWGs` for high-level control of the *AWG Cores*. 
 
     Arguments:
         name (str): The internal QCoDeS name of the instrument
