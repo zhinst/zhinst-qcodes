@@ -1,6 +1,15 @@
-Welcome to the Documentation for :mod:`zhinst-qcodes`!
-=======================================================
+.. image:: images/zhinst_logo_sep_horiz_2019_1000.png
+   :width: 400
 
+|
+|
+|
+
+*Zurich Instruments QCoDeS* Documentation
+=========================================
+
+
+:mod:`zhinst-qcodes`
 
 .. toctree::
    :maxdepth: 2
