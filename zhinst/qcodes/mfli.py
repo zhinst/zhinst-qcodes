@@ -364,7 +364,7 @@ class MFLI(ZIBaseInstrument):
 
     Attributes:
         daq (:class:`DAQ`): A MFLI-specific *Data Acquisition Module*.
-        daq (:class:`Sweeper`): A MFLI-specific *Sweeper Module*.
+        sweeper (:class:`Sweeper`): A MFLI-specific *Sweeper Module*.
 
     """
 

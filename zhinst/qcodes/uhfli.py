@@ -365,7 +365,9 @@ class UHFLI(ZIBaseInstrument):
 
     Attributes:
         daq (:class:`DAQ`): A UHFLI-specific *Data Acquisition Module*.
-        daq (:class:`Sweeper`): A UHFLI-specific *Sweeper Module*.
+        sweeper (:class:`Sweeper`): A UHFLI-specific *Sweeper Module*.
+        awg (:class:`zhinst.qcodes.uhfqa.AWG`): *AWG Core* for the *UHFLI*, 
+            taken from the *UHFQA*. 
 
     """
 
