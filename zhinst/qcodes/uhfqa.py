@@ -368,6 +368,10 @@ class Channel(InstrumentChannel):
         """
         self._channel.disable()
 
+    @property
+    def index(self):
+        return self._channel.index
+
 
 class UHFQA(ZIBaseInstrument):
     """QCoDeS driver for the *Zurich Instruments UHFQA*.
