@@ -15,8 +15,8 @@
    :maxdepth: 2
    :caption: Contents:
 
-   start/index
    about/index
+   start/index
    toolkit/index
    zhinst-qcodes/index
    examples/index
