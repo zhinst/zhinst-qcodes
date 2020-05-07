@@ -43,6 +43,7 @@ class AWG(InstrumentChannel):
             *'Simple'*.
         is_running (bool): A flag that shows if the `AWG Core` is currently 
             running or not.
+        index (int): The index of the `AWG Core` in the list of *awgs*.
     
     """
 
@@ -268,6 +269,10 @@ class AWG(InstrumentChannel):
     @property
     def is_running(self):
         return self._awg.is_running
+
+    @property
+    def index(self):
+        return self._awg.index
 
 
 class HDAWG(ZIBaseInstrument):
