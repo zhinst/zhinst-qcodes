@@ -31,7 +31,6 @@ class AWG(InstrumentChannel):
             output channel 1. The value must be between -1 and +1 (default: +1).
         gain2 (:class:`Parameter`): Gain of the 
             output channel 2. The value must be between -1 and +1 (default: +1).
-        name (str): The name of the `AWG Core`.
         waveforms (list): A list of `Waveforms` that respresent the queue of 
             waveforms to upload to the device when the sequence type is 
             *'Simple'*.
@@ -216,10 +215,6 @@ class AWG(InstrumentChannel):
             
         """
         return self._awg.sequence_params
-
-    @property
-    def name(self):
-        return self._awg.name
 
     @property
     def waveforms(self):
