@@ -1,4 +1,9 @@
 Examples
 ========
 
-add jupyter notebooks here .... similar to toolkit Examples
+
+.. toctree::
+   :maxdepth: 2
+
+   notebooks/example1_getting_started
+   tour
