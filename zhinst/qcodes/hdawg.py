@@ -38,6 +38,12 @@ class AWG(InstrumentChannel):
             modulation is enabled. Must be between -1 and +1 (default: +1).
         gain2 (:class:`Parameter`): Gain of the output channel 2 if IQ 
             modulation is enabled. Must be between -1 and +1 (default: +1).
+        name (str): The name of the `AWG Core`.
+        waveforms (list): A list of `Waveforms` that respresent the queue of 
+            waveforms to upload to the device when the sequence type is 
+            *'Simple'*.
+        is_running (bool): A flag that shows if the `AWG Core` is currently 
+            running or not.
     
     """
 
@@ -253,6 +259,18 @@ class AWG(InstrumentChannel):
             
         """
         return self._awg.sequence_params
+
+    @property
+    def name(self):
+        return self._awg.name
+
+    @property
+    def waveforms(self):
+        return self._awg.waveforms
+
+    @property
+    def is_running(self):
+        return self._awg.is_running
 
 
 class HDAWG(ZIBaseInstrument):
