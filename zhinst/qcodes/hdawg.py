@@ -50,6 +50,8 @@ class AWG(InstrumentChannel):
     def __init__(self, name, index, parent_instr, parent_contr):
         InstrumentChannel.__init__(self, parent_instr, name)
         self._awg = HDAWG_AWG(parent_contr, index)
+        self._awg._setup()
+        # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "outputs",
             unit=None,

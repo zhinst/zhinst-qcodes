@@ -43,6 +43,7 @@ class AWG(InstrumentChannel):
     def __init__(self, name, parent_instr, parent_contr):
         super().__init__(parent_instr, name)
         self._awg = UHFQA_AWG(parent_contr, 0)
+        self._awg._setup()
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "outputs",
