@@ -8,9 +8,6 @@
 *Zurich Instruments QCoDeS* Documentation
 =========================================
 
-
-:mod:`zhinst-qcodes`
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -25,10 +22,8 @@
 
 
 
-
 Index
 =====
 
 * :ref:`genindex`
 
-.. _QCoDeS: https://qcodes.github.io/Qcodes/index.html
