@@ -5,12 +5,12 @@
 |
 |
 
-*Zurich Instruments QCoDeS* Documentation
-=========================================
+Zurich Instruments QCoDeS Documentation
+=======================================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    about/index
    start/index
