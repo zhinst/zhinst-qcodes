@@ -4,6 +4,7 @@ import qcodes.utils.validators as vals
 
 import zhinst.toolkit as tk
 from zhinst.toolkit.control.drivers.mfli import DAQModule, SweeperModule
+from typing import List, Dict
 
 
 class DAQ(InstrumentChannel):
@@ -29,7 +30,7 @@ class DAQ(InstrumentChannel):
     
     """
 
-    def __init__(self, name, parent_instr, parent_contr):
+    def __init__(self, name: str, parent_instr, parent_contr) -> None:
         super().__init__(parent_instr, name)
         self._daq_module = DAQModule(parent_contr)
         self._daq_module._setup()
@@ -48,7 +49,7 @@ class DAQ(InstrumentChannel):
                     val_mapping=val_mapping,
                 )
 
-    def trigger(self, trigger_source, trigger_type):
+    def trigger(self, trigger_source: str, trigger_type: str) -> None:
         """Sets the trigger signal of the *DAQ Module*. 
         
         This method can be used to specify the signal used to trigger the data 
@@ -65,7 +66,7 @@ class DAQ(InstrumentChannel):
         """
         self._daq_module.trigger(trigger_source, trigger_type)
 
-    def trigger_list(self, source=None):
+    def trigger_list(self, source=None) -> List:
         """Returns a list of all the available signal sources for data acquisition.
         
         Keyword Arguments:
@@ -73,21 +74,21 @@ class DAQ(InstrumentChannel):
                 (default: None) 
             
         Returns:
-            Returns all available signal sources by default. If the keyword is 
-            specified with one of the signal sources, all the available signal 
-            types for the signal source are returned.
+            Returns a list of all available signal sources by default. If the 
+            keyword is specified with one of the signal sources, a list with all 
+            the available signal types for the signal source are returned.
         
         """
         return self._daq_module.trigger_list(source)
 
     def signals_add(
         self,
-        signal_source,
-        signal_type="",
-        operation="avg",
-        fft=False,
-        complex_selector="abs",
-    ):
+        signal_source: str,
+        signal_type: str = "",
+        operation: str = "avg",
+        fft: bool = False,
+        complex_selector: str = "abs",
+    ) -> str:
         """Add a signal to the signals list to be subscribed to during measurement.
         
         The specified signal is added to the property *signals* list. On 
@@ -129,7 +130,7 @@ class DAQ(InstrumentChannel):
             signal_source, signal_type, operation, fft, complex_selector
         )
 
-    def signals_list(self, source=None):
+    def signals_list(self, source=None) -> List:
         """Returns a list of all the available signal sources for data acquisition.
         
         Keyword Arguments:
@@ -148,8 +149,8 @@ class DAQ(InstrumentChannel):
         """Resets the `signal` list attribute to an empty list."""
         self._daq_module.signals_clear()
 
-    def measure(self, verbose=True, timeout=20):
-        """Performs the measurement.
+    def measure(self, verbose: bool = True, timeout: float = 20) -> None:
+        """Performs the measurement. 
 
         Starts a measurement and stores the result in `daq.results`. This 
         method subscribes to all the paths previously added to `daq.signals`, 
@@ -165,11 +166,11 @@ class DAQ(InstrumentChannel):
         """
         self._daq_module.measure(verbose, timeout)
 
-    def _set(self, *args):
+    def _set(self, *args) -> None:
         """Sets a given node of the module to a given value."""
         self._daq_module._set(*args)
 
-    def _get(self, *args, valueonly=True):
+    def _get(self, *args, valueonly: bool = True):
         """Gets the value of a given node of the module."""
         return self._daq_module._get(*args)
 
@@ -205,7 +206,7 @@ class Sweeper(InstrumentChannel):
     
     """
 
-    def __init__(self, name, parent_instr, parent_contr):
+    def __init__(self, name: str, parent_instr, parent_contr) -> None:
         super().__init__(parent_instr, name)
         self._sweeper_module = SweeperModule(parent_contr)
         self._sweeper_module._setup()
@@ -224,7 +225,7 @@ class Sweeper(InstrumentChannel):
                     val_mapping=val_mapping,
                 )
 
-    def signals_add(self, signal_source):
+    def signals_add(self, signal_source: str) -> str:
         """Adds a signal to the measurement.
         
         The according signal node path will be generated and added to the 
@@ -250,11 +251,11 @@ class Sweeper(InstrumentChannel):
         """
         return self._sweeper_module.signals_add(signal_source)
 
-    def signals_clear(self):
+    def signals_clear(self) -> None:
         """Resets the `signal` list attribute to an empty list."""
         self._sweeper_module.signals_clear()
 
-    def signals_list(self):
+    def signals_list(self) -> List:
         """Lists the keywords for available signals that can be added to the 
         measurement.
         
@@ -264,7 +265,7 @@ class Sweeper(InstrumentChannel):
         """
         return self._sweeper_module.signals_list()
 
-    def sweep_parameter_list(self):
+    def sweep_parameter_list(self) -> List:
         """Lists the keywords for available parameters that can be swept during 
         the measurement.
         
@@ -274,7 +275,7 @@ class Sweeper(InstrumentChannel):
         """
         return self._sweeper_module.sweep_parameter_list()
 
-    def sweep_parameter(self, param):
+    def sweep_parameter(self, param: str) -> None:
         """Sets the sweep parameter. 
         
         The parameter to sweep should be given by a keyword string. The 
@@ -285,9 +286,9 @@ class Sweeper(InstrumentChannel):
                 during measurement.
 
         """
-        return self._sweeper_module.sweep_parameter(param)
+        self._sweeper_module.sweep_parameter(param)
 
-    def measure(self, verbose=True, timeout=20):
+    def measure(self, verbose: bool = True, timeout: float = 20) -> None:
         """Performs the measurement.
         
         Starts a measurement and stores the result in `sweeper.results`. This 
@@ -304,7 +305,7 @@ class Sweeper(InstrumentChannel):
         """
         self._sweeper_module.measure(verbose, timeout)
 
-    def application_list(self):
+    def application_list(self) -> List:
         """Lists the availbale application presets.
         
         Returns:
@@ -327,11 +328,11 @@ class Sweeper(InstrumentChannel):
         """
         self._sweeper_module.application(application)
 
-    def _set(self, *args):
+    def _set(self, *args) -> None:
         """Sets a given node of the module to a given value."""
         self._sweeper_module._set(*args)
 
-    def _get(self, *args, valueonly=True):
+    def _get(self, *args, valueonly: bool = True):
         """Gets the value of a given node of the module."""
         return self._sweeper_module._get(*args)
 
@@ -372,19 +373,19 @@ class MFLI(ZIBaseInstrument):
         self,
         name: str,
         serial: str,
-        interface="1gbe",
-        host="localhost",
-        port=8004,
-        api=6,
+        interface: str = "1gbe",
+        host: str = "localhost",
+        port: int = 8004,
+        api: int = 6,
         **kwargs
-    ):
+    ) -> None:
         super().__init__(name, "mfli", serial, interface, host, port, api, **kwargs)
         submodules = self.nodetree_dict.keys()
         # initialize submodules from nodetree with blacklist
         blacklist = ["scopes"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
-    def _connect(self):
+    def _connect(self) -> None:
         """Connects the device to the data server.
 
         Instantiates the device controller from :mod:`zhinst-toolkit`, sets up 
