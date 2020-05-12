@@ -60,10 +60,10 @@ class ZIBaseInstrument(Instrument):
         name: str,
         device_type: str,
         serial: str,
-        interface="1gbe",
-        host="localhost",
-        port=8004,
-        api=6,
+        interface: str = "1gbe",
+        host: str = "localhost",
+        port: int = 8004,
+        api: int = 6,
         **kwargs,
     ) -> None:
         super().__init__(name, **kwargs)
@@ -81,7 +81,7 @@ class ZIBaseInstrument(Instrument):
             )
         self._connect()
 
-    def _connect(self):
+    def _connect(self) -> None:
         """
         Instantiates the device controller from zhinst-toolkit, sets up the data 
         server and connects the device the data server. This method is called 
@@ -104,7 +104,7 @@ class ZIBaseInstrument(Instrument):
         # get the nodetree from the device as a nested dict
         self._get_nodetree_dict()
 
-    def _init_submodule(self, key):
+    def _init_submodule(self, key: str) -> None:
         """
         Recursively initialize submodules from highest layer keys in nodetree 
         dictionary.For e.g. 'dev8030/sigouts/...' one would call this method 
@@ -119,7 +119,7 @@ class ZIBaseInstrument(Instrument):
         else:
             print(f"Key {key} not in nodetree: {list(self.nodetree_dict.keys())}")
 
-    def _get_nodetree_dict(self):
+    def _get_nodetree_dict(self) -> None:
         """
         Retrieve the nodetree from the device as a nested dict and process it accordingly.
 
@@ -129,9 +129,9 @@ class ZIBaseInstrument(Instrument):
         for key, value in tree.items():
             key = key.replace(f"/{self._serial.upper()}/", "")
             hirarchy = key.split("/")
-            dictify(self.nodetree_dict, hirarchy, value)
+            _dictify(self.nodetree_dict, hirarchy, value)
 
-    def _add_submodules_recursively(self, parent, treedict: dict):
+    def _add_submodules_recursively(self, parent, treedict: dict) -> None:
         """
         Recursively add submodules (ZINodes) for each node in the ZI node tree.
         At the leaves create a parameter. Create a ChannelList as submodules
@@ -172,7 +172,7 @@ class ZIBaseInstrument(Instrument):
                     parent.add_submodule(key, module)
                     self._add_submodules_recursively(module, treedict[key])
 
-    def _add_parameter_from_dict(self, instr, name, params):
+    def _add_parameter_from_dict(self, instr, name: str, params: dict) -> None:
         """
         Add a QCoDeS parameter associated to a ZI node from a dict describing 
         the parameter with e.g. 'Node', 'Properties', 'Description', 'Options' 
@@ -197,13 +197,13 @@ class ZIBaseInstrument(Instrument):
             setter = False
         instr.add_parameter(
             name=name,
-            docstring=dict_to_doc(params),
+            docstring=_dict_to_doc(params),
             unit=params["Unit"] if params["Unit"] != "None" else None,
             get_cmd=getter,
             set_cmd=setter,
         )
 
-    def get_idn(self):
+    def get_idn(self) -> dict:
         return dict(
             vendor="Zurich Instruments",
             model=self._type.upper(),
@@ -218,7 +218,7 @@ Helper functions used to process the nodetree dictionary in ZIBaseInstrument.
 """
 
 
-def dictify(data, keys, val):
+def _dictify(data, keys, val) -> dict:
     """
     Helper function to generate nested dictionary from list of keys and value. 
     Calls itself recursively.
@@ -228,6 +228,10 @@ def dictify(data, keys, val):
         keys (list): list of keys to traverse along tree and place value
         val (dict): value for innermost layer of nested dict
 
+    Returns:
+        data (dict): A nested dictionary respresenting the (sub-)nodetree data 
+            structure.
+
     """
     key = keys[0]
     key = int(key) if key.isdecimal() else key.lower()
@@ -235,21 +239,25 @@ def dictify(data, keys, val):
         data[key] = val
     else:
         if key in data.keys():
-            data[key] = dictify(data[key], keys[1:], val)
+            data[key] = _dictify(data[key], keys[1:], val)
         else:
-            data[key] = dictify({}, keys[1:], val)
+            data[key] = _dictify({}, keys[1:], val)
     return data
 
 
-def dict_to_doc(d):
+def _dict_to_doc(d) -> str:
     """
     Turn dictionary into pretty doc string.
 
     Arguments:
         d (dict)
 
+    Returns:
+        s (str): A pretty string that lists the key/value pairs of the given 
+            dictionary for documentation. 
+
     """
     s = ""
     for k, v in d.items():
-        s += f"* `{k}`: {v}\n"
+        s += f"- '{k}'': {v}\n"
     return s
