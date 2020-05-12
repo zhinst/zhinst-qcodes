@@ -194,7 +194,7 @@ class ZIBaseInstrument(Instrument):
             # use controller.set("device name", "node", value) as setter
             setter = partial(self._controller._set, node)
         else:
-            setter = None
+            setter = False
         instr.add_parameter(
             name=name,
             docstring=dict_to_doc(params),
