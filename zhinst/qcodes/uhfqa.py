@@ -121,7 +121,7 @@ class AWG(InstrumentChannel):
         self,
         wave1: Union[List, np.array],
         wave2: Union[List, np.array],
-        delay: int = 0,
+        delay: float = 0,
     ) -> None:
         """Queues up a waveform to the *AWG Core*. 
         

@@ -164,7 +164,7 @@ class AWG(InstrumentChannel):
         self,
         wave1: Union[List, np.array],
         wave2: Union[List, np.array],
-        delay: int = 0,
+        delay: float = 0,
     ) -> None:
         """Queues up a waveform to the *AWG Core*. 
         
@@ -196,7 +196,7 @@ class AWG(InstrumentChannel):
         wave1: Union[List, np.array],
         wave2: Union[List, np.array],
         i: int = 0,
-        delay: int = 0,
+        delay: float = 0,
     ) -> None:
         """Replaces the data in a waveform in the queue. 
         
