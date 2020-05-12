@@ -4,6 +4,7 @@ from qcodes.instrument.channel import InstrumentChannel
 
 import zhinst.toolkit as tk
 from zhinst.toolkit.control.drivers.uhfli import DAQModule, SweeperModule
+from typing import List, Dict
 
 
 class DAQ(InstrumentChannel):
