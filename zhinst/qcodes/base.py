@@ -3,6 +3,7 @@ from functools import partial
 from qcodes.instrument.base import Instrument
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
 import zhinst.toolkit as tk
+from typing import List, Dict
 
 
 class ZIQcodesException(Exception):
@@ -131,7 +132,7 @@ class ZIBaseInstrument(Instrument):
             hirarchy = key.split("/")
             _dictify(self.nodetree_dict, hirarchy, value)
 
-    def _add_submodules_recursively(self, parent, treedict: dict) -> None:
+    def _add_submodules_recursively(self, parent, treedict: Dict) -> None:
         """
         Recursively add submodules (ZINodes) for each node in the ZI node tree.
         At the leaves create a parameter. Create a ChannelList as submodules
@@ -172,7 +173,7 @@ class ZIBaseInstrument(Instrument):
                     parent.add_submodule(key, module)
                     self._add_submodules_recursively(module, treedict[key])
 
-    def _add_parameter_from_dict(self, instr, name: str, params: dict) -> None:
+    def _add_parameter_from_dict(self, instr, name: str, params: Dict) -> None:
         """
         Add a QCoDeS parameter associated to a ZI node from a dict describing 
         the parameter with e.g. 'Node', 'Properties', 'Description', 'Options' 
@@ -203,7 +204,7 @@ class ZIBaseInstrument(Instrument):
             set_cmd=setter,
         )
 
-    def get_idn(self) -> dict:
+    def get_idn(self) -> Dict:
         return dict(
             vendor="Zurich Instruments",
             model=self._type.upper(),
@@ -218,7 +219,7 @@ Helper functions used to process the nodetree dictionary in ZIBaseInstrument.
 """
 
 
-def _dictify(data, keys, val) -> dict:
+def _dictify(data, keys, val) -> Dict:
     """
     Helper function to generate nested dictionary from list of keys and value. 
     Calls itself recursively.
@@ -245,7 +246,7 @@ def _dictify(data, keys, val) -> dict:
     return data
 
 
-def _dict_to_doc(d) -> str:
+def _dict_to_doc(d: Dict) -> str:
     """
     Turn dictionary into pretty doc string.
 

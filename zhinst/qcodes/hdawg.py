@@ -4,6 +4,7 @@ from zhinst.toolkit.control.drivers.hdawg import AWG as HDAWG_AWG
 
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
 import qcodes.utils.validators as vals
+from typing import List, Dict
 
 
 class AWG(InstrumentChannel):
@@ -243,7 +244,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.set_sequence_params(**kwargs)
 
-    def sequence_params(self) -> dict:
+    def sequence_params(self) -> Dict:
         """Returns the current seuence parameters.
         
         Returns:
