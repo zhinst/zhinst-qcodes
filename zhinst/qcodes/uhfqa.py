@@ -46,14 +46,6 @@ class AWG(InstrumentChannel):
         self._awg._setup()
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
-            "outputs",
-            unit=None,
-            docstring="Expects a tuple with 'on' and 'off' values for the two channels of the AWG, e.g. ('on', 'off').",
-            get_cmd=self._awg.outputs,
-            set_cmd=self._awg.outputs,
-            label="Output Ch 1&2",
-        )
-        self.add_parameter(
             "output1",
             unit=self._awg.output1._unit,
             docstring=self._awg.output1.__repr__(),
