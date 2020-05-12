@@ -4,7 +4,8 @@ from zhinst.toolkit.control.drivers.hdawg import AWG as HDAWG_AWG
 
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
 import qcodes.utils.validators as vals
-from typing import List, Dict
+from typing import List, Dict, Union
+import numpy as np
 
 
 class AWG(InstrumentChannel):
@@ -134,7 +135,7 @@ class AWG(InstrumentChannel):
         """Stops the *AWG Core*."""
         self._awg.stop()
 
-    def wait_done(self, timeout=10) -> None:
+    def wait_done(self, timeout: float = 10) -> None:
         """Waits until the *AWG Core* is finished running. 
         
         Keyword Arguments:
@@ -159,7 +160,12 @@ class AWG(InstrumentChannel):
         """Resets the waveform queue to an empty list."""
         self._awg.reset_queue()
 
-    def queue_waveform(self, wave1, wave2, delay: int = 0) -> None:
+    def queue_waveform(
+        self,
+        wave1: Union[List, np.array],
+        wave2: Union[List, np.array],
+        delay: int = 0,
+    ) -> None:
         """Queues up a waveform to the *AWG Core*. 
         
         Uploading custom waveforms is only possible when using the *'Simple'* 
@@ -185,7 +191,13 @@ class AWG(InstrumentChannel):
         """
         self._awg.queue_waveform(wave1, wave2, delay=delay)
 
-    def replace_waveform(self, wave1, wave2, i: int = 0, delay: int = 0) -> None:
+    def replace_waveform(
+        self,
+        wave1: Union[List, np.array],
+        wave2: Union[List, np.array],
+        i: int = 0,
+        delay: int = 0,
+    ) -> None:
         """Replaces the data in a waveform in the queue. 
         
         The new data must have the same length as the previous data s.t. the 
