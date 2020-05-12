@@ -45,7 +45,7 @@ class AWG(InstrumentChannel):
     
     """
 
-    def __init__(self, name, index, parent_instr, parent_contr):
+    def __init__(self, name: str, index: int, parent_instr, parent_contr) -> None:
         InstrumentChannel.__init__(self, parent_instr, name)
         self._awg = HDAWG_AWG(parent_contr, index)
         self._awg._setup()
@@ -105,7 +105,7 @@ class AWG(InstrumentChannel):
             vals=vals.Numbers(),
         )
 
-    def enable_iq_modulation(self):
+    def enable_iq_modulation(self) -> None:
         """Enables IQ Modulation by on the *AWG Core*.
         
         This method applies the corresponding settings for IQ modulation using 
@@ -117,7 +117,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.enable_iq_modulation()
 
-    def disable_iq_modulation(self):
+    def disable_iq_modulation(self) -> None:
         """Disables IQ modulation on the *AWG Core*.
 
         Resets the settings of the sine generators and the AWG modulation.
@@ -125,15 +125,15 @@ class AWG(InstrumentChannel):
         """
         self._awg.disable_iq_modulation()
 
-    def run(self):
+    def run(self) -> None:
         """Runs the *AWG Core*."""
         self._awg.run()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stops the *AWG Core*."""
         self._awg.stop()
 
-    def wait_done(self, timeout=10):
+    def wait_done(self, timeout=10) -> None:
         """Waits until the *AWG Core* is finished running. 
         
         Keyword Arguments:
@@ -143,7 +143,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.wait_done(timeout=timeout)
 
-    def compile(self):
+    def compile(self) -> None:
         """Compiles the current *Sequence Program* on the *AWG Core*.
         
         Raises:
@@ -154,11 +154,11 @@ class AWG(InstrumentChannel):
         """
         self._awg.compile()
 
-    def reset_queue(self):
+    def reset_queue(self) -> None:
         """Resets the waveform queue to an empty list."""
         self._awg.reset_queue()
 
-    def queue_waveform(self, wave1, wave2, delay=0):
+    def queue_waveform(self, wave1, wave2, delay: int = 0) -> None:
         """Queues up a waveform to the *AWG Core*. 
         
         Uploading custom waveforms is only possible when using the *'Simple'* 
@@ -184,7 +184,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.queue_waveform(wave1, wave2, delay=delay)
 
-    def replace_waveform(self, wave1, wave2, i=0, delay=0):
+    def replace_waveform(self, wave1, wave2, i: int = 0, delay: int = 0) -> None:
         """Replaces the data in a waveform in the queue. 
         
         The new data must have the same length as the previous data s.t. the 
@@ -203,7 +203,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.replace_waveform(wave1, wave2, i=i, delay=delay)
 
-    def upload_waveforms(self):
+    def upload_waveforms(self) -> None:
         """Uploads all waveforms in the queue to the AWG Core.
 
         This method only works as expected if the Sequence Program is in 
@@ -212,7 +212,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.upload_waveforms()
 
-    def compile_and_upload_waveforms(self):
+    def compile_and_upload_waveforms(self) -> None:
         """Compiles the Sequence Program and uploads the queued waveforms.
 
         Simply combines the two methods to make sure the sequence is compiled 
@@ -221,7 +221,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.compile_and_upload_waveforms()
 
-    def set_sequence_params(self, **kwargs):
+    def set_sequence_params(self, **kwargs) -> None:
         """Sets the parameters of the *Sequence Program*.
 
         Passes all the keyword arguments to the `set_param(...)` method of the 
@@ -243,7 +243,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.set_sequence_params(**kwargs)
 
-    def sequence_params(self):
+    def sequence_params(self) -> dict:
         """Returns the current seuence parameters.
         
         Returns:
@@ -293,10 +293,10 @@ class HDAWG(ZIBaseInstrument):
         self,
         name: str,
         serial: str,
-        interface="1gbe",
-        host="localhost",
-        port=8004,
-        api=6,
+        interface: str = "1gbe",
+        host: str = "localhost",
+        port: int = 8004,
+        api: int = 6,
         **kwargs,
     ) -> None:
         super().__init__(name, "hdawg", serial, interface, host, port, api, **kwargs)
@@ -305,7 +305,7 @@ class HDAWG(ZIBaseInstrument):
         blacklist = ["awgs"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
-    def _connect(self):
+    def _connect(self) -> None:
         """Connects the device to the data server.
 
         Instantiates the device controller from :mod:`zhinst-toolkit`, sets up 
