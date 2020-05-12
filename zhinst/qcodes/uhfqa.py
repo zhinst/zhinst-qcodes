@@ -1,9 +1,10 @@
 from .base import ZIBaseInstrument
-import zhinst.toolkit as tk
-from zhinst.toolkit.control.drivers.uhfqa import ReadoutChannel, AWG as UHFQA_AWG
-
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
 import qcodes.utils.validators as vals
+
+import zhinst.toolkit as tk
+from zhinst.toolkit.control.drivers.uhfqa import ReadoutChannel, AWG as UHFQA_AWG
+from typing import List, Dict
 
 
 class AWG(InstrumentChannel):
@@ -40,7 +41,7 @@ class AWG(InstrumentChannel):
     
     """
 
-    def __init__(self, name, parent_instr, parent_contr):
+    def __init__(self, name: str, parent_instr, parent_contr) -> None:
         super().__init__(parent_instr, name)
         self._awg = UHFQA_AWG(parent_contr, 0)
         self._awg._setup()
@@ -82,15 +83,15 @@ class AWG(InstrumentChannel):
             vals=vals.Numbers(-1, 1),
         )
 
-    def run(self):
+    def run(self) -> None:
         """Runs the *AWG Core*."""
         self._awg.run()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stops the *AWG Core*."""
         self._awg.stop()
 
-    def wait_done(self, timeout=100):
+    def wait_done(self, timeout: float = 100) -> None:
         """Waits until the *AWG Core* is finished running. 
         
         Keyword Arguments:
@@ -100,7 +101,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.wait_done(timeout=timeout)
 
-    def compile(self):
+    def compile(self) -> None:
         """Compiles the current *Sequence Program* on the *AWG Core*.
         
         Raises:
@@ -111,11 +112,11 @@ class AWG(InstrumentChannel):
         """
         self._awg.compile()
 
-    def reset_queue(self):
+    def reset_queue(self) -> None:
         """Resets the waveform queue to an empty list."""
         self._awg.reset_queue()
 
-    def queue_waveform(self, wave1, wave2, delay=0):
+    def queue_waveform(self, wave1, wave2, delay: int = 0) -> None:
         """Queues up a waveform to the *AWG Core*. 
         
         Uploading custom waveforms is only possible when using the *'Simple'* 
@@ -141,7 +142,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.queue_waveform(wave1, wave2, delay=delay)
 
-    def replace_waveform(self, wave1, wave2, i=0, delay=0):
+    def replace_waveform(self, wave1, wave2, i: int = 0, delay: float = 0) -> None:
         """Replaces the data in a waveform in the queue. 
         
         The new data must have the same length as the previous data s.t. the 
@@ -160,7 +161,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.replace_waveform(wave1, wave2, i=i, delay=delay)
 
-    def upload_waveforms(self):
+    def upload_waveforms(self) -> None:
         """Uploads all waveforms in the queue to the AWG Core.
 
         This method only works as expected if the Sequence Program is in 
@@ -169,7 +170,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.upload_waveforms()
 
-    def compile_and_upload_waveforms(self):
+    def compile_and_upload_waveforms(self) -> None:
         """Compiles the Sequence Program and uploads the queued waveforms.
 
         Simply combines the two methods to make sure the sequence is compiled 
@@ -178,7 +179,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.compile_and_upload_waveforms()
 
-    def set_sequence_params(self, **kwargs):
+    def set_sequence_params(self, **kwargs) -> None:
         """Sets the parameters of the *Sequence Program*.
 
         Passes all the keyword arguments to the `set_param(...)` method of the 
@@ -200,7 +201,7 @@ class AWG(InstrumentChannel):
         """
         self._awg.set_sequence_params(**kwargs)
 
-    def sequence_params(self):
+    def sequence_params(self) -> None:
         """Returns the current seuence parameters.
         
         Returns:
@@ -273,7 +274,7 @@ class Channel(InstrumentChannel):
 
     """
 
-    def __init__(self, name, index, parent_instr, parent_contr):
+    def __init__(self, name: str, index: int, parent_instr, parent_contr) -> None:
         super().__init__(parent_instr, name)
         self._channel = ReadoutChannel(parent_contr, 0)
         # add custom parameters as QCoDeS parameters
@@ -338,11 +339,11 @@ class Channel(InstrumentChannel):
             vals=vals.Bool(),
         )
 
-    def enabled(self):
+    def enabled(self) -> None:
         """Returns if weighted integration is enabled."""
         return self._channel.enabled()
 
-    def enable(self):
+    def enable(self) -> None:
         """
         Enables the readout channel. This enables weighted integration mode, 
         sets the itnegration time to its default (2 us) and sets the 
@@ -352,7 +353,7 @@ class Channel(InstrumentChannel):
         """
         self._channel.enable()
 
-    def disable(self):
+    def disable(self) -> None:
         """
         Disables the readout channel and resets the integration weigths 
         corresponding to this channel.
@@ -395,10 +396,10 @@ class UHFQA(ZIBaseInstrument):
         self,
         name: str,
         serial: str,
-        interface="1gbe",
-        host="localhost",
-        port=8004,
-        api=6,
+        interface: str = "1gbe",
+        host: str = "localhost",
+        port: int = 8004,
+        api: int = 6,
         **kwargs,
     ) -> None:
         super().__init__(name, "uhfqa", serial, interface, host, port, api, **kwargs)
@@ -409,7 +410,7 @@ class UHFQA(ZIBaseInstrument):
         ]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
-    def _connect(self):
+    def _connect(self) -> None:
         """Connects the device to the data server.
 
         Instantiates the device controller from :mod:`zhinst-toolkit`, sets up 
@@ -477,7 +478,7 @@ class UHFQA(ZIBaseInstrument):
             vals=vals.Enum("Cyclic", "Sequential"),
         )
 
-    def arm(self, length=None, averages=None):
+    def arm(self, length=None, averages=None) -> None:
         """Prepare UHFQA for result acquisition.
 
         This method enables the QA Results Acquisition and resets the acquired 
@@ -494,7 +495,7 @@ class UHFQA(ZIBaseInstrument):
         """
         self._controller.arm(length=length, averages=averages)
 
-    def enable_readout_channels(self, channels=range(10)):
+    def enable_readout_channels(self, channels: List = range(10)) -> None:
         """Enables weighted integration on the specified readout channels.
         
         Keyword Arguments:
@@ -504,7 +505,7 @@ class UHFQA(ZIBaseInstrument):
         """
         self._controller.enable_readout_channels(channels=channels)
 
-    def disable_readout_channels(self, channels=range(10)):
+    def disable_readout_channels(self, channels: List = range(10)) -> None:
         """Disables weighted integration on the specified readout channels.
         
         Keyword Arguments:
