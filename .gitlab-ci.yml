@@ -16,6 +16,7 @@ pages:
   stage: docs
   script:
    - pip install .
+   - pip install zhinst-toolkit
    - pip install ipython
    - cd docs
    - make html
