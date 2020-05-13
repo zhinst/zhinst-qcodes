@@ -2,6 +2,9 @@
 *.ipynb_checkpoints
 *.pyc
 *.egg-info/
+.eggs/
+dist/
+build/
 */build/
 */_build/
 */*/_build/
