@@ -1,7 +1,7 @@
 Getting Started
 ===============
 
-LabOne Software
+LabOne software
 ^^^^^^^^^^^^^^^
 
 As prerequisite, the LabOne software version 20.01 or later must be installed. 
@@ -45,7 +45,7 @@ The upgrade is very similar to the installation; from the prompt type
 
 The upgrade is highly recommended if you are upgrading LabOne as well.
 
-Install from Source
+Install from source
 ^^^^^^^^^^^^^^^^^^^
 
 If you need to modify the zhinst-qcodes package or you need a fature that it's 

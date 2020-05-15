@@ -1,4 +1,4 @@
-QCoDeS drivers and :mod:`zhinst-toolkit`
+QCoDeS Drivers and :mod:`zhinst-toolkit`
 ========================================
 
 The *Zurich Instruments* drivers for *QCoDeS* are based on the *Zurich 
