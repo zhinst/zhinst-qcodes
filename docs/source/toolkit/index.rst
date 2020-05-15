@@ -4,7 +4,10 @@ QCoDeS Drivers and :mod:`zhinst-toolkit`
 The *Zurich Instruments* drivers for *QCoDeS* are based on the *Zurich 
 Instruments Toolkit*. The Python package :mod:`zhinst-toolkit` is an extension 
 of the *LabOne* Python API :mod:`ziPython`. The :mod:`zhinst-toolkit` allows for 
-easier and more intuitive control of Zurich Instruments devices. 
+easier and more intuitive control of Zurich Instruments devices. For more 
+information, have a look at its `GitHub 
+repository <https://github.com/zhinst/zhinst-toolkit>`_ and 
+`online documentation  <https://docs.zhinst.com/zhinst-toolkit/en/latest>`_
 
 Functionally, the instrument drivers for *QCoDeS* work in the same way as the 
 drivers available in the :mod:`zhinst-toolkit`. However, they implement the 

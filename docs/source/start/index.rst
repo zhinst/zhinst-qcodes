@@ -25,8 +25,9 @@ install it manually before according to the `QCoDeS documentation
 Install :mod:`zhinst-qcodes`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This installation methos is recommended for the majority of the users that don't need to modify the zhinst-qcodes package.
-zhinst-qcodes is packaged on PyPI, so it's enough to write in the prompt
+This installation methos is recommended for the majority of the users that don't 
+need to modify the *zhinst-qcodes* package. zhinst-qcodes is packaged on PyPI, 
+so it's enough to write in the prompt
 
 .. code-block:: bash
 
