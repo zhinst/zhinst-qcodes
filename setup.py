@@ -13,7 +13,7 @@ requirements = [
     "setuptools>=40.1.0",
     "zhinst>=20.01",
     "zhinst-toolkit>=0.1.2",
-    "qcodes",
+    "qcodes>=0.14.0",
     "attrs",
 ]
 
