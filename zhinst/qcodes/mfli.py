@@ -385,6 +385,16 @@ class MFLI(ZIBaseInstrument):
         blacklist = ["scopes"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
+        # The following parameters are excluded from the snapshot update
+        # as they can only be captured when the instrument is in a specific state.
+        for demods in self.nodetree_dict['demods'].values():
+            demods['sample']['snapshot_get'] = False
+        for dios in self.nodetree_dict['dios'].values():
+            dios['input']['snapshot_get'] = False
+        self.nodetree_dict['auxins'][0]['sample']['snapshot_get'] = False
+        self.nodetree_dict['system']['fwlog']['snapshot_get'] = False
+        self.nodetree_dict['features']['code']['snapshot_get'] = False
+
     def _connect(self) -> None:
         """Connects the device to the data server.
 
