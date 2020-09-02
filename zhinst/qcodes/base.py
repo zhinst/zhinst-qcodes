@@ -185,6 +185,13 @@ class ZIBaseInstrument(Instrument):
             params (dict): dictionary describing the parameter, innermost layer of nodetree_dict
 
         """
+
+        # Pass options about how the parameter snapshot should behave to qcodes.
+        # The specific driver can add these values to the nodetree as needed.
+        snapshot_exclude = params.get('snapshot_exclude', False)
+        snapshot_get = params.get('snapshot_get', True)
+        snapshot_value = params.get('snapshot_value', True)
+
         node = params["Node"].lower().replace(f"/{self._serial}/", "")
         if "Read" in params["Properties"]:
             # use controller.get("device name", "node") as getter
@@ -202,6 +209,9 @@ class ZIBaseInstrument(Instrument):
             unit=params["Unit"] if params["Unit"] != "None" else None,
             get_cmd=getter,
             set_cmd=setter,
+            snapshot_exclude=snapshot_exclude,
+            snapshot_get=snapshot_get,
+            snapshot_value=snapshot_value
         )
 
     def get_idn(self) -> Dict:
