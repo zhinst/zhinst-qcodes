@@ -196,12 +196,18 @@ class ZIBaseInstrument(Instrument):
             setter = partial(self._controller._set, node)
         else:
             setter = False
+        if "Setting" in params["Properties"]:
+            snapshot_exclude = False
+        else:
+            snapshot_exclude = True
+
         instr.add_parameter(
             name=name,
             docstring=_dict_to_doc(params),
             unit=params["Unit"] if params["Unit"] != "None" else None,
             get_cmd=getter,
             set_cmd=setter,
+            snapshot_exclude=snapshot_exclude
         )
 
     def get_idn(self) -> Dict:
