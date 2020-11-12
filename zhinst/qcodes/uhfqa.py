@@ -288,7 +288,7 @@ class Channel(InstrumentChannel):
 
     def __init__(self, name: str, index: int, parent_instr, parent_contr) -> None:
         super().__init__(parent_instr, name)
-        self._channel = ReadoutChannel(parent_contr, 0)
+        self._channel = ReadoutChannel(parent_contr, index)
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "rotation",
