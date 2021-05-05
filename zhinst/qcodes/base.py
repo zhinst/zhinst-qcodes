@@ -1,7 +1,9 @@
 from functools import partial
+import re
 
 from qcodes.instrument.base import Instrument
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
+from qcodes.utils.validators import ComplexNumbers
 import zhinst.toolkit as tk
 from typing import List, Dict
 
@@ -186,6 +188,7 @@ class ZIBaseInstrument(Instrument):
 
         """
         node = params["Node"].lower().replace(f"/{self._serial}/", "")
+        demod_sample = re.compile("demods/./sample")
         if "Read" in params["Properties"]:
             # use controller.get("device name", "node") as getter
             getter = partial(self._controller._get, node)
@@ -207,6 +210,7 @@ class ZIBaseInstrument(Instrument):
             unit=params["Unit"] if params["Unit"] != "None" else None,
             get_cmd=getter,
             set_cmd=setter,
+            vals=ComplexNumbers() if re.match(demod_sample, node) else None,
             snapshot_exclude=snapshot_exclude
         )
 
