@@ -408,3 +408,7 @@ class MFLI(ZIBaseInstrument):
         # initialize DAQ and Sweeper submodules
         self.add_submodule("daq", DAQ("daq", self, self._controller))
         self.add_submodule("sweeper", Sweeper("sweeper", self, self._controller))
+
+    def factory_reset(self) -> None:
+        """Load the factory default settings."""
+        self._controller.factory_reset()

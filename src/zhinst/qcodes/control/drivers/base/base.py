@@ -77,7 +77,7 @@ class ZIBaseInstrument(Instrument):
         self._port = port
         self._api = api
         self.zi_submodules = {}
-        supported_types = ["hdawg", "uhfqa", "uhfli", "mfli", "shfqa"]
+        supported_types = ["hdawg", "uhfqa", "uhfli", "mfli", "shfqa", "pqsc"]
         if device_type not in supported_types:
             raise ZIQcodesException(
                 f"Device type {device_type} is currently not supported in ziQCoDeS. Supported types are {supported_types}"

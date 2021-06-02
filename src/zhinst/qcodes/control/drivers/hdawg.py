@@ -1,6 +1,6 @@
 from .base import ZIBaseInstrument
 import zhinst.toolkit as tk
-from zhinst.toolkit.control.drivers.hdawg import AWG as HDAWG_AWG
+from zhinst.toolkit.control.drivers.hdawg import AWG as HDAWG_AWG, CT as HDAWG_CT
 
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
 import qcodes.utils.validators as vals
@@ -53,6 +53,7 @@ class AWG(InstrumentChannel):
         self._awg._setup()
         self._awg._init_awg_params()
         self._add_qcodes_awg_params()
+        self._init_ct()
 
     def _add_qcodes_awg_params(self):
         # add custom parameters as QCoDeS parameters
@@ -63,7 +64,6 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.output1,
             set_cmd=self._awg.output1,
             label="Output Ch 1",
-            vals=vals.OnOff(),
         )
         self.add_parameter(
             "output2",
@@ -72,7 +72,6 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.output2,
             set_cmd=self._awg.output2,
             label="Output Ch 2",
-            vals=vals.OnOff(),
         )
         self.add_parameter(
             "gain1",
@@ -81,7 +80,6 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.gain1,
             set_cmd=self._awg.gain1,
             label="Gain Ch 1",
-            vals=vals.Numbers(-1, 1),
         )
         self.add_parameter(
             "gain2",
@@ -90,7 +88,6 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.gain2,
             set_cmd=self._awg.gain2,
             label="Gain Ch 2",
-            vals=vals.Numbers(-1, 1),
         )
         self.add_parameter(
             "modulation_phase_shift",
@@ -110,6 +107,40 @@ class AWG(InstrumentChannel):
             label="Modulation Frequency",
             vals=vals.Numbers(),
         )
+        self.add_parameter(
+            "single",
+            unit=self._awg.single._unit,
+            docstring=self._awg.single.__repr__(),
+            get_cmd=self._awg.single,
+            set_cmd=self._awg.single,
+            label="Single Run",
+        )
+
+    def _init_ct(self):
+        # init submodule for CT
+        self.add_submodule(
+            "ct",
+            CT(
+                "ct",
+                self,
+                self._awg,
+                "https://docs.zhinst.com/hdawg/commandtable/v2/schema",
+            ),
+        )
+
+    def outputs(self, value=None):
+        """Sets both signal outputs simultaneously.
+
+        Keyword Arguments:
+            value (tuple): Tuple of values {'on', 'off'} for channel 1 and 2
+                (default: None).
+
+        Returns:
+            A tuple with the states {'on', 'off'} for the two output channels if
+            the keyword argument is not given.
+
+        """
+        return self._awg.outputs(value)
 
     def enable_iq_modulation(self) -> None:
         """Enables IQ Modulation by on the *AWG Core*.
@@ -282,6 +313,18 @@ class AWG(InstrumentChannel):
         return self._awg.index
 
 
+class CT(InstrumentChannel):
+    """Device-specific CommandTable for HDAWG."""
+
+    def __init__(self, name: str, parent_instr, parent_contr, ct_schema_url) -> None:
+        super().__init__(parent_instr, name)
+        self._ct = HDAWG_CT(parent_contr, ct_schema_url)
+
+    def load(self, table):
+        """Load a given command table to the instrument"""
+        self._ct.load(table)
+
+
 class HDAWG(ZIBaseInstrument):
     """QCoDeS driver for the *Zurich Instruments HDAWG*.
 
@@ -351,3 +394,11 @@ class HDAWG(ZIBaseInstrument):
             channel_list.append(AWG(f"awg-{i}", i, self, self._controller))
         channel_list.lock()
         self.add_submodule("awgs", channel_list)
+
+    def factory_reset(self) -> None:
+        """Load the factory default settings."""
+        self._controller.factory_reset()
+
+    def enable_qccs_mode(self) -> None:
+        """Configure the instrument to work with PQSC"""
+        self._controller.enable_qccs_mode()
