@@ -9,37 +9,37 @@ import numpy as np
 
 
 class AWG(InstrumentChannel):
-    """Device-specific *AWG Core* for the *UHFQA*. 
-    
-    Inherits from :class:`InstrumentChannel` and wraps around a `AWGCore` for 
-    *HDAWG* from :mod:`zhinst-toolkit`. This class adds Parameters from the 
-    :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of the 
-    *toolkit's* `AWGCore`. 
+    """Device-specific *AWG Core* for the *UHFQA*.
+
+    Inherits from :class:`InstrumentChannel` and wraps around a `AWGCore` for
+    *HDAWG* from :mod:`zhinst-toolkit`. This class adds Parameters from the
+    :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of the
+    *toolkit's* `AWGCore`.
 
     Arguments:
         name (str): The name of the `AWG` submodule.
-        parent_instr (:class:`qcodes.instrument.base.Instrument`): The QCoDeS 
+        parent_instr (:class:`qcodes.instrument.base.Instrument`): The QCoDeS
             parent instrument of the `InstrumentChannel`.
-        parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller` 
-            of the parent instrument that is used for getting and setting 
-            parameters. 
+        parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller`
+            of the parent instrument that is used for getting and setting
+            parameters.
 
     Attributes:
-        output1 (:class:`Parameter`): The state 
+        output1 (:class:`Parameter`): The state
             of the output of channel 1. Can be one of {'on', 'off'}.
-        output2 (:class:`Parameter`): The state 
+        output2 (:class:`Parameter`): The state
             of the output of channel 2. Can be one of {'on', 'off'}.
-        gain1 (:class:`Parameter`): Gain of the 
+        gain1 (:class:`Parameter`): Gain of the
             output channel 1. The value must be between -1 and +1 (default: +1).
-        gain2 (:class:`Parameter`): Gain of the 
+        gain2 (:class:`Parameter`): Gain of the
             output channel 2. The value must be between -1 and +1 (default: +1).
-        waveforms (list): A list of `Waveforms` that respresent the queue of 
-            waveforms to upload to the device when the sequence type is 
+        waveforms (list): A list of `Waveforms` that respresent the queue of
+            waveforms to upload to the device when the sequence type is
             *'Simple'*.
-        is_running (bool): A flag that shows if the `AWG Core` is currently 
+        is_running (bool): A flag that shows if the `AWG Core` is currently
             running or not.
         index (int): The index of the `AWG Core` in the list of *awgs*.
-    
+
     """
 
     def __init__(self, name: str, parent_instr, parent_contr) -> None:
@@ -93,10 +93,10 @@ class AWG(InstrumentChannel):
         self._awg.stop()
 
     def wait_done(self, timeout: float = 100) -> None:
-        """Waits until the *AWG Core* is finished running. 
-        
+        """Waits until the *AWG Core* is finished running.
+
         Keyword Arguments:
-            timeout (int): A timeout in seconds after which the AWG is stopped 
+            timeout (int): A timeout in seconds after which the AWG is stopped
                 (default: 100)
 
         """
@@ -104,7 +104,7 @@ class AWG(InstrumentChannel):
 
     def compile(self) -> None:
         """Compiles the current *Sequence Program* on the *AWG Core*.
-        
+
         Raises:
             `ToolkitError`: If the *AWG Core* has not been set up yet.
             `ToolkitError`: If the compilation has failed.
@@ -123,26 +123,26 @@ class AWG(InstrumentChannel):
         wave2: Union[List, np.array],
         delay: float = 0,
     ) -> None:
-        """Queues up a waveform to the *AWG Core*. 
-        
-        Uploading custom waveforms is only possible when using the *'Simple'* 
-        sequence type. The waveform is specified with two numpy arrays for the 
-        two channels of the *AWG Core*. The waveform will then automatically 
-        align them to the correct minimum waveform length, sample granularity 
-        and scaling. An individual delay can be specified to shift the 
+        """Queues up a waveform to the *AWG Core*.
+
+        Uploading custom waveforms is only possible when using the *'Simple'*
+        sequence type. The waveform is specified with two numpy arrays for the
+        two channels of the *AWG Core*. The waveform will then automatically
+        align them to the correct minimum waveform length, sample granularity
+        and scaling. An individual delay can be specified to shift the
         individual waveform with respect to the time origin of the period.
-        
+
         Arguments:
-            wave1 (array like): A list or array of samples in the waveform to be 
-                queued for channel 1. An empty list '[]' will upload zeros of 
+            wave1 (array like): A list or array of samples in the waveform to be
+                queued for channel 1. An empty list '[]' will upload zeros of
                 the minimum waveform length.
-            wave2 (array like): A list or array of samples in the waveform to be 
-                queued for channel 2. An empty list '[]' will upload zeros of 
+            wave2 (array like): A list or array of samples in the waveform to be
+                queued for channel 2. An empty list '[]' will upload zeros of
                 the minimum waveform length.
-        
+
         Keyword Arguments:
-            delay (float): An individual delay for the queued sequence with 
-                respect to the time origin. Positive values shift the start of 
+            delay (float): An individual delay for the queued sequence with
+                respect to the time origin. Positive values shift the start of
                 the waveform forwards in time. (default: 0)
 
         """
@@ -155,52 +155,52 @@ class AWG(InstrumentChannel):
         i: int = 0,
         delay: float = 0,
     ) -> None:
-        """Replaces the data in a waveform in the queue. 
-        
-        The new data must have the same length as the previous data s.t. the 
-        waveform data can be replaced without recompilation of the sequence 
+        """Replaces the data in a waveform in the queue.
+
+        The new data must have the same length as the previous data s.t. the
+        waveform data can be replaced without recompilation of the sequence
         program.
-        
+
         Arguments:
             wave1 (array): Waveform to replace current wave for Channel 1.
             wave2 (array): Waveform to replace current wave for Channel 2.
-        
+
         Keyword Arguments:
             i (int): The index of the waveform in the queue to be replaced.
-            delay (int): An individual delay in seconds for this waveform w.r.t. 
+            delay (int): An individual delay in seconds for this waveform w.r.t.
                 the time origin of the sequence. (default: 0)
-        
+
         """
         self._awg.replace_waveform(wave1, wave2, i=i, delay=delay)
 
     def upload_waveforms(self) -> None:
         """Uploads all waveforms in the queue to the AWG Core.
 
-        This method only works as expected if the Sequence Program is in 
+        This method only works as expected if the Sequence Program is in
         'Simple' mode and has been compiled beforehand.
-        
+
         """
         self._awg.upload_waveforms()
 
     def compile_and_upload_waveforms(self) -> None:
         """Compiles the Sequence Program and uploads the queued waveforms.
 
-        Simply combines the two methods to make sure the sequence is compiled 
+        Simply combines the two methods to make sure the sequence is compiled
         before the waveform queue is uplaoded.
-        
+
         """
         self._awg.compile_and_upload_waveforms()
 
     def set_sequence_params(self, **kwargs) -> None:
         """Sets the parameters of the *Sequence Program*.
 
-        Passes all the keyword arguments to the `set_param(...)` method of the 
-        *Sequence Program*. The available sequence parameters may vary between 
-        different sequences. For a list of all current sequence parameters see 
-        the method `sequence_params()`. 
+        Passes all the keyword arguments to the `set_param(...)` method of the
+        *Sequence Program*. The available sequence parameters may vary between
+        different sequences. For a list of all current sequence parameters see
+        the method `sequence_params()`.
 
         They include:
-            *'sequence_type', 'period', 'repetitions', 'trigger_mode', 
+            *'sequence_type', 'period', 'repetitions', 'trigger_mode',
             'trigger_delay', ...*
 
             >>> hdawg.awgs[0].set_sequence_params(
@@ -209,16 +209,16 @@ class AWG(InstrumentChannel):
             >>>     repetitions=1e6,
             >>>     alignemnt="Start with Trigger"
             >>> )
-              
+
         """
         self._awg.set_sequence_params(**kwargs)
 
     def sequence_params(self) -> None:
         """Returns the current seuence parameters.
-        
+
         Returns:
             A dictionary with the current sequence parameters.
-            
+
         """
         return self._awg.sequence_params
 
@@ -236,15 +236,15 @@ class AWG(InstrumentChannel):
 
 
 class Channel(InstrumentChannel):
-    """Implements a *Readout Channel* for the *UHFQA*. 
+    """Implements a *Readout Channel* for the *UHFQA*.
 
-    Inherits from :class:`InstrumentChannel` and wraps around a `ReadoutChannel` 
-    for *UHFQA* from :mod:`zhinst-toolkit`. This class adds *Parameters* from 
-    the :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of 
-    the *toolkit's* `ReadoutChannel`. 
+    Inherits from :class:`InstrumentChannel` and wraps around a `ReadoutChannel`
+    for *UHFQA* from :mod:`zhinst-toolkit`. This class adds *Parameters* from
+    the :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of
+    the *toolkit's* `ReadoutChannel`.
 
-    This class represents the signal processing chain for one of the ten 
-    :class:`ReadoutChannels` of a UHFQA. One channel is typically used for 
+    This class represents the signal processing chain for one of the ten
+    :class:`ReadoutChannels` of a UHFQA. One channel is typically used for
     dispersive resonator readout of a superconducting Qubit.
 
         >>> ch = uhfqa.channels[0]
@@ -258,31 +258,31 @@ class Channel(InstrumentChannel):
         >>> ch.result()
         array([0.0, 1.0, 1.0, 1.0, 0.0, ...])
 
-    The readout channel can be enabled with `enable()` which means that the 
-    weighted integration mode is activated and integration weights are set to 
-    demodulate the signal at the given readout frequency. If the channel is 
-    enabled, the readout parameters are also used for signal generation in the 
-    :class:`AWGCore` if the sequence type is set to "Readout". 
+    The readout channel can be enabled with `enable()` which means that the
+    weighted integration mode is activated and integration weights are set to
+    demodulate the signal at the given readout frequency. If the channel is
+    enabled, the readout parameters are also used for signal generation in the
+    :class:`AWGCore` if the sequence type is set to "Readout".
 
     Arguments:
         name (str): The name of the `Channel` submodule.
-        parent_instr (:class:`qcodes.instrument.base.Instrument`): The QCoDeS 
+        parent_instr (:class:`qcodes.instrument.base.Instrument`): The QCoDeS
             parent instrument of the `InstrumentChannel`.
-        parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller` 
-            of the parent instrument that is used for getting and setting 
-            parameters. 
+        parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller`
+            of the parent instrument that is used for getting and setting
+            parameters.
 
     Attributes:
         index (int): The index of the Readout Channel from 1 - 10.
-        rotation (:class:`Parameter`): The 
-            rotation applied to the signal in IQ plane. The angle is specified 
+        rotation (:class:`Parameter`): The
+            rotation applied to the signal in IQ plane. The angle is specified
             in degrees.
-        threshold (:class:`Parameter`): The 
-            signal threshold used for state discrimination in the thresholding 
+        threshold (:class:`Parameter`): The
+            signal threshold used for state discrimination in the thresholding
             unit.
-        result (:class:`Parameter`): This 
-            read-only Parameter holds the result vector for the given readout 
-            channel as a 1D numpy array.            
+        result (:class:`Parameter`): This
+            read-only Parameter holds the result vector for the given readout
+            channel as a 1D numpy array.
 
     """
 
@@ -357,9 +357,9 @@ class Channel(InstrumentChannel):
 
     def enable(self) -> None:
         """
-        Enables the readout channel. This enables weighted integration mode, 
-        sets the itnegration time to its default (2 us) and sets the 
-        corresponding integration weights to demodulate at the given readout 
+        Enables the readout channel. This enables weighted integration mode,
+        sets the itnegration time to its default (2 us) and sets the
+        corresponding integration weights to demodulate at the given readout
         frequency.
 
         """
@@ -367,9 +367,9 @@ class Channel(InstrumentChannel):
 
     def disable(self) -> None:
         """
-        Disables the readout channel and resets the integration weigths 
+        Disables the readout channel and resets the integration weigths
         corresponding to this channel.
-        
+
         """
         self._channel.disable()
 
@@ -381,9 +381,9 @@ class Channel(InstrumentChannel):
 class UHFQA(ZIBaseInstrument):
     """QCoDeS driver for the *Zurich Instruments UHFQA*.
 
-    Inherits from :class:`ZIBaseInstrument`. Initializes some *submodules* 
-    from the device's nodetree and a device-specific *AWG Core*. It also 
-    features a :class:`ChannelList` of ten *Readout Channels* 
+    Inherits from :class:`ZIBaseInstrument`. Initializes some *submodules*
+    from the device's nodetree and a device-specific *AWG Core*. It also
+    features a :class:`ChannelList` of ten *Readout Channels*
     (:class:`Channel`).
 
     Arguments:
@@ -391,7 +391,7 @@ class UHFQA(ZIBaseInstrument):
         serial (str): The device serial number, e.g. *'dev1234'*.
 
     Keyword Arguments:
-        interface (str): The interface used to connect to the 
+        interface (str): The interface used to connect to the
             device. (default: '1gbe')
         host (str): Address of the data server. (default: 'localhost')
         port (int): Port used to connect to the data server. (default: 8004)
@@ -425,8 +425,8 @@ class UHFQA(ZIBaseInstrument):
     def _connect(self) -> None:
         """Connects the device to the data server.
 
-        Instantiates the device controller from :mod:`zhinst-toolkit`, sets up 
-        the data server and connects the device the data server. This method is 
+        Instantiates the device controller from :mod:`zhinst-toolkit`, sets up
+        the data server and connects the device the data server. This method is
         called from `__init__` of the :class:`BaseInstrument` class.
 
         """
@@ -493,15 +493,15 @@ class UHFQA(ZIBaseInstrument):
     def arm(self, length=None, averages=None) -> None:
         """Prepare UHFQA for result acquisition.
 
-        This method enables the QA Results Acquisition and resets the acquired 
-        points. Optionally, the *result length* and *result averages* can be set 
-        when specified as keyword arguments. If they are not specified, they are 
-        not changed.  
+        This method enables the QA Results Acquisition and resets the acquired
+        points. Optionally, the *result length* and *result averages* can be set
+        when specified as keyword arguments. If they are not specified, they are
+        not changed.
 
         Keyword Arguments:
-            length (int): If specified, the length of the result vector will be 
+            length (int): If specified, the length of the result vector will be
                 set before arming the UHFQA readout. (default: None)
-            averages (int): If specified, the result averages will be set before 
+            averages (int): If specified, the result averages will be set before
                 arming the UHFQA readout. (default: None)
 
         """
@@ -509,20 +509,20 @@ class UHFQA(ZIBaseInstrument):
 
     def enable_readout_channels(self, channels: List = range(10)) -> None:
         """Enables weighted integration on the specified readout channels.
-        
+
         Keyword Arguments:
-            channels (list): A list of indices of channels to enable. 
+            channels (list): A list of indices of channels to enable.
                 (default: range(10))
-        
+
         """
         self._controller.enable_readout_channels(channels=channels)
 
     def disable_readout_channels(self, channels: List = range(10)) -> None:
         """Disables weighted integration on the specified readout channels.
-        
+
         Keyword Arguments:
-            channels (list): A list of indices of channels to disable. 
+            channels (list): A list of indices of channels to disable.
                 (default: range(10))
-        
+
         """
         self._controller.disable_readout_channels(channels=channels)
