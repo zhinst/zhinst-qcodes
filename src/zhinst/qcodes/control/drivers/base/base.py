@@ -13,12 +13,12 @@ class ZIQcodesException(Exception):
 
 
 class ZINode(InstrumentChannel):
-    """Implements a node in the instrument nodetree as a 
+    """Implements a node in the instrument nodetree as a
     :class:`InstrumentChannel`.
-    
-    :class:`ZINode` class collects *submodules* (which may again be *ZINodes*) 
-    and *parameters* to represent the hirarchy of the Zurich Instruments node 
-    tree in *QCoDeS*. It inherits from :class:`InstrumentChannel` and overrides 
+
+    :class:`ZINode` class collects *submodules* (which may again be *ZINodes*)
+    and *parameters* to represent the hirarchy of the Zurich Instruments node
+    tree in *QCoDeS*. It inherits from :class:`InstrumentChannel` and overrides
     the snapshot method.
 
     """
@@ -38,10 +38,10 @@ class ZINode(InstrumentChannel):
 
 
 class ZIBaseInstrument(Instrument):
-    """Base class for all Zurich Instruments QCoDeS drivers. 
-    
-    Implements basic wrapper around :mod:`zhinst-toolkit` deice drivers and 
-    translates the nodetree to a hirarchy of *QCoDeS submodules* 
+    """Base class for all Zurich Instruments QCoDeS drivers.
+
+    Implements basic wrapper around :mod:`zhinst-toolkit` deice drivers and
+    translates the nodetree to a hirarchy of *QCoDeS submodules*
     (:class:`ZINodes`) and *parameters*.
 
     Arguments:
@@ -50,7 +50,7 @@ class ZIBaseInstrument(Instrument):
         serial (str): The device serial number.
 
     Keyword Arguments:
-        interface (str): The interface used to connect to the 
+        interface (str): The interface used to connect to the
             device (default: *'1GbE'*).
         host (str): Address of the data server. (default: 'localhost')
         port (int): Port used to connect to the data server. (default: 8004)
@@ -86,10 +86,10 @@ class ZIBaseInstrument(Instrument):
 
     def _connect(self) -> None:
         """
-        Instantiates the device controller from zhinst-toolkit, sets up the data 
-        server and connects the device the data server. This method is called 
+        Instantiates the device controller from zhinst-toolkit, sets up the data
+        server and connects the device the data server. This method is called
         from __init__ of the base instruemnt class.
-        
+
         """
         # use zhinst.toolkit.tools.BaseController() to interface the device
         self._controller = tk.BaseInstrument(
@@ -109,10 +109,10 @@ class ZIBaseInstrument(Instrument):
 
     def _init_submodule(self, key: str) -> None:
         """
-        Recursively initialize submodules from highest layer keys in nodetree 
-        dictionary.For e.g. 'dev8030/sigouts/...' one would call this method 
+        Recursively initialize submodules from highest layer keys in nodetree
+        dictionary.For e.g. 'dev8030/sigouts/...' one would call this method
         with 'sigouts'.
-        
+
         Arguments:
             key (str): dictionary key in the highest layer of nodetree_dict
 
@@ -139,11 +139,11 @@ class ZIBaseInstrument(Instrument):
         Recursively add submodules (ZINodes) for each node in the ZI node tree.
         At the leaves create a parameter. Create a ChannelList as submodules
         whenever a node is enumerated, e.g. 'dev8030/sigouts/*/on'.
-        
+
         Arguments:
-            parent (InstrumentChannel): parent QCoDeS object, either 
+            parent (InstrumentChannel): parent QCoDeS object, either
                 Instrument(-Channel) or ZINode
-            treedict (dict): dictionary specifying the (sub-)tree of the ZI 
+            treedict (dict): dictionary specifying the (sub-)tree of the ZI
                 node hirarchy
 
         """
@@ -177,10 +177,10 @@ class ZIBaseInstrument(Instrument):
 
     def _add_parameter_from_dict(self, instr, name: str, params: Dict) -> None:
         """
-        Add a QCoDeS parameter associated to a ZI node from a dict describing 
-        the parameter with e.g. 'Node', 'Properties', 'Description', 'Options' 
+        Add a QCoDeS parameter associated to a ZI node from a dict describing
+        the parameter with e.g. 'Node', 'Properties', 'Description', 'Options'
         etc.
-        
+
         Arguments:
             instr: instrument/submodule the parameter is associated with
             name (str): parameter name
@@ -211,7 +211,7 @@ class ZIBaseInstrument(Instrument):
             get_cmd=getter,
             set_cmd=setter,
             vals=ComplexNumbers() if re.match(demod_sample, node) else None,
-            snapshot_exclude=snapshot_exclude
+            snapshot_exclude=snapshot_exclude,
         )
 
     def get_idn(self) -> Dict:
@@ -231,16 +231,16 @@ Helper functions used to process the nodetree dictionary in ZIBaseInstrument.
 
 def _dictify(data, keys, val) -> Dict:
     """
-    Helper function to generate nested dictionary from list of keys and value. 
+    Helper function to generate nested dictionary from list of keys and value.
     Calls itself recursively.
-    
+
     Arguments:
         data (dict): dictionary to add value to with keys
         keys (list): list of keys to traverse along tree and place value
         val (dict): value for innermost layer of nested dict
 
     Returns:
-        data (dict): A nested dictionary respresenting the (sub-)nodetree data 
+        data (dict): A nested dictionary respresenting the (sub-)nodetree data
             structure.
 
     """
@@ -264,8 +264,8 @@ def _dict_to_doc(d: Dict) -> str:
         d (dict)
 
     Returns:
-        s (str): A pretty string that lists the key/value pairs of the given 
-            dictionary for documentation. 
+        s (str): A pretty string that lists the key/value pairs of the given
+            dictionary for documentation.
 
     """
     s = ""

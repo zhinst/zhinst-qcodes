@@ -48,7 +48,7 @@ setuptools.setup(
     packages=setuptools.find_namespace_packages(
         where="src", exclude=["test*"], include=["zhinst.*"]
     ),
-	package_dir={"": "src"},
+    package_dir={"": "src"},
     use_scm_version=True,
     setup_requires=["setuptools_scm"],
     install_requires=requirements,
