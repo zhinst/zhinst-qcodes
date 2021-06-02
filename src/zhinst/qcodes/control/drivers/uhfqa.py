@@ -58,7 +58,6 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.output1,
             set_cmd=self._awg.output1,
             label="Output Ch 1",
-            vals=vals.OnOff(),
         )
         self.add_parameter(
             "output2",
@@ -67,7 +66,6 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.output2,
             set_cmd=self._awg.output2,
             label="Output Ch 2",
-            vals=vals.OnOff(),
         )
         self.add_parameter(
             "gain1",
@@ -76,7 +74,6 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.gain1,
             set_cmd=self._awg.gain1,
             label="Gain Ch 1",
-            vals=vals.Numbers(-1, 1),
         )
         self.add_parameter(
             "gain2",
@@ -85,8 +82,29 @@ class AWG(InstrumentChannel):
             get_cmd=self._awg.gain2,
             set_cmd=self._awg.gain2,
             label="Gain Ch 2",
-            vals=vals.Numbers(-1, 1),
         )
+        self.add_parameter(
+            "single",
+            unit=self._awg.single._unit,
+            docstring=self._awg.single.__repr__(),
+            get_cmd=self._awg.single,
+            set_cmd=self._awg.single,
+            label="AWG Single Shot Mode",
+        )
+
+    def outputs(self, value=None):
+        """Sets both signal outputs simultaneously.
+
+        Keyword Arguments:
+            value (tuple): Tuple of values {'on', 'off'} for channel 1 and 2
+                (default: {None})
+
+        Returns:
+            The state {'on', 'off'} for both outputs if the keyword argument is
+            not given.
+
+        """
+        return self._awg.outputs(value)
 
     def run(self) -> None:
         """Runs the *AWG Core*."""
@@ -323,7 +341,14 @@ class Channel(InstrumentChannel):
             get_cmd=self._channel.readout_frequency,
             set_cmd=self._channel.readout_frequency,
             label="Readout Frequency",
-            vals=vals.Numbers(0),
+            vals=vals.Numbers(),
+        )
+        self.add_parameter(
+            "int_weights_envelope",
+            docstring="Envelope values multiplied with the integration weights.",
+            get_cmd=self._channel.int_weights_envelope,
+            set_cmd=self._channel.int_weights_envelope,
+            label="Integration Weights Envelope",
         )
         self.add_parameter(
             "readout_amplitude",
@@ -356,7 +381,6 @@ class Channel(InstrumentChannel):
             docstring="Enable or disable the weighted integration for this readout channel with 'channel.enable()' or 'channel.disable()'.",
             get_cmd=self._channel.enabled,
             label="Enabled",
-            vals=vals.Bool(),
         )
 
     def enabled(self) -> None:
@@ -493,11 +517,19 @@ class UHFQA(ZIBaseInstrument):
         )
         self.add_parameter(
             "integration_time",
-            docstring="The integration time used for demodulation in seconds. Can be up to 2.27 us when using weighted integration and up to 50 us in spectroscopy mode.",
+            unit=self._controller.integration_time._unit,
+            docstring=self._controller.integration_time.__repr__(),
             get_cmd=self._controller.integration_time,
             set_cmd=self._controller.integration_time,
             label="Integration Time",
-            vals=vals.Numbers(0, 50e-6),
+        )
+        self.add_parameter(
+            "integration_length",
+            unit=self._controller.integration_length._unit,
+            docstring=self._controller.integration_length.__repr__(),
+            get_cmd=self._controller.integration_length,
+            set_cmd=self._controller.integration_length,
+            label="Integration Length",
         )
         self.add_parameter(
             "averaging_mode",
@@ -507,6 +539,19 @@ class UHFQA(ZIBaseInstrument):
             label="Averaging Mode",
             vals=vals.Enum("Cyclic", "Sequential"),
         )
+        self.add_parameter(
+            "qa_delay",
+            docstring="The adjustment in the the quantum analyzer delay "
+            "in units of samples.",
+            get_cmd=self._controller.qa_delay,
+            set_cmd=self._controller.qa_delay,
+            label="Quantum Analyzer Delay",
+            vals=vals.Numbers(),
+        )
+
+    def factory_reset(self) -> None:
+        """Load the factory default settings."""
+        self._controller.factory_reset()
 
     def arm(self, length=None, averages=None) -> None:
         """Prepare UHFQA for result acquisition.
@@ -544,3 +589,7 @@ class UHFQA(ZIBaseInstrument):
 
         """
         self._controller.disable_readout_channels(channels=channels)
+
+    def enable_qccs_mode(self) -> None:
+        """Configure the instrument to work with PQSC"""
+        self._controller.enable_qccs_mode()
