@@ -46,6 +46,10 @@ class AWG(InstrumentChannel):
         super().__init__(parent_instr, name)
         self._awg = UHFQA_AWG(parent_contr, 0)
         self._awg._setup()
+        self._awg._init_awg_params()
+        self._add_qcodes_awg_params()
+
+    def _add_qcodes_awg_params(self):
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "output1",
@@ -289,6 +293,10 @@ class Channel(InstrumentChannel):
     def __init__(self, name: str, index: int, parent_instr, parent_contr) -> None:
         super().__init__(parent_instr, name)
         self._channel = ReadoutChannel(parent_contr, index)
+        self._channel._init_channel_params()
+        self._add_qcodes_channel_params()
+
+    def _add_qcodes_channel_params(self):
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "rotation",
@@ -442,13 +450,23 @@ class UHFQA(ZIBaseInstrument):
         self._controller.connect_device(nodetree=False)
         self.connect_message()
         self._get_nodetree_dict()
-        # init submodules for ReadoutChannels and AWG
+        self._init_readout_channels()
+        self._init_awg_channels()
+        self._add_qcodes_params()
+
+    def _init_readout_channels(self):
+        # init submodules for ReadoutChannels
         channel_list = ChannelList(self, "channels", Channel)
         for i in range(10):
             channel_list.append(Channel(f"ch-{i}", i, self, self._controller))
         channel_list.lock()
         self.add_submodule("channels", channel_list)
+
+    def _init_awg_channels(self):
+        # init submodule AWG
         self.add_submodule("awg", AWG("awg", self, self._controller))
+
+    def _add_qcodes_params(self):
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "crosstalk_matrix",

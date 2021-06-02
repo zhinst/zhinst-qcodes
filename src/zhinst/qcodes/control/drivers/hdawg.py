@@ -51,6 +51,10 @@ class AWG(InstrumentChannel):
         InstrumentChannel.__init__(self, parent_instr, name)
         self._awg = HDAWG_AWG(parent_contr, index)
         self._awg._setup()
+        self._awg._init_awg_params()
+        self._add_qcodes_awg_params()
+
+    def _add_qcodes_awg_params(self):
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "output1",
@@ -338,6 +342,9 @@ class HDAWG(ZIBaseInstrument):
         self._controller.connect_device(nodetree=False)
         self.connect_message()
         self._get_nodetree_dict()
+        self._init_awg_channels()
+
+    def _init_awg_channels(self):
         # initialize ChannelList of AWGs
         channel_list = ChannelList(self, "awgs", AWG)
         for i in range(4):
