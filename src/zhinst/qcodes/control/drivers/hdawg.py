@@ -382,7 +382,7 @@ class HDAWG(ZIBaseInstrument):
             api=self._api,
         )
         self._controller.setup()
-        self._controller.connect_device(nodetree=False)
+        self._controller.connect_device()
         self.connect_message()
         self._get_nodetree_dict()
         self._init_awg_channels()
