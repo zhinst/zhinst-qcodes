@@ -102,10 +102,8 @@ class ZIBaseInstrument(Instrument):
             api=self._api,
         )
         self._controller.setup()
-        self._controller.connect_device(nodetree=False)
+        self._controller.connect_device()
         self.connect_message()
-        # get the nodetree from the device as a nested dict
-        self._get_nodetree_dict()
 
     def _init_submodule(self, key: str) -> None:
         """
@@ -114,25 +112,17 @@ class ZIBaseInstrument(Instrument):
         with 'sigouts'.
 
         Arguments:
-            key (str): dictionary key in the highest layer of nodetree_dict
+            key (str): dictionary key in the highest layer of nodetree dictionary
 
         """
-        if key in self.nodetree_dict.keys():
-            self._add_submodules_recursively(self, {key: self.nodetree_dict[key]})
+        if key in self._controller._nodetree._nodetree_dict.keys():
+            self._add_submodules_recursively(
+                self, {key: self._controller._nodetree._nodetree_dict[key]}
+            )
         else:
-            print(f"Key {key} not in nodetree: {list(self.nodetree_dict.keys())}")
-
-    def _get_nodetree_dict(self) -> None:
-        """
-        Retrieve the nodetree from the device as a nested dict and process it accordingly.
-
-        """
-        tree = self._controller._get_nodetree(f"{self._serial}/*")
-        self.nodetree_dict = dict()
-        for key, value in tree.items():
-            key = key.replace(f"/{self._serial.upper()}/", "")
-            hirarchy = key.split("/")
-            _dictify(self.nodetree_dict, hirarchy, value)
+            print(
+                f"Key {key} not in nodetree: {list(self._controller._nodetree._nodetree_dict.keys())}"
+            )
 
     def _add_submodules_recursively(self, parent, treedict: Dict) -> None:
         """
@@ -184,7 +174,7 @@ class ZIBaseInstrument(Instrument):
         Arguments:
             instr: instrument/submodule the parameter is associated with
             name (str): parameter name
-            params (dict): dictionary describing the parameter, innermost layer of nodetree_dict
+            params (dict): dictionary describing the parameter, innermost layer of nodetree dictionary
 
         """
         node = params["Node"].lower().replace(f"/{self._serial}/", "")
@@ -227,33 +217,6 @@ class ZIBaseInstrument(Instrument):
 Helper functions used to process the nodetree dictionary in ZIBaseInstrument.
 
 """
-
-
-def _dictify(data, keys, val) -> Dict:
-    """
-    Helper function to generate nested dictionary from list of keys and value.
-    Calls itself recursively.
-
-    Arguments:
-        data (dict): dictionary to add value to with keys
-        keys (list): list of keys to traverse along tree and place value
-        val (dict): value for innermost layer of nested dict
-
-    Returns:
-        data (dict): A nested dictionary respresenting the (sub-)nodetree data
-            structure.
-
-    """
-    key = keys[0]
-    key = int(key) if key.isdecimal() else key.lower()
-    if len(keys) == 1:
-        data[key] = val
-    else:
-        if key in data.keys():
-            data[key] = _dictify(data[key], keys[1:], val)
-        else:
-            data[key] = _dictify({}, keys[1:], val)
-    return data
 
 
 def _dict_to_doc(d: Dict) -> str:
