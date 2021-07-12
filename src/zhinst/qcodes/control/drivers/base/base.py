@@ -104,6 +104,7 @@ class ZIBaseInstrument(Instrument):
         self._controller.setup()
         self._controller.connect_device()
         self.connect_message()
+        self.nodetree_dict = self._controller.nodetree._nodetree_dict
 
     def _init_submodule(self, key: str) -> None:
         """
@@ -115,14 +116,10 @@ class ZIBaseInstrument(Instrument):
             key (str): dictionary key in the highest layer of nodetree dictionary
 
         """
-        if key in self._controller._nodetree._nodetree_dict.keys():
-            self._add_submodules_recursively(
-                self, {key: self._controller._nodetree._nodetree_dict[key]}
-            )
+        if key in self.nodetree_dict.keys():
+            self._add_submodules_recursively(self, {key: self.nodetree_dict[key]})
         else:
-            print(
-                f"Key {key} not in nodetree: {list(self._controller._nodetree._nodetree_dict.keys())}"
-            )
+            print(f"Key {key} not in nodetree: {list(self.nodetree_dict.keys())}")
 
     def _add_submodules_recursively(self, parent, treedict: Dict) -> None:
         """

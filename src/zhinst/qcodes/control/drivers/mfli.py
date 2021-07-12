@@ -404,7 +404,7 @@ class MFLI(ZIBaseInstrument):
         self._controller.setup()
         self._controller.connect_device()
         self.connect_message()
-        self._get_nodetree_dict()
+        self.nodetree_dict = self._controller.nodetree._nodetree_dict
         # initialize DAQ and Sweeper submodules
         self.add_submodule("daq", DAQ("daq", self, self._controller))
         self.add_submodule("sweeper", Sweeper("sweeper", self, self._controller))
