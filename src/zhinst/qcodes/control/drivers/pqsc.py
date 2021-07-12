@@ -42,9 +42,9 @@ class PQSC(ZIBaseInstrument):
             api=self._api,
         )
         self._controller.setup()
-        self._controller.connect_device(nodetree=False)
+        self._controller.connect_device()
         self.connect_message()
-        self._get_nodetree_dict()
+        self.nodetree_dict = self._controller.nodetree._nodetree_dict
         self._add_qcodes_params()
 
     def _add_qcodes_params(self):

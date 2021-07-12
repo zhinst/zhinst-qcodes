@@ -410,7 +410,7 @@ class UHFLI(ZIBaseInstrument):
         self._controller.setup()
         self._controller.connect_device()
         self.connect_message()
-        self._get_nodetree_dict()
+        self.nodetree_dict = self._controller.nodetree._nodetree_dict
         # initialize AWG, DAQ and Sweeper submodules
         if "AWG" in self._controller.options:
             self.add_submodule("awg", AWG("awg", self, self._controller))
