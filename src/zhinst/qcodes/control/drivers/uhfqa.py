@@ -3,7 +3,11 @@ from qcodes.instrument.channel import ChannelList, InstrumentChannel
 import qcodes.utils.validators as vals
 
 import zhinst.toolkit as tk
-from zhinst.toolkit.control.drivers.uhfqa import ReadoutChannel, AWG as UHFQA_AWG
+from zhinst.toolkit.control.drivers.uhfqa import (
+    ReadoutChannel,
+    AWG as UHFQA_AWG,
+    UHFScope as UHFQA_Scope,
+)
 from typing import List, Dict, Union
 import numpy as np
 
@@ -95,42 +99,69 @@ class AWG(InstrumentChannel):
     def outputs(self, value=None):
         """Sets both signal outputs simultaneously.
 
-        Keyword Arguments:
-            value (tuple): Tuple of values {'on', 'off'} for channel 1 and 2
-                (default: {None})
+        Arguments:
+            value (tuple): Tuple of values {'on', 'off'} for channel 1
+                and 2 (default: None).
 
         Returns:
-            The state {'on', 'off'} for both outputs if the keyword argument is
-            not given.
-
-        """
-        return self._awg.outputs(value)
-
-    def run(self) -> None:
-        """Runs the *AWG Core*."""
-        self._awg.run()
-
-    def stop(self) -> None:
-        """Stops the *AWG Core*."""
-        self._awg.stop()
-
-    def wait_done(self, timeout: float = 100) -> None:
-        """Waits until the *AWG Core* is finished running.
-
-        Keyword Arguments:
-            timeout (int): A timeout in seconds after which the AWG is stopped
-                (default: 100)
-
-        """
-        self._awg.wait_done(timeout=timeout)
-
-    def compile(self) -> None:
-        """Compiles the current *Sequence Program* on the *AWG Core*.
+            A tuple with the states {'on', 'off'} for the two output
+            channels if the keyword argument is not given.
 
         Raises:
-            `ToolkitError`: If the *AWG Core* has not been set up yet.
-            `ToolkitError`: If the compilation has failed.
-            `Warning`: If the compilation has finished with a warning.
+            ValueError: If the `value` argument is not a list or tuple
+                of length 2.
+
+        """
+        return self._awg.outputs(value=value)
+
+    def run(self, sync=True) -> None:
+        """Run the AWG Core.
+
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after enabling the AWG Core (default: True).
+
+        """
+        self._awg.run(sync=sync)
+
+    def stop(self, sync=True) -> None:
+        """Stop the AWG Core.
+
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after disabling the AWG Core (default: True).
+
+        """
+        self._awg.stop(sync=sync)
+
+    def wait_done(self, timeout: float = 10, sleep_time: float = 0.005) -> None:
+        """Wait until the AWG Core is finished.
+
+        Arguments:
+            timeout (float): The maximum waiting time in seconds for the
+                AWG Core (default: 10).
+            sleep_time (float): Time in seconds to wait between
+                requesting AWG state
+
+        Raises:
+            ToolkitError: If the AWG is running in continuous mode.
+            TimeoutError: If the AWG is not finished before the timeout.
+
+        """
+        self._awg.wait_done(timeout=timeout, sleep_time=sleep_time)
+
+    def compile(self) -> None:
+        """Compiles the current SequenceProgram on the AWG Core.
+
+        Raises:
+            ToolkitConnectionError: If the AWG Core has not been set up
+                yet
+            ToolkitError: if the compilation has failed or the ELF
+                upload is not successful.
+            TimeoutError: if the program upload is not completed before
+                timeout.
 
         """
         self._awg.compile()
@@ -147,25 +178,29 @@ class AWG(InstrumentChannel):
     ) -> None:
         """Queues up a waveform to the *AWG Core*.
 
-        Uploading custom waveforms is only possible when using the *'Simple'*
-        sequence type. The waveform is specified with two numpy arrays for the
-        two channels of the *AWG Core*. The waveform will then automatically
-        align them to the correct minimum waveform length, sample granularity
-        and scaling. An individual delay can be specified to shift the
-        individual waveform with respect to the time origin of the period.
+        Uploading custom waveforms is only possible when using the
+        *'Simple'* or *'Custom'* sequence types. The waveform is
+        specified with two numpy arrays for the two channels of the
+        *AWG Core*. The waveform will then automatically align them to
+        the correct minimum waveform length, sample granularity and
+        scaling. An individual delay can be specified to shift the
+        individual waveform with respect to the time origin of the
+        period.
 
         Arguments:
-            wave1 (array like): A list or array of samples in the waveform to be
-                queued for channel 1. An empty list '[]' will upload zeros of
-                the minimum waveform length.
-            wave2 (array like): A list or array of samples in the waveform to be
-                queued for channel 2. An empty list '[]' will upload zeros of
-                the minimum waveform length.
+            wave1 (array like): A list or array of samples in the
+                waveform to be queued for channel 1. An empty list '[]'
+                will upload zeros of the minimum waveform length.
+            wave2 (array like): A list or array of samples in the
+                waveform to be queued for channel 2. An empty list '[]'
+                will upload zeros of the minimum waveform length.
+            delay (float): An individual delay for the queued sequence
+                with respect to the time origin. Positive values shift
+                the start of the waveform forwards in time. (default: 0)
 
-        Keyword Arguments:
-            delay (float): An individual delay for the queued sequence with
-                respect to the time origin. Positive values shift the start of
-                the waveform forwards in time. (default: 0)
+        Raises:
+            ToolkitError: If the sequence is not of type *'Simple'* or
+                *'Custom'*.
 
         """
         self._awg.queue_waveform(wave1, wave2, delay=delay)
@@ -179,18 +214,23 @@ class AWG(InstrumentChannel):
     ) -> None:
         """Replaces the data in a waveform in the queue.
 
-        The new data must have the same length as the previous data s.t. the
-        waveform data can be replaced without recompilation of the sequence
-        program.
+        The new data must have the same length as the previous data
+        s.t. the waveform data can be replaced without recompilation of
+        the sequence program.
 
         Arguments:
-            wave1 (array): Waveform to replace current wave for Channel 1.
-            wave2 (array): Waveform to replace current wave for Channel 2.
+            wave1 (array): Waveform to replace current wave for
+                Channel 1.
+            wave2 (array): Waveform to replace current wave for
+                Channel 2.
+            i (int): The index of the waveform in the queue to be
+                replaced.
+            delay (int): An individual delay in seconds for this
+                waveform w.r.t. the time origin of the sequence
+                (default: 0).
 
-        Keyword Arguments:
-            i (int): The index of the waveform in the queue to be replaced.
-            delay (int): An individual delay in seconds for this waveform w.r.t.
-                the time origin of the sequence. (default: 0)
+        Raises:
+            ValueError: If the given index is out of range.
 
         """
         self._awg.replace_waveform(wave1, wave2, i=i, delay=delay)
@@ -199,8 +239,8 @@ class AWG(InstrumentChannel):
         """Uploads all waveforms in the queue to the AWG Core.
 
         This method only works as expected if the Sequence Program is in
-        'Simple' mode and has been compiled beforehand.
-
+        'Simple' or 'Custom' modes and has been compiled beforehand.
+        See :func:`compile_and_upload_waveforms(...)`.
         """
         self._awg.upload_waveforms()
 
@@ -209,7 +249,6 @@ class AWG(InstrumentChannel):
 
         Simply combines the two methods to make sure the sequence is compiled
         before the waveform queue is uplaoded.
-
         """
         self._awg.compile_and_upload_waveforms()
 
@@ -323,7 +362,6 @@ class Channel(InstrumentChannel):
             get_cmd=self._channel.rotation,
             set_cmd=self._channel.rotation,
             label="Rotation",
-            vals=vals.Numbers(),
         )
         self.add_parameter(
             "threshold",
@@ -337,7 +375,8 @@ class Channel(InstrumentChannel):
         self.add_parameter(
             "readout_frequency",
             unit="Hz",
-            docstring="Readout frequency of the channel. Is used to create a readout tone and to set the integration weights.",
+            docstring="Readout frequency of the channel. Is used to create a readout "
+            "tone and to set the integration weights.",
             get_cmd=self._channel.readout_frequency,
             set_cmd=self._channel.readout_frequency,
             label="Readout Frequency",
@@ -353,7 +392,8 @@ class Channel(InstrumentChannel):
         self.add_parameter(
             "readout_amplitude",
             unit="Hz",
-            docstring="The amplitude of the readout tone associated with this channel. Used in a 'Readout' sequence.",
+            docstring="The amplitude of the readout tone associated with this channel. "
+            "Used in a 'Readout' sequence.",
             get_cmd=self._channel.readout_amplitude,
             set_cmd=self._channel.readout_amplitude,
             label="Readout Amplitude",
@@ -362,7 +402,8 @@ class Channel(InstrumentChannel):
         self.add_parameter(
             "phase_shift",
             unit="Hz",
-            docstring="The phase shift of the readout tone associated with this channel. Used in a 'Readout' sequence.",
+            docstring="The phase shift of the readout tone associated with this "
+            "channel. Used in a 'Readout' sequence.",
             get_cmd=self._channel.phase_shift,
             set_cmd=self._channel.phase_shift,
             label="Readout Phase Shift",
@@ -375,39 +416,281 @@ class Channel(InstrumentChannel):
             get_cmd=self._channel.result,
             label="Result",
         )
-        self.add_parameter(
-            "enabled",
-            unit="Boolean",
-            docstring="Enable or disable the weighted integration for this readout channel with 'channel.enable()' or 'channel.disable()'.",
-            get_cmd=self._channel.enabled,
-            label="Enabled",
-        )
 
     def enabled(self) -> None:
         """Returns if weighted integration is enabled."""
         return self._channel.enabled()
 
     def enable(self) -> None:
-        """
-        Enables the readout channel. This enables weighted integration mode,
-        sets the itnegration time to its default (2 us) and sets the
-        corresponding integration weights to demodulate at the given readout
-        frequency.
+        """Enable weighted integration for this channel.
 
+        This method also sets the corresponding integration weights to
+        demodulate at the given readout frequency.
         """
         self._channel.enable()
 
     def disable(self) -> None:
-        """
-        Disables the readout channel and resets the integration weigths
-        corresponding to this channel.
+        """Disable weighted integration for this channel.
 
+        This method also resets the corresponding integration weights.
         """
         self._channel.disable()
 
     @property
     def index(self):
         return self._channel.index
+
+
+class Scope(InstrumentChannel):
+    """Device-specific *Scope* for the *UHFQA*."""
+
+    def __init__(self, name: str, parent_instr, parent_contr) -> None:
+        super().__init__(parent_instr, name)
+        self._scope = UHFQA_Scope(parent_contr)
+        self._scope._setup()
+        self._scope._init_scope_params()
+        self._scope._init_scope_settings()
+        self._add_qcodes_scope_params()
+
+    def _add_qcodes_scope_params(self):
+        # add custom parameters as QCoDeS parameters
+        self.add_parameter(
+            "single",
+            unit=self._scope.single._unit,
+            docstring=self._scope.single.__repr__(),
+            get_cmd=self._scope.single,
+            set_cmd=self._scope.single,
+            label="Scope Single Shot Mode",
+        )
+        self.add_parameter(
+            "length",
+            unit=self._scope.length._unit,
+            docstring=self._scope.length.__repr__(),
+            get_cmd=self._scope.length,
+            set_cmd=self._scope.length,
+            label="Length of Scope Shot",
+        )
+        self.add_parameter(
+            "trigger_source",
+            unit=self._scope.trigger_source._unit,
+            docstring=self._scope.trigger_source.__repr__(),
+            get_cmd=self._scope.trigger_source,
+            set_cmd=self._scope.trigger_source,
+            label="Scope Trigger Source",
+        )
+        self.add_parameter(
+            "trigger_level",
+            unit=self._scope.trigger_level._unit,
+            docstring=self._scope.trigger_level.__repr__(),
+            get_cmd=self._scope.trigger_level,
+            set_cmd=self._scope.trigger_level,
+            label="Scope Trigger Level",
+        )
+        self.add_parameter(
+            "trigger_enable",
+            unit=self._scope.trigger_enable._unit,
+            docstring=self._scope.trigger_enable.__repr__(),
+            get_cmd=self._scope.trigger_enable,
+            set_cmd=self._scope.trigger_enable,
+            label="Enable Triggered Scope Shot",
+        )
+        self.add_parameter(
+            "trigger_reference",
+            unit=self._scope.trigger_reference._unit,
+            docstring=self._scope.trigger_reference.__repr__(),
+            get_cmd=self._scope.trigger_reference,
+            set_cmd=self._scope.trigger_reference,
+            label="Trigger Reference Position",
+        )
+        self.add_parameter(
+            "trigger_holdoff",
+            unit=self._scope.trigger_holdoff._unit,
+            docstring=self._scope.trigger_holdoff.__repr__(),
+            get_cmd=self._scope.trigger_holdoff,
+            set_cmd=self._scope.trigger_holdoff,
+            label="Hold off Time Inbetween Acquiring Triggers",
+        )
+
+    def arm(
+        self, sync=True, num_records: int = None, averager_weight: int = None
+    ) -> None:
+        """Prepare the scope for recording.
+
+        This method tells the scope module to be ready to acquire data
+        and resets the scope module's progress to 0.0. Optionally, the
+        *number of records* and *averager weight* can be set when
+        specified as keyword argument. If it is not specified, it is not
+        changed.
+
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after preparing scope (default: True).
+            num_records (int): The number of scope records to acquire
+                (default: None).
+            averager_weight (int): Averager weight parameter.
+                Averaging is disabled if it is set to 1. For values
+                greater than 1, the scope  record shots are averaged
+                using an exponentially weighted moving average
+                (default: None).
+
+        """
+        self._scope.arm(
+            sync=sync, num_records=num_records, averager_weight=averager_weight
+        )
+
+    def run(self, sync=True) -> None:
+        """Run the scope recording.
+
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after enabling the scope (default: True).
+
+        """
+        self._scope.run(sync=sync)
+
+    def arm_and_run(self, num_records: int = None, averager_weight: int = None) -> None:
+        """Arm the scope and start recording
+
+        Simply combines the methods arm and run. A synchronisation
+        is performed between the device and the data server after
+        preparing scope.
+
+        Arguments:
+            num_records (int): The number of scope records to acquire
+                (default: None).
+            averager_weight (int): Averager weight parameter.
+                Averaging is disabled if it is set to 1. For values
+                greater than 1, the scope  record shots are averaged
+                using an exponentially weighted moving average
+                (default: None).
+
+        """
+        self._scope.arm_and_run(
+            num_records=num_records, averager_weight=averager_weight
+        )
+
+    def stop(self, sync=True) -> None:
+        """Stops the scope recording.
+
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after disabling the scope (default: True).
+
+        """
+        self._scope.stop(sync=sync)
+
+    def wait_done(self, timeout: float = 10, sleep_time: float = 0.005) -> None:
+        """Wait until the Scope recording is finished.
+
+        Arguments:
+            timeout (float): The maximum waiting time in seconds for the
+                Scope (default: 10).
+            sleep_time (float): Time in seconds to wait between
+                requesting the progress and records values
+
+        Raises:
+            TimeoutError: If the Scope recording is not done before the
+                timeout.
+
+        """
+        self._scope.wait_done(timeout=timeout, sleep_time=sleep_time)
+
+    def read(
+        self,
+        channel=None,
+        blocking: bool = True,
+        timeout: float = 10,
+        sleep_time: float = 0.005,
+    ):
+        """Read out the recorded data from the specified channel of the scope.
+
+        Arguments:
+            channel (int): The scope channel to read the data from. If
+                no channel is specified, the method will return the data
+                for all channels (default: None).
+            blocking (bool): A flag that specifies if the program
+                should be blocked until the Scope Module has received
+                and  processed the desired number of records
+                (default: True).
+            timeout (float): The maximum waiting time in seconds for the
+                Scope (default: 10).
+            sleep_time (float): Time in seconds to wait between
+                requesting the progress and records values
+
+        Raises:
+            TimeoutError: If the Scope recording is not done before the
+                timeout.
+
+        Returns:
+            A dictionary showing the recorded data and scope time.
+
+        """
+        return self._scope.read(
+            channel=channel, blocking=blocking, timeout=timeout, sleep_time=sleep_time
+        )
+
+    def channels(self, value=None):
+        """Set all Scope channels simultaneously.
+
+        Arguments:
+            value (tuple): Tuple of values {'on', 'off'} for channel 1
+                and 2 (default: None).
+
+        Returns:
+            A tuple with the states {'on', 'off'} for all input channels.
+
+        """
+        return self._scope.channels(value=value)
+
+    def mode(self, value=None):
+        """Set or get scope data processing mode.
+
+        Arguments:
+            value (str): Can be either "time" or "FFT" (default: None).
+
+        Returns:
+            If no argument is given the method returns the current
+            scope data processing mode.
+
+        """
+        return self._scope.mode(value=value)
+
+    def num_records(self, value=None):
+        """Set or get the number of scope records to acquire.
+
+        Arguments:
+            value (int): The number of scope records to acquire
+                (default: None).
+
+        Returns:
+            If no argument is given the method returns the current
+            number of scope records to acquire.
+
+        """
+        return self._scope.num_records(value=value)
+
+    def averager_weight(self, value=None):
+        """Set or get the averager weight parameter.
+
+        Arguments:
+            value (int): Averager weight parameter. Averaging is
+                disabled if it is set to 1. For values greater than 1,
+                the scope record shots are averaged using an
+                exponentially weighted moving average (default: None).
+
+        Returns:
+            If no argument is given the method returns the current
+            scope data processing mode.
+
+        """
+        return self._scope.averager_weight(value=value)
+
+    @property
+    def is_running(self):
+        return self._scope.is_running
 
 
 class UHFQA(ZIBaseInstrument):
@@ -448,10 +731,7 @@ class UHFQA(ZIBaseInstrument):
     ) -> None:
         super().__init__(name, "uhfqa", serial, interface, host, port, api, **kwargs)
         submodules = self.nodetree_dict.keys()
-        blacklist = [
-            "awgs",
-            "scopes",
-        ]
+        blacklist = ["awgs", "scopes"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
     def _connect(self) -> None:
@@ -476,6 +756,7 @@ class UHFQA(ZIBaseInstrument):
         self.nodetree_dict = self._controller.nodetree._nodetree_dict
         self._init_readout_channels()
         self._init_awg_channels()
+        self._init_scope()
         self._add_qcodes_params()
 
     def _init_readout_channels(self):
@@ -490,11 +771,17 @@ class UHFQA(ZIBaseInstrument):
         # init submodule AWG
         self.add_submodule("awg", AWG("awg", self, self._controller))
 
+    def _init_scope(self):
+        # init submodule Scope
+        self.add_submodule("scope", Scope("scope", self, self._controller))
+
     def _add_qcodes_params(self):
         # add custom parameters as QCoDeS parameters
+        super()._add_qcodes_params()
         self.add_parameter(
             "crosstalk_matrix",
-            docstring="The 10x10 crosstalk suppression matrix that multiplies the 10 signal paths. Can be set only partially.",
+            docstring="The 10x10 crosstalk suppression matrix that multiplies the 10 "
+            "signal paths. Can be set only partially.",
             get_cmd=self._controller.crosstalk_matrix,
             set_cmd=self._controller.crosstalk_matrix,
             label="Crosstalk Matrix",
@@ -548,48 +835,95 @@ class UHFQA(ZIBaseInstrument):
             label="Quantum Analyzer Delay",
             vals=vals.Numbers(),
         )
+        self.add_parameter(
+            "ref_clock",
+            unit=self._controller.ref_clock._unit,
+            docstring=self._controller.ref_clock.__repr__(),
+            get_cmd=self._controller.ref_clock,
+            set_cmd=self._controller.ref_clock,
+            label="Intended Reference Clock Source",
+        )
 
-    def factory_reset(self) -> None:
-        """Load the factory default settings."""
-        self._controller.factory_reset()
+    def factory_reset(self, sync=True) -> None:
+        """Load the factory default settings.
+
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after loading the factory preset (default: True).
+
+        """
+        self._controller.factory_reset(sync=sync)
 
     def arm(self, length=None, averages=None) -> None:
         """Prepare UHFQA for result acquisition.
 
-        This method enables the QA Results Acquisition and resets the acquired
-        points. Optionally, the *result length* and *result averages* can be set
-        when specified as keyword arguments. If they are not specified, they are
-        not changed.
+        This method enables the QA Results Acquisition and resets the
+        acquired points. Optionally, the *result length* and
+        *result averages* can be set when specified as keyword
+        arguments. If they are not specified,they are not changed.
 
-        Keyword Arguments:
-            length (int): If specified, the length of the result vector will be
-                set before arming the UHFQA readout. (default: None)
-            averages (int): If specified, the result averages will be set before
-                arming the UHFQA readout. (default: None)
+        Arguments:
+            length (int): If specified, the length of the result vector
+                will be set before arming the UHFQA readout
+                (default: None).
+            averages (int): If specified, the result averages will be
+                set before arming the UHFQA readout (default: None).
 
         """
         self._controller.arm(length=length, averages=averages)
 
     def enable_readout_channels(self, channels: List = range(10)) -> None:
-        """Enables weighted integration on the specified readout channels.
+        """Enable weighted integration on the specified readout
+         channels.
 
-        Keyword Arguments:
+        Arguments:
             channels (list): A list of indices of channels to enable.
                 (default: range(10))
+
+        Raises:
+            ValueError: If the channel list contains an element outside
+                the allowed range.
 
         """
         self._controller.enable_readout_channels(channels=channels)
 
     def disable_readout_channels(self, channels: List = range(10)) -> None:
-        """Disables weighted integration on the specified readout channels.
+        """Disable weighted integration on the specified readout
+        channels.
 
-        Keyword Arguments:
+        Arguments:
             channels (list): A list of indices of channels to disable.
                 (default: range(10))
+
+        Raises:
+            ValueError: If the channel list contains an element outside
+                the allowed range.
 
         """
         self._controller.disable_readout_channels(channels=channels)
 
     def enable_qccs_mode(self) -> None:
-        """Configure the instrument to work with PQSC"""
+        """Configure the instrument to work with PQSC.
+
+        This method sets the reference clock source and DIO settings
+        correctly to connect the instrument to the PQSC.
+        """
         self._controller.enable_qccs_mode()
+
+    def enable_manual_mode(self) -> None:
+        """Disconnect from the PQSC.
+
+        This method sets the reference clock source and DIO settings to
+        factory default states and the instrument is disconnected from
+        the PQSC.
+        """
+        self._controller.enable_manual_mode()
+
+    @property
+    def allowed_sequences(self):
+        return self._controller.allowed_sequences
+
+    @property
+    def allowed_trigger_modes(self):
+        return self._controller.allowed_trigger_modes

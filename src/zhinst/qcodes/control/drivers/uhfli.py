@@ -417,6 +417,21 @@ class UHFLI(ZIBaseInstrument):
         self.add_submodule("daq", DAQ("daq", self, self._controller))
         self.add_submodule("sweeper", Sweeper("sweeper", self, self._controller))
 
-    def factory_reset(self) -> None:
-        """Load the factory default settings."""
-        self._controller.factory_reset()
+    def factory_reset(self, sync=True) -> None:
+        """Load the factory default settings.
+
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after loading the factory preset (default: True).
+
+        """
+        self._controller.factory_reset(sync=sync)
+
+    @property
+    def allowed_sequences(self):
+        return self._controller.allowed_sequences
+
+    @property
+    def allowed_trigger_modes(self):
+        return self._controller.allowed_trigger_modes

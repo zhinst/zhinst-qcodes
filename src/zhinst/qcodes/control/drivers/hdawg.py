@@ -115,6 +115,54 @@ class AWG(InstrumentChannel):
             set_cmd=self._awg.single,
             label="Single Run",
         )
+        self.add_parameter(
+            "zsync_register_mask",
+            unit=self._awg.zsync_register_mask._unit,
+            docstring=self._awg.zsync_register_mask.__repr__(),
+            get_cmd=self._awg.zsync_register_mask,
+            set_cmd=self._awg.zsync_register_mask,
+            label="ZSYNC Register Mask",
+        )
+        self.add_parameter(
+            "zsync_register_shift",
+            unit=self._awg.zsync_register_shift._unit,
+            docstring=self._awg.zsync_register_shift.__repr__(),
+            get_cmd=self._awg.zsync_register_shift,
+            set_cmd=self._awg.zsync_register_shift,
+            label="ZSYNC Register Shift",
+        )
+        self.add_parameter(
+            "zsync_register_offset",
+            unit=self._awg.zsync_register_offset._unit,
+            docstring=self._awg.zsync_register_offset.__repr__(),
+            get_cmd=self._awg.zsync_register_offset,
+            set_cmd=self._awg.zsync_register_offset,
+            label="ZSYNC Register Offset",
+        )
+        self.add_parameter(
+            "zsync_decoder_mask",
+            unit=self._awg.zsync_decoder_mask._unit,
+            docstring=self._awg.zsync_decoder_mask.__repr__(),
+            get_cmd=self._awg.zsync_decoder_mask,
+            set_cmd=self._awg.zsync_decoder_mask,
+            label="ZSYNC Decoder Mask",
+        )
+        self.add_parameter(
+            "zsync_decoder_shift",
+            unit=self._awg.zsync_decoder_shift._unit,
+            docstring=self._awg.zsync_decoder_shift.__repr__(),
+            get_cmd=self._awg.zsync_decoder_shift,
+            set_cmd=self._awg.zsync_decoder_shift,
+            label="ZSYNC Decoder Shift",
+        )
+        self.add_parameter(
+            "zsync_decoder_offset",
+            unit=self._awg.zsync_decoder_offset._unit,
+            docstring=self._awg.zsync_decoder_offset.__repr__(),
+            get_cmd=self._awg.zsync_decoder_offset,
+            set_cmd=self._awg.zsync_decoder_offset,
+            label="ZSYNC Decoder Offset",
+        )
 
     def _init_ct(self):
         # init submodule for CT
@@ -131,16 +179,20 @@ class AWG(InstrumentChannel):
     def outputs(self, value=None):
         """Sets both signal outputs simultaneously.
 
-        Keyword Arguments:
-            value (tuple): Tuple of values {'on', 'off'} for channel 1 and 2
-                (default: None).
+        Arguments:
+            value (tuple): Tuple of values {'on', 'off'} for channel 1
+                and 2 (default: None).
 
         Returns:
-            A tuple with the states {'on', 'off'} for the two output channels if
-            the keyword argument is not given.
+            A tuple with the states {'on', 'off'} for the two output
+            channels if the keyword argument is not given.
+
+        Raises:
+            ValueError: If the `value` argument is not a list or tuple
+                of length 2.
 
         """
-        return self._awg.outputs(value)
+        return self._awg.outputs(value=value)
 
     def enable_iq_modulation(self) -> None:
         """Enables IQ Modulation by on the *AWG Core*.
@@ -162,31 +214,52 @@ class AWG(InstrumentChannel):
         """
         self._awg.disable_iq_modulation()
 
-    def run(self) -> None:
-        """Runs the *AWG Core*."""
-        self._awg.run()
+    def run(self, sync=True) -> None:
+        """Run the AWG Core.
 
-    def stop(self) -> None:
-        """Stops the *AWG Core*."""
-        self._awg.stop()
-
-    def wait_done(self, timeout: float = 10) -> None:
-        """Waits until the *AWG Core* is finished running.
-
-        Keyword Arguments:
-            timeout (int): A timeout in seconds after which the AWG is stopped
-                (default: 100)
-
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after enabling the AWG Core (default: True).
         """
-        self._awg.wait_done(timeout=timeout)
+        self._awg.run(sync=sync)
 
-    def compile(self) -> None:
-        """Compiles the current *Sequence Program* on the *AWG Core*.
+    def stop(self, sync=True) -> None:
+        """Stop the AWG Core.
+
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after disabling the AWG Core (default: True).
+        """
+        self._awg.stop(sync=sync)
+
+    def wait_done(self, timeout: float = 10, sleep_time: float = 0.005) -> None:
+        """Wait until the AWG Core is finished.
+
+        Arguments:
+            timeout (float): The maximum waiting time in seconds for the
+                AWG Core (default: 10).
+            sleep_time (float): Time in seconds to wait between
+                requesting AWG state
 
         Raises:
-            `ToolkitError`: If the *AWG Core* has not been set up yet.
-            `ToolkitError`: If the compilation has failed.
-            `Warning`: If the compilation has finished with a warning.
+            ToolkitError: If the AWG is running in continuous mode.
+            TimeoutError: If the AWG is not finished before the timeout.
+
+        """
+        self._awg.wait_done(timeout=timeout, sleep_time=sleep_time)
+
+    def compile(self) -> None:
+        """Compiles the current SequenceProgram on the AWG Core.
+
+        Raises:
+            ToolkitConnectionError: If the AWG Core has not been set up
+                yet
+            ToolkitError: if the compilation has failed or the ELF
+                upload is not successful.
+            TimeoutError: if the program upload is not completed before
+                timeout.
 
         """
         self._awg.compile()
@@ -203,25 +276,29 @@ class AWG(InstrumentChannel):
     ) -> None:
         """Queues up a waveform to the *AWG Core*.
 
-        Uploading custom waveforms is only possible when using the *'Simple'*
-        sequence type. The waveform is specified with two numpy arrays for the
-        two channels of the *AWG Core*. The waveform will then automatically
-        align them to the correct minimum waveform length, sample granularity
-        and scaling. An individual delay can be specified to shift the
-        individual waveform with respect to the time origin of the period.
+        Uploading custom waveforms is only possible when using the
+        *'Simple'* or *'Custom'* sequence types. The waveform is
+        specified with two numpy arrays for the two channels of the
+        *AWG Core*. The waveform will then automatically align them to
+        the correct minimum waveform length, sample granularity and
+        scaling. An individual delay can be specified to shift the
+        individual waveform with respect to the time origin of the
+        period.
 
         Arguments:
-            wave1 (array like): A list or array of samples in the waveform to be
-                queued for channel 1. An empty list '[]' will upload zeros of
-                the minimum waveform length.
-            wave2 (array like): A list or array of samples in the waveform to be
-                queued for channel 2. An empty list '[]' will upload zeros of
-                the minimum waveform length.
+            wave1 (array like): A list or array of samples in the
+                waveform to be queued for channel 1. An empty list '[]'
+                will upload zeros of the minimum waveform length.
+            wave2 (array like): A list or array of samples in the
+                waveform to be queued for channel 2. An empty list '[]'
+                will upload zeros of the minimum waveform length.
+            delay (float): An individual delay for the queued sequence
+                with respect to the time origin. Positive values shift
+                the start of the waveform forwards in time. (default: 0)
 
-        Keyword Arguments:
-            delay (float): An individual delay for the queued sequence with
-                respect to the time origin. Positive values shift the start of
-                the waveform forwards in time. (default: 0)
+        Raises:
+            ToolkitError: If the sequence is not of type *'Simple'* or
+                *'Custom'*.
 
         """
         self._awg.queue_waveform(wave1, wave2, delay=delay)
@@ -235,18 +312,23 @@ class AWG(InstrumentChannel):
     ) -> None:
         """Replaces the data in a waveform in the queue.
 
-        The new data must have the same length as the previous data s.t. the
-        waveform data can be replaced without recompilation of the sequence
-        program.
+        The new data must have the same length as the previous data
+        s.t. the waveform data can be replaced without recompilation of
+        the sequence program.
 
         Arguments:
-            wave1 (array): Waveform to replace current wave for Channel 1.
-            wave2 (array): Waveform to replace current wave for Channel 2.
+            wave1 (array): Waveform to replace current wave for
+                Channel 1.
+            wave2 (array): Waveform to replace current wave for
+                Channel 2.
+            i (int): The index of the waveform in the queue to be
+                replaced.
+            delay (int): An individual delay in seconds for this
+                waveform w.r.t. the time origin of the sequence
+                (default: 0).
 
-        Keyword Arguments:
-            i (int): The index of the waveform in the queue to be replaced.
-            delay (int): An individual delay in seconds for this waveform w.r.t.
-                the time origin of the sequence. (default: 0)
+        Raises:
+            ValueError: If the given index is out of range.
 
         """
         self._awg.replace_waveform(wave1, wave2, i=i, delay=delay)
@@ -255,7 +337,8 @@ class AWG(InstrumentChannel):
         """Uploads all waveforms in the queue to the AWG Core.
 
         This method only works as expected if the Sequence Program is in
-        'Simple' mode and has been compiled beforehand.
+        'Simple' or 'Custom' modes and has been compiled beforehand.
+        See :func:`compile_and_upload_waveforms(...)`.
 
         """
         self._awg.upload_waveforms()
@@ -292,7 +375,7 @@ class AWG(InstrumentChannel):
         self._awg.set_sequence_params(**kwargs)
 
     def sequence_params(self) -> Dict:
-        """Returns the current seuence parameters.
+        """Returns the current sequence parameters.
 
         Returns:
             A dictionary with the current sequence parameters.
@@ -386,6 +469,7 @@ class HDAWG(ZIBaseInstrument):
         self.connect_message()
         self.nodetree_dict = self._controller.nodetree._nodetree_dict
         self._init_awg_channels()
+        self._add_qcodes_params()
 
     def _init_awg_channels(self):
         # initialize ChannelList of AWGs
@@ -395,10 +479,58 @@ class HDAWG(ZIBaseInstrument):
         channel_list.lock()
         self.add_submodule("awgs", channel_list)
 
-    def factory_reset(self) -> None:
-        """Load the factory default settings."""
-        self._controller.factory_reset()
+    def _add_qcodes_params(self):
+        # add custom parameters as QCoDeS parameters
+        super()._add_qcodes_params()
+        self.add_parameter(
+            "ref_clock",
+            unit=self._controller.ref_clock._unit,
+            docstring=self._controller.ref_clock.__repr__(),
+            get_cmd=self._controller.ref_clock,
+            set_cmd=self._controller.ref_clock,
+            label="Intended Reference Clock Source",
+        )
+        self.add_parameter(
+            "ref_clock_status",
+            unit=self._controller.ref_clock_status._unit,
+            docstring=self._controller.ref_clock_status.__repr__(),
+            get_cmd=self._controller.ref_clock_status,
+            set_cmd=self._controller.ref_clock_status,
+            label="Status Reference Clock",
+        )
+
+    def factory_reset(self, sync=True) -> None:
+        """Load the factory default settings.
+
+        Arguments:
+            sync (bool): A flag that specifies if a synchronisation
+                should be performed between the device and the data
+                server after loading the factory preset (default: True).
+
+        """
+        self._controller.factory_reset(sync=sync)
 
     def enable_qccs_mode(self) -> None:
-        """Configure the instrument to work with PQSC"""
+        """Configure the instrument to work with PQSC
+
+        This method sets the reference clock source and DIO settings
+        correctly to connect the instrument to the PQSC.
+        """
         self._controller.enable_qccs_mode()
+
+    def enable_manual_mode(self) -> None:
+        """Disconnect from PQSC
+
+        This method sets the reference clock source and DIO settings to
+        factory default states and the instrument is disconnected from
+        the PQSC.
+        """
+        self._controller.enable_manual_mode()
+
+    @property
+    def allowed_sequences(self):
+        return self._controller.allowed_sequences
+
+    @property
+    def allowed_trigger_modes(self):
+        return self._controller.allowed_trigger_modes
