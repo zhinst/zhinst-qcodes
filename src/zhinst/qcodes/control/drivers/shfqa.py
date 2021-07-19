@@ -312,8 +312,9 @@ class Readout(InstrumentChannel):
 
     def _init_integrations(self):
         # init submodules for Integration Units
+        num_integrations = self._readout.device.num_integrations_per_qachannel()
         channel_list = ChannelList(self, "integrations", Integration)
-        for i in range(16):
+        for i in range(num_integrations):
             channel_list.append(Integration(f"integration-{i}", i, self, self._readout))
         channel_list.lock()
         self.add_submodule("integrations", channel_list)
@@ -430,7 +431,7 @@ class Readout(InstrumentChannel):
 
 
 class Integration(InstrumentChannel):
-    """Device-specific *ReadoutChannel* for the *SHFQA*."""
+    """Device-specific *Integration* for the *SHFQA*."""
 
     def __init__(self, name: str, index: int, parent_instr, parent_contr) -> None:
         super().__init__(parent_instr, name)
@@ -946,7 +947,7 @@ class SHFQA(ZIBaseInstrument):
 
     def _init_qachannels(self):
         # init submodules for QAChannels
-        num_qachannels = self._controller._num_qachannels()
+        num_qachannels = self._controller.num_qachannels()
         channel_list = ChannelList(self, "qachannels", QAChannel)
         for i in range(num_qachannels):
             channel_list.append(QAChannel(f"qachannel-{i}", i, self, self._controller))
