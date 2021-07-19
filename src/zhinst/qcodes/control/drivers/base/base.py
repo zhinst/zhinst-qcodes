@@ -88,7 +88,7 @@ class ZIBaseInstrument(Instrument):
         """
         Instantiates the device controller from zhinst-toolkit, sets up the data
         server and connects the device the data server. This method is called
-        from __init__ of the base instruemnt class.
+        from __init__ of the base instrument class.
 
         """
         # use zhinst.toolkit.tools.BaseController() to interface the device
@@ -105,6 +105,47 @@ class ZIBaseInstrument(Instrument):
         self._controller.connect_device()
         self.connect_message()
         self.nodetree_dict = self._controller.nodetree._nodetree_dict
+        self._add_qcodes_params()
+
+    def _add_qcodes_params(self):
+        # add custom parameters as QCoDeS parameters
+        self.add_parameter(
+            "data_server_version",
+            unit=self._controller.data_server_version._unit,
+            docstring=self._controller.data_server_version.__repr__(),
+            get_cmd=self._controller.data_server_version,
+            set_cmd=self._controller.data_server_version,
+            label="Zurich Instruments Data Server Version",
+        )
+        self.add_parameter(
+            "firmware_version",
+            unit=self._controller.firmware_version._unit,
+            docstring=self._controller.firmware_version.__repr__(),
+            get_cmd=self._controller.firmware_version,
+            set_cmd=self._controller.firmware_version,
+            label="Revision of Device Internal Controller Software",
+        )
+        self.add_parameter(
+            "fpga_version",
+            unit=self._controller.fpga_version._unit,
+            docstring=self._controller.fpga_version.__repr__(),
+            get_cmd=self._controller.fpga_version,
+            set_cmd=self._controller.fpga_version,
+            label="HDL Firmware Revision",
+        )
+
+    def sync(self):
+        """Perform a global synchronisation between the device and the
+        data server.
+
+        Eventually wraps around the daq.sync() of the API.
+
+        Raises:
+            ToolkitError: If called and the device in not yet connected
+                to the data server.
+
+        """
+        self._controller.sync()
 
     def _init_submodule(self, key: str) -> None:
         """
