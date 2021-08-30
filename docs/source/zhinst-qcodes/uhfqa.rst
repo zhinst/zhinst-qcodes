@@ -14,7 +14,6 @@ AWG Core for UHFQA
     :members:
 
 
-
 Readout Channel for UHFQA
 -------------------------
 

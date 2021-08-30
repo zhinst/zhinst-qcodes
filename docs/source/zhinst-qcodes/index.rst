@@ -8,7 +8,10 @@ Package Documentation
 
    base
    hdawg
+   mfli
+   pqsc
+   shfqa
    uhfqa
    uhfli
-   mfli
+
    
