@@ -21,6 +21,7 @@ build:doc:
     - apt-get -y install pandoc
   script:
     - cd docs
+    - pip install -r requirements.txt
     - make html
   artifacts:
     paths:
