@@ -1,18 +1,94 @@
 from .base import ZIBaseInstrument
 import zhinst.toolkit as tk
-from zhinst.toolkit.control.drivers.hdawg import AWG as HDAWG_AWG
 
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
-import qcodes.utils.validators as vals
 from typing import List, Dict, Union
 import numpy as np
 
 
-class AWG(InstrumentChannel):
-    """Device-specific *AWG Core* for the *HDAWG*.
+class SGChannel(InstrumentChannel):
+    """SGChannel for the SHFSG
+    
+    Inherits from :class:`InstrumentChannel` and wraps around a `SG Channel` for
+    *SHFSG* from :mod:`zhinst-toolkit`.  This class adds *Parameters* from the
+    :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of the
+    *toolkit's* `SGChannel`.
 
+    Arguments:
+        name (str): The name of the `AWG` submodule.
+        parent_instr (:class:`qcodes.instrument.base.Instrument`): The QCoDeS
+            parent instrument of the `InstrumentChannel`.
+        parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller`
+            of the parent instrument that is used for getting and setting
+            parameters.
+
+    Attributes:
+        output (:class:`Parameter`): State of the output, i.e. one of
+            {'on', 'off'}.
+        output_range (:class:`Parameter`): State of the output 1, i.e. one of
+            {'on', 'off'}.
+        rf_center_freq (:class:`Parameter`): State of the output 1, i.e. one of
+            {'on', 'off'}.
+        rf_or_lf_path (:class:`Parameter`): State of the output 1, i.e. one of
+            {'on', 'off'}.
+    """
+    def __init__(self, name: str, index: int, parent_instr, parent_contr) -> None:
+        InstrumentChannel.__init__(self, parent_instr, name)
+
+        self._sgchannel = parent_contr.sgchannels[index]
+        self.add_submodule("awg", AWG("AWG", parent_instr, self))
+        self.add_submodule("sine", Sine("Sine", parent_instr, self))
+        self._add_qcodes_params()
+
+    def _add_qcodes_params(self):
+        # add custom parameters as QCoDeS parameters
+        self.add_parameter(
+            "output",
+            unit=self._sgchannel.output._unit,
+            docstring=self._sgchannel.output.__repr__(),
+            get_cmd=self._sgchannel.output,
+            set_cmd=self._sgchannel.output,
+            label="Output",
+        )
+        self.add_parameter(
+            "output_range",
+            unit=self._sgchannel.output_range._unit,
+            docstring=self._sgchannel.output_range.__repr__(),
+            get_cmd=self._sgchannel.output_range,
+            set_cmd=self._sgchannel.output_range,
+            label="Output Range",
+        )
+        self.add_parameter(
+            "rf_center_freq",
+            unit=self._sgchannel.rf_center_freq._unit,
+            docstring=self._sgchannel.rf_center_freq.__repr__(),
+            get_cmd=self._sgchannel.rf_center_freq,
+            set_cmd=self._sgchannel.rf_center_freq,
+            label="RF Center Frequency",
+        )
+        # self.add_parameter(
+        #     "digital_mixer_center_freq",
+        #     unit=self._sgchannel.digital_mixer_center_freq._unit,
+        #     docstring=self._sgchannel.digital_mixer_center_freq.__repr__(),
+        #     get_cmd=self._sgchannel.digital_mixer_center_freq,
+        #     set_cmd=self._sgchannel.digital_mixer_center_freq,
+        #     label="Digital Mixer Center Frequency",
+        # )
+        self.add_parameter(
+            "rf_or_lf_path",
+            unit=self._sgchannel.rf_or_lf_path._unit,
+            docstring=self._sgchannel.rf_or_lf_path.__repr__(),
+            get_cmd=self._sgchannel.rf_or_lf_path,
+            set_cmd=self._sgchannel.rf_or_lf_path,
+            label="RF or LF Path",
+        )
+
+
+class AWG(InstrumentChannel):
+    """AWG Core of a SGChannel for the SHFSG
+    
     Inherits from :class:`InstrumentChannel` and wraps around a `AWGCore` for
-    *HDAWG* from :mod:`zhinst-toolkit`. This class adds *Parameters* from the
+    *SHFSG* from :mod:`zhinst-toolkit`. This class adds *Parameters* from the
     :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of the
     *toolkit's* `AWGCore`.
 
@@ -25,86 +101,103 @@ class AWG(InstrumentChannel):
             parameters.
 
     Attributes:
-        output1 (:class:`Parameter`): State of the output 1, i.e. one of
+        output1 (:class:`Parameter`): State of the output 1 (readonly), i.e. one of
             {'on', 'off'}.
-        output2 (:class:`Parameter`): State of the output 2, i.e. one of
+        output2 (:class:`Parameter`): State of the output 2 (readonly), i.e. one of
             {'on', 'off'}.
         modulation_freq (:class:`Parameter`): Frequency of the modulation in
             Hz if IQ modulation is enabled.
         modulation_phase_shift (:class:`Parameter`): Phase shift in degrees
             between I and Q quadratures if IQ modulation is enabled
             (default: 90).
-        gain1 (:class:`Parameter`): Gain of the output channel 1 if IQ
-            modulation is enabled. Must be between -1 and +1 (default: +1).
-        gain2 (:class:`Parameter`): Gain of the output channel 2 if IQ
-            modulation is enabled. Must be between -1 and +1 (default: +1).
+        gain00 (:class:`Parameter`): Gain of the output channel 1 of the I channel.
+            Must be between -1 and +1 (default: +1).
+        gain01 (:class:`Parameter`): Gain of the output channel 2 of the I channel.
+            Must be between -1 and +1 (default: +1).
+        gain10 (:class:`Parameter`): Gain of the output channel 1 of the Q channel.
+            Must be between -1 and +1 (default: +1).
+        gain11 (:class:`Parameter`): Gain of the output channel 2 of the Q channel.
+            Must be between -1 and +1 (default: +1).
+        single (:class:`Parameter`): Enable or Disable Single Run of the AWG.
+        digital_trigger1_source (:class:`Parameter`): Digital Trigger 1 Source.
+        digital_trigger2_source (:class:`Parameter`): Digital Trigger 2 Source.
+        digital_trigger1_slope (:class:`Parameter`): Digital Trigger 1 Slope.
+        digital_trigger2_slope (:class:`Parameter`): Digital Trigger 2 Slope.
+        osc_select (:class:`Parameter`): Select Oscillator.
         waveforms (list): A list of `Waveforms` that respresent the queue of
             waveforms to upload to the device when the sequence type is
             *'Simple'*.
         is_running (bool): A flag that shows if the `AWG Core` is currently
             running or not.
         index (int): The index of the `AWG Core` in the list of *awgs*.
-
     """
-
-    def __init__(self, name: str, index: int, parent_instr, parent_contr) -> None:
+    def __init__(self, name: str, parent_instr, parent) -> None:
         InstrumentChannel.__init__(self, parent_instr, name)
-        self._awg = HDAWG_AWG(parent_contr, index)
-        self._awg._setup()
-        self._awg._init_awg_params()
-        self._add_qcodes_awg_params()
 
-    def _add_qcodes_awg_params(self):
+        self._awg = parent._sgchannel.awg
+        self._add_qcodes_params()
+
+    def _add_qcodes_params(self):
         # add custom parameters as QCoDeS parameters
         self.add_parameter(
             "output1",
             unit=self._awg.output1._unit,
             docstring=self._awg.output1.__repr__(),
             get_cmd=self._awg.output1,
-            set_cmd=self._awg.output1,
-            label="Output Ch 1",
+            label="AWG Output Ch 1 (readonly)",
         )
         self.add_parameter(
             "output2",
             unit=self._awg.output2._unit,
             docstring=self._awg.output2.__repr__(),
             get_cmd=self._awg.output2,
-            set_cmd=self._awg.output2,
-            label="Output Ch 2",
-        )
-        self.add_parameter(
-            "gain1",
-            unit=self._awg.gain1._unit,
-            docstring=self._awg.gain1.__repr__(),
-            get_cmd=self._awg.gain1,
-            set_cmd=self._awg.gain1,
-            label="Gain Ch 1",
-        )
-        self.add_parameter(
-            "gain2",
-            unit=self._awg.gain2._unit,
-            docstring=self._awg.gain2.__repr__(),
-            get_cmd=self._awg.gain2,
-            set_cmd=self._awg.gain2,
-            label="Gain Ch 2",
-        )
-        self.add_parameter(
-            "modulation_phase_shift",
-            unit=self._awg.modulation_phase_shift._unit,
-            docstring=self._awg.modulation_phase_shift.__repr__(),
-            get_cmd=self._awg.modulation_phase_shift,
-            set_cmd=self._awg.modulation_phase_shift,
-            label="Modulation Phase Shift",
-            vals=vals.Numbers(),
+            label="AWG Output Ch 2 (readonly)",
         )
         self.add_parameter(
             "modulation_freq",
             unit=self._awg.modulation_freq._unit,
             docstring=self._awg.modulation_freq.__repr__(),
             get_cmd=self._awg.modulation_freq,
-            set_cmd=self._awg.modulation_freq,
             label="Modulation Frequency",
-            vals=vals.Numbers(),
+        )
+        self.add_parameter(
+            "modulation_phase_shift",
+            unit=self._awg.modulation_phase_shift._unit,
+            docstring=self._awg.modulation_phase_shift.__repr__(),
+            get_cmd=self._awg.modulation_phase_shift,
+            label="Modulation Phase Shift",
+        )
+        self.add_parameter(
+            "gain00",
+            unit=self._awg.gain00._unit,
+            docstring=self._awg.gain00.__repr__(),
+            get_cmd=self._awg.gain00,
+            set_cmd=self._awg.gain00,
+            label="Output 0 Gain 0",
+        )
+        self.add_parameter(
+            "gain01",
+            unit=self._awg.gain01._unit,
+            docstring=self._awg.gain01.__repr__(),
+            get_cmd=self._awg.gain01,
+            set_cmd=self._awg.gain01,
+            label="Output 0 Gain 1",
+        )
+        self.add_parameter(
+            "gain10",
+            unit=self._awg.gain10._unit,
+            docstring=self._awg.gain10.__repr__(),
+            get_cmd=self._awg.gain10,
+            set_cmd=self._awg.gain10,
+            label="Output 1 Gain 0",
+        )
+        self.add_parameter(
+            "gain11",
+            unit=self._awg.gain11._unit,
+            docstring=self._awg.gain11.__repr__(),
+            get_cmd=self._awg.gain11,
+            set_cmd=self._awg.gain11,
+            label="Output 1 Gain 1",
         )
         self.add_parameter(
             "single",
@@ -115,75 +208,49 @@ class AWG(InstrumentChannel):
             label="Single Run",
         )
         self.add_parameter(
-            "zsync_register_mask",
-            unit=self._awg.zsync_register_mask._unit,
-            docstring=self._awg.zsync_register_mask.__repr__(),
-            get_cmd=self._awg.zsync_register_mask,
-            set_cmd=self._awg.zsync_register_mask,
-            label="ZSYNC Register Mask",
+            "digital_trigger1_source",
+            unit=self._awg.digital_trigger1_source._unit,
+            docstring=self._awg.digital_trigger1_source.__repr__(),
+            get_cmd=self._awg.digital_trigger1_source,
+            set_cmd=self._awg.digital_trigger1_source,
+            label="Digital Trigger 1 Source",
         )
         self.add_parameter(
-            "zsync_register_shift",
-            unit=self._awg.zsync_register_shift._unit,
-            docstring=self._awg.zsync_register_shift.__repr__(),
-            get_cmd=self._awg.zsync_register_shift,
-            set_cmd=self._awg.zsync_register_shift,
-            label="ZSYNC Register Shift",
+            "digital_trigger2_source",
+            unit=self._awg.digital_trigger2_source._unit,
+            docstring=self._awg.digital_trigger2_source.__repr__(),
+            get_cmd=self._awg.digital_trigger2_source,
+            set_cmd=self._awg.digital_trigger2_source,
+            label="Digital Trigger 2 Source",
         )
         self.add_parameter(
-            "zsync_register_offset",
-            unit=self._awg.zsync_register_offset._unit,
-            docstring=self._awg.zsync_register_offset.__repr__(),
-            get_cmd=self._awg.zsync_register_offset,
-            set_cmd=self._awg.zsync_register_offset,
-            label="ZSYNC Register Offset",
+            "digital_trigger1_slope",
+            unit=self._awg.digital_trigger1_slope._unit,
+            docstring=self._awg.digital_trigger1_slope.__repr__(),
+            get_cmd=self._awg.digital_trigger1_slope,
+            set_cmd=self._awg.digital_trigger1_slope,
+            label="Digital Trigger 1 Slope",
         )
         self.add_parameter(
-            "zsync_decoder_mask",
-            unit=self._awg.zsync_decoder_mask._unit,
-            docstring=self._awg.zsync_decoder_mask.__repr__(),
-            get_cmd=self._awg.zsync_decoder_mask,
-            set_cmd=self._awg.zsync_decoder_mask,
-            label="ZSYNC Decoder Mask",
+            "digital_trigger2_slope",
+            unit=self._awg.digital_trigger2_slope._unit,
+            docstring=self._awg.digital_trigger2_slope.__repr__(),
+            get_cmd=self._awg.digital_trigger2_slope,
+            set_cmd=self._awg.digital_trigger2_slope,
+            label="Digital Trigger 2 Slope",
         )
         self.add_parameter(
-            "zsync_decoder_shift",
-            unit=self._awg.zsync_decoder_shift._unit,
-            docstring=self._awg.zsync_decoder_shift.__repr__(),
-            get_cmd=self._awg.zsync_decoder_shift,
-            set_cmd=self._awg.zsync_decoder_shift,
-            label="ZSYNC Decoder Shift",
-        )
-        self.add_parameter(
-            "zsync_decoder_offset",
-            unit=self._awg.zsync_decoder_offset._unit,
-            docstring=self._awg.zsync_decoder_offset.__repr__(),
-            get_cmd=self._awg.zsync_decoder_offset,
-            set_cmd=self._awg.zsync_decoder_offset,
-            label="ZSYNC Decoder Offset",
+            "osc_select",
+            unit=self._awg.osc_select._unit,
+            docstring=self._awg.osc_select.__repr__(),
+            get_cmd=self._awg.osc_select,
+            set_cmd=self._awg.osc_select,
+            label="Selected Oscillator",
         )
 
     def load_ct(self, table):
         """Load a given command table to the instrument"""
         self._awg.ct.load(table)
-
-    def outputs(self, value=None):
-        """Sets both signal outputs simultaneously.
-
-        Arguments:
-            value (tuple): Tuple of values {'on', 'off'} for channel 1
-                and 2 (default: None).
-
-        Returns:
-            A tuple with the states {'on', 'off'} for the two output
-            channels if the keyword argument is not given.
-
-        Raises:
-            ValueError: If the `value` argument is not a list or tuple
-                of length 2.
-
-        """
-        return self._awg.outputs(value=value)
 
     def enable_iq_modulation(self) -> None:
         """Enables IQ Modulation by on the *AWG Core*.
@@ -355,7 +422,7 @@ class AWG(InstrumentChannel):
             *'sequence_type', 'period', 'repetitions', 'trigger_mode',
             'trigger_delay', ...*
 
-            >>> hdawg.awgs[0].set_sequence_params(
+            >>> shfsg.awgs[0].set_sequence_params(
             >>>     sequence_type="Simple",
             >>>     trigger_mode="Send Trigger",
             >>>     repetitions=1e6,
@@ -386,18 +453,135 @@ class AWG(InstrumentChannel):
     def index(self):
         return self._awg.index
 
-class HDAWG(ZIBaseInstrument):
-    """QCoDeS driver for the *Zurich Instruments HDAWG*.
+
+class Sine(InstrumentChannel):
+    """Sine of a SGChannel for the SHFSG
+    
+    Inherits from :class:`InstrumentChannel` and wraps around a `Sine` for
+    *SHFSG* from :mod:`zhinst-toolkit`. This class adds *Parameters* from the
+    :mod:`zhinst-toolkit` as *QCoDeS Parameters* and wraps all methods of the
+    *toolkit's* `Sine`.
+
+    Arguments:
+        name (str): The name of the `AWG` submodule.
+        parent_instr (:class:`qcodes.instrument.base.Instrument`): The QCoDeS
+            parent instrument of the `InstrumentChannel`.
+        parent_contr (:class:`zhinst.toolkit.BaseInstrument`): The `_controller`
+            of the parent instrument that is used for getting and setting
+            parameters.
+
+    Attributes:
+        osc_select (:class:`Parameter`): Select Oscillator.
+        harmonic (:class:`Parameter`): Harmonic.
+        phaseshift (:class:`Parameter`): Phaseshift.
+        i_enable (:class:`Parameter`): Enable I Channel.
+        i_sin (:class:`Parameter`): Amplitude of Sine in I Channel
+        i_cos (:class:`Parameter`): Amplitude of Cosine in I Channel
+        q_enable (:class:`Parameter`): Enable Q Channel.
+        q_sin (:class:`Parameter`): Amplitude of Sine in Q Channel
+        q_cos (:class:`Parameter`): Amplitude of Cosine in Q Channel
+    """
+    
+    def __init__(self, name: str, parent_instr, parent) -> None:
+        InstrumentChannel.__init__(self, parent_instr, name)
+
+        self._sine = parent._sgchannel.sine
+        self._add_qcodes_params()
+
+    def _add_qcodes_params(self):
+        # add custom parameters as QCoDeS parameters
+        self.add_parameter(
+            "osc_select",
+            unit=self._sine.osc_select._unit,
+            docstring=self._sine.osc_select.__repr__(),
+            get_cmd=self._sine.osc_select,
+            set_cmd=self._sine.osc_select,
+            label="Selected Oscillator",
+        )
+        self.add_parameter(
+            "harmonic",
+            unit=self._sine.harmonic._unit,
+            docstring=self._sine.harmonic.__repr__(),
+            get_cmd=self._sine.harmonic,
+            set_cmd=self._sine.harmonic,
+            label="Harmonic",
+        )
+        # self.add_parameter(
+        #     "freq",
+        #     unit=self._sine.freq._unit,
+        #     docstring=self._sine.freq.__repr__(),
+        #     get_cmd=self._sine.freq,
+        #     set_cmd=self._sine.freq,
+        #     label="Frequency",
+        # )
+        self.add_parameter(
+            "phaseshift",
+            unit=self._sine.phaseshift._unit,
+            docstring=self._sine.phaseshift.__repr__(),
+            get_cmd=self._sine.phaseshift,
+            set_cmd=self._sine.phaseshift,
+            label="Phaseshift",
+        )
+        self.add_parameter(
+            "i_enable",
+            unit=self._sine.i_enable._unit,
+            docstring=self._sine.i_enable.__repr__(),
+            get_cmd=self._sine.i_enable,
+            set_cmd=self._sine.i_enable,
+            label="Enable I Channel",
+        )
+        self.add_parameter(
+            "i_sin",
+            unit=self._sine.i_sin._unit,
+            docstring=self._sine.i_sin.__repr__(),
+            get_cmd=self._sine.i_sin,
+            set_cmd=self._sine.i_sin,
+            label="Amplitude of Sine in I Channel",
+        )
+        self.add_parameter(
+            "i_cos",
+            unit=self._sine.i_cos._unit,
+            docstring=self._sine.i_cos.__repr__(),
+            get_cmd=self._sine.i_cos,
+            set_cmd=self._sine.i_cos,
+            label="Amplitude of Cosine in I Channel",
+        )
+        self.add_parameter(
+            "q_enable",
+            unit=self._sine.q_enable._unit,
+            docstring=self._sine.q_enable.__repr__(),
+            get_cmd=self._sine.q_enable,
+            set_cmd=self._sine.q_enable,
+            label="Enable Q Channel",
+        )
+        self.add_parameter(
+            "q_sin",
+            unit=self._sine.q_sin._unit,
+            docstring=self._sine.q_sin.__repr__(),
+            get_cmd=self._sine.q_sin,
+            set_cmd=self._sine.q_sin,
+            label="Amplitude of Sine in Q Channel",
+        )
+        self.add_parameter(
+            "q_cos",
+            unit=self._sine.q_cos._unit,
+            docstring=self._sine.q_cos.__repr__(),
+            get_cmd=self._sine.q_cos,
+            set_cmd=self._sine.q_cos,
+            label="Amplitude of Cosine in Q Channel",
+        )
+
+
+class SHFSG(ZIBaseInstrument):
+    """QCoDeS driver for the *Zurich Instruments SHFSG*.
 
     Inherits from :class:`ZIBaseInstrument`. Initializes some *submodules*
     from the device's nodetree and a :class:`ChannelList` of device-specific
-    `AWGs` for high-level control of the *AWG Cores*.
+    `SGChannels` for high-level control of the *signal output* and *AWG Cores*.
 
     Arguments:
         name (str): The internal QCoDeS name of the instrument.
         serial (str): The device serial number, e.g. *'dev1234'*.
-
-    Keyword Arguments:
         interface (str): The interface used to connect to the
             device. (default: '1gbe')
         host (str): Address of the data server. (default: 'localhost')
@@ -405,8 +589,8 @@ class HDAWG(ZIBaseInstrument):
         api (int): Api level used for the data server. (default: 6)
 
     Attributes:
-        awgs (:class:`ChannelList`): A list of four *HDAWG* specific
-            *AWG Cores* (:class:`zhinst.qcodes.hdawg.AWG`).
+        sgchannel (:class:`ChannelList`): A list of four/eight *SHFSG* specific
+            *SGChannels* (:class:`zhinst.qcodes.shfsg.sgchannel`).
 
     """
 
@@ -420,10 +604,11 @@ class HDAWG(ZIBaseInstrument):
         api: int = 6,
         **kwargs,
     ) -> None:
-        super().__init__(name, "hdawg", serial, interface, host, port, api, **kwargs)
+        super().__init__(name, "shfsg", serial, interface, host, port, api, **kwargs)
+
         submodules = self.nodetree_dict.keys()
         # initialize submodules from nodetree with blacklist
-        blacklist = ["awgs"]
+        blacklist = ["sgchannels"]
         [self._init_submodule(key) for key in submodules if key not in blacklist]
 
     def _connect(self) -> None:
@@ -434,7 +619,7 @@ class HDAWG(ZIBaseInstrument):
         called from `__init__` of the :class:`BaseInstrument` class.
 
         """
-        self._controller = tk.HDAWG(
+        self._controller = tk.SHFSG(
             self._name,
             self._serial,
             interface=self._interface,
@@ -446,16 +631,16 @@ class HDAWG(ZIBaseInstrument):
         self._controller.connect_device()
         self.connect_message()
         self.nodetree_dict = self._controller.nodetree._nodetree_dict
-        self._init_awg_channels()
+        self._init_sg_channels()
         self._add_qcodes_params()
 
-    def _init_awg_channels(self):
-        # initialize ChannelList of AWGs
-        channel_list = ChannelList(self, "awgs", AWG)
-        for i in range(self._controller.num_awg_cores()):
-            channel_list.append(AWG(f"awg-{i}", i, self, self._controller))
+    def _init_sg_channels(self):
+        """initialize ChannelList of SGChannels"""
+        channel_list = ChannelList(self, "sgchannels", SGChannel)
+        for i in range(self._controller.num_sgchannels()):
+            channel_list.append(SGChannel(f"sgchannel-{i}", i, self, self._controller))
         channel_list.lock()
-        self.add_submodule("awgs", channel_list)
+        self.add_submodule("sgchannels", channel_list)
 
     def _add_qcodes_params(self):
         # add custom parameters as QCoDeS parameters
