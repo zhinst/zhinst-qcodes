@@ -12,7 +12,7 @@ requirements = [
     "numpy>=1.13",
     "setuptools>=40.1.0",
     "zhinst>=21.8",
-    "zhinst-toolkit>=0.2.0",
+    "zhinst-toolkit>=0.2.2",
     "qcodes>=0.14.0",
     "attrs",
 ]
