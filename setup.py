@@ -46,7 +46,7 @@ setuptools.setup(
     ],
     keywords="zhinst sdk quantum qcodes",
     packages=setuptools.find_namespace_packages(
-        where="src", exclude=["test*"], include=["zhinst.*"]
+        where="src", exclude=["test*", "docs*"], include=["zhinst.*"]
     ),
     package_dir={"": "src"},
     use_scm_version={
