@@ -1,3 +1,4 @@
+from zhinst.qcodes.control.drivers.base.base import ZINode
 from .base import ZIBaseInstrument
 from qcodes.instrument.channel import ChannelList, InstrumentChannel
 
@@ -127,6 +128,18 @@ class Generator(InstrumentChannel):
             set_cmd=self._generator.single,
             label="Single Run",
         )
+        user_registers = ChannelList(self, "user_registers", ZINode)
+        self.add_submodule("user_registers", user_registers)
+        for i in range(16):
+            module = ZINode(self, f"user_register{i}")
+            module.add_parameter(
+                f"value",
+                docstring=self._generator.user_registers[i].__repr__(),
+                get_cmd=self._generator.user_registers[i],
+                set_cmd=self._generator.user_registers[i],
+                label=f"User Register {i}",
+            )
+            user_registers.append(module)
 
     def run(self, sync=True) -> None:
         """Run the generator.
@@ -309,6 +322,28 @@ class Readout(InstrumentChannel):
             set_cmd=self._readout.result_source,
             label="Result Source",
         )
+        self.add_parameter(
+            "result_length",
+            docstring=self._readout.result_length.__repr__(),
+            get_cmd=self._readout.result_length,
+            set_cmd=self._readout.result_length,
+            label="Result Source",
+        )
+        self.add_parameter(
+            "num_averages",
+            docstring=self._readout.num_averages.__repr__(),
+            get_cmd=self._readout.num_averages,
+            set_cmd=self._readout.num_averages,
+            label="Result Source",
+        )
+        self.add_parameter(
+            "mode",
+            docstring=self._readout.mode.__repr__(),
+            get_cmd=self._readout.mode,
+            set_cmd=self._readout.mode,
+            label="Result Source",
+        )
+
 
     def _init_integrations(self):
         # init submodules for Integration Units
