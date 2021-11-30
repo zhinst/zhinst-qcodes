@@ -359,7 +359,7 @@ class Readout(InstrumentChannel):
     def is_running(self):
         return self._readout.is_running
 
-    def arm(self, sync=True, length: int = None, averages: int = None) -> None:
+    def arm(self, sync=True, length: int = None, averages: int = None, mode:str = None) -> None:
         """Prepare SHF device for readout and result acquisition.
 
         This method enables the QA Results Acquisition and resets the
@@ -377,9 +377,11 @@ class Readout(InstrumentChannel):
                 (default: None)
             averages (int): If specified, the result averages will be
                 set before arming the readout. (default: None)
+            mode (str): If specified, the result mode will be
+                set before arming the readout. (cyclic, sequential) (default: None)
 
         """
-        self._readout.arm(sync=sync, length=length, averages=averages)
+        self._readout.arm(sync=sync, length=length, averages=averages, mode=mode)
 
     def run(self, sync=True) -> None:
         """Start the result logger.
