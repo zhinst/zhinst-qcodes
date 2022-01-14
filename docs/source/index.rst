@@ -14,10 +14,6 @@ Zurich Instruments QCoDeS Documentation
    :caption: Contents
 
    about/index
-   start/index
-   toolkit/index
-   zhinst-qcodes/index
-   examples/index
    changelog/index
    license/index
 
