@@ -1,5 +1,14 @@
 # zhinst-qcodes Changelog
 
+## Version 0.3
+* **redesign and complete refactoring of zhinst-qcodes**
+  * lazy node tree to improve setup times
+  * switch to session based approach (no longer device based)
+  * command table handling improved
+  * waveform handling improved
+  * removed automated sequencer code generation
+  * added LabOne modules
+
 ## Version 0.2.2
 * Add SHFSG driver
 * Support both HDAWG8 and HDAWG4
