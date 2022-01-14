@@ -1,0 +1,6 @@
+{% for function in class.functions %}
+{{ function.decorator }}
+def {{ function.name }}{{ function.signature }}:
+    """{{ function.docstring }}"""
+    return self._tk_object.{{ function.name }}({{ function.call_signature }})
+{% endfor %}

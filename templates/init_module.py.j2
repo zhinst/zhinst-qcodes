@@ -1,0 +1,12 @@
+{% for module in class.modules %}
+if self._tk_object.{{ module.name }}:
+    {% if module.is_list %}
+    channel_list = ZIChannelList(self, '{{ module.name }}', {{ module.class_name }}, zi_node=self._tk_object.{{ module.name }}.node_info.path, snapshot_cache=self._snapshot_cache)
+    for i, x in enumerate(self._tk_object.{{ module.name }}):
+        channel_list.append({{ module.class_name }}(self,x,i,zi_node=self._tk_object.{{ module.name }}[i].node_info.path, snapshot_cache=self._snapshot_cache))
+    # channel_list.lock()
+    self.add_submodule('{{ module.name }}', channel_list)
+    {% else %}
+    self.add_submodule('{{ module.name }}', {{ module.class_name }}(self, self._tk_object.{{ module.name }}, zi_node=self._tk_object.{{ module.name }}.node_info.path, snapshot_cache=self._snapshot_cache))
+    {% endif %}
+{% endfor %}

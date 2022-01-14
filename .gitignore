@@ -1,11 +1,14 @@
-*.json
 *.ipynb_checkpoints
 *.pyc
 *.egg-info/
 .eggs/
+.vscode
 dist/
 build/
 */build/
 */_build/
 */*/_build/
 _version.py
+*.ipynb
+
+_autosummary/

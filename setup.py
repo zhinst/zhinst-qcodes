@@ -10,11 +10,9 @@ import setuptools
 
 requirements = [
     "numpy>=1.13",
-    "setuptools>=40.1.0",
     "zhinst>=21.8",
     "zhinst-toolkit>=0.2.2",
-    "qcodes>=0.14.0",
-    "attrs",
+    "qcodes>=0.30.0",
 ]
 
 
@@ -40,8 +38,10 @@ setuptools.setup(
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Scientific/Engineering",
     ],
     keywords="zhinst sdk quantum qcodes",
@@ -51,10 +51,11 @@ setuptools.setup(
     package_dir={"": "src"},
     use_scm_version={
         "write_to": "src/zhinst/qcodes/_version.py",
-        "local_scheme": "no-local-version"},
+        "local_scheme": "no-local-version",
+    },
     setup_requires=["setuptools_scm"],
     install_requires=requirements,
     include_package_data=True,
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     zip_safe=False,
 )
