@@ -93,7 +93,7 @@ class ZIBaseInstrument(Instrument):
         """
         # use zhinst.toolkit.tools.BaseController() to interface the device
         self._controller = tk.BaseInstrument(
-            self._name,
+            self.full_name,
             self._type,
             self._serial,
             interface=self._interface,

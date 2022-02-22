@@ -394,7 +394,7 @@ class MFLI(ZIBaseInstrument):
 
         """
         self._controller = tk.MFLI(
-            self._name,
+            self.full_name,
             self._serial,
             interface=self._interface,
             host=self._host,

@@ -743,7 +743,7 @@ class UHFQA(ZIBaseInstrument):
 
         """
         self._controller = tk.UHFQA(
-            self._name,
+            self.full_name,
             self._serial,
             interface=self._interface,
             host=self._host,
