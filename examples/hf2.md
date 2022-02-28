@@ -6,9 +6,9 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.6
+      jupytext_version: 1.13.7
   kernelspec:
-    display_name: Python 3.9.7 64-bit ('toolkit')
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
@@ -31,7 +31,7 @@ with other devices.
 ```python
 from zhinst.qcodes import HF2
 
-device = HF2("DEV81", "10.42.0.92")
+device = HF2("DEVXXXX", "localhost")
 ```
 
 ## Polling DEMOD Samples

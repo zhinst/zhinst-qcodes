@@ -8,6 +8,7 @@ driver on top of the native LabOne ziPython package. Meaning it shares the same
 functionallities but also the same problems.
 
 To just mention a few of them:
+
 * Long setup times
 * Missing nodes
 * Slow response times

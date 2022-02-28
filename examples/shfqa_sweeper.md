@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.6
+      jupytext_version: 1.13.7
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -26,7 +26,7 @@ Create a toolkit session to the data server and connect the device:
 ```python
 from zhinst.qcodes import SHFQA
 
-device = SHFQA("dev12019", 'localhost')
+device = SHFQA("DEVXXXX", 'localhost')
 sweeper = device.session.modules.shfqa_sweeper
 CHANNEL = 0
 ```

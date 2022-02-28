@@ -4,7 +4,7 @@
 
 |
 
-Zurich Instruments QCoDeS driver |version| Documentation
+Zurich Instruments QCoDeS driver 0.3 Documentation
 =========================================================
 
 The Zurich Instruments drivers for QCoDeS (zhinst-qcodes) is a package of

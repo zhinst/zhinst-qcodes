@@ -3,5 +3,5 @@ jinja2
 black
 click
 setuptools
-git+https://github.com/zhinst/device-utils
-git+https://github.com/zhinst/zhinst-toolkit.git@refactoring
+zhinst-deviceutils
+zhinst-toolkit
