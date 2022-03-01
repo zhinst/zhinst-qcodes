@@ -51,7 +51,7 @@ zhinst-qcodes.
     <ZIBaseInstrument: zi_XXXX_dev5678>
 
 The created device object holds all device specific nodes and depending on the device
-type also implements additional functionallities (e.g. exposes the
+type also implements additional functionalities (e.g. exposes the
 ``zhinst.deviceutils`` functions).
 
 .. code-block:: python
@@ -65,17 +65,17 @@ a generic high level python driver for LabOne. Except for the node tree which in
 case for the zhinst-qcodes driver is implemented with the native QCoDeS
 Parameters, both driver behave the same. To be even more precise the
 zhinst-qcodes forwards all calls (functions, parameters ...) to zhinst-toolkit
-and has no logic buildin what so ever.
+and has no logic builtin what so ever.
 
-For the device drivers this means that some device may have additional functionallity
-provided by zhinst-toolkit. zhinst-qcodes forwards these functionitions.
+For the device drivers this means that some device may have additional functionality
+provided by zhinst-toolkit. zhinst-qcodes forwards these functionalities.
 Please take a look at the examples in the
 `zhinst-toolkit examples <https://docs.zhinst.com/zhinst-toolkit/en/latest/examples/index.html>`_
 to see a list of all available functions. As already mentioned they can be used
 with the exact same syntax, which also is the case for all the examples from
 zhinst-toolkit (just replace the imports from zhinst-toolkit with zhinst-qcodes).
 
-Easy device setup
+Easy Device Setup
 -----------------
 
 Since QCoDeS by design normally creates device objects directly zhinst-qcodes
@@ -94,7 +94,7 @@ are just wrapper around the server-based connectivity methodology.
     you can use the generic one ``ZIDevice``.
 
 Under the hood the helper class just creates a session, connects the device to
-it and returns the device class. It is therfore identical to:
+it and returns the device class. It is therefore identical to:
 
 .. code-block:: python
 
@@ -105,11 +105,45 @@ it and returns the device class. It is therfore identical to:
 To avoid creating a new session to data server every time when using these helper
 classes, zhinst-qcodes by default only creates one session to a data server.
 Meaning if one connects two devices to e.g. ``localhost`` they will share the
-same session. For most use cases this is the desired behaviour since it saves
-ressources and avoids unintended edge cases. In the rare cases where you need
-to have a seperate session for a device one can use the ``new_session`` flag.
-But it is prefered to work in such cases with the session directly and not use
+same session. For most use cases this is the desired behavior since it saves
+resources and avoids unintended edge cases. In the rare cases where you need
+to have a separate session for a device one can use the ``new_session`` flag.
+But it is preferred to work in such cases with the session directly and not use
 the helper classes, since it is simpler to understand and recreate.
+
+Custom Device Classes
+----------------------
+Since the exposed helper classes only serve as a creator and can not be instantiated
+directly, it is **not** possible to derive from them directly.
+
+One needs to derive from the underlying device driver directly. The device drivers
+are located under ``zhinst.qcodes.driver.devices``.
+
+.. code-block:: python
+
+    >>> from zhinst.qcodes.driver.devices.shfqa import SHFQA as ZISHFQADriver
+    >>> class SHFQADriver(ZISHFQADriver):
+    >>>     def tester(self):
+    >>>         print("I am just a tester")
+
+Since the session takes care of the device object creation it needs to be made
+aware of the new class. This can easily be done be changing the underlying device
+mapping dictionary.
+
+.. code-block:: python
+
+    >>> from zhinst.qcodes.driver.devices import DEVICE_CLASS_BY_MODEL
+    >>> DEVICE_CLASS_BY_MODEL["SHFQA"] = SHFQADriver
+
+After that one can use the above described ways to create a device connection.
+For example, by using the exposed helper class:
+
+.. code-block:: python
+
+    >>> from zhinst.qcodes import SHFQA
+    >>> device = SHFQA("DEV1234", "localhost")
+    >>> device.tester()
+    I am just a tester
 
 
 Node Tree
@@ -130,7 +164,7 @@ explanation of Parameter work in QCoDeS.
 
 So what did that code do?
 
-1. The ``session`` represents the session to the data server and therfor gives access to its nodes (``/zi/*`` in ziPython).
+1. The ``session`` represents the session to the data server and therefor gives access to its nodes (``/zi/*`` in ziPython).
 2. One of these nodes is ``zi/debug/level``. zhinst-qcodes allows it to access that node by attributes.
 3. To get the current value of the node simply make a call operation.
 
@@ -155,8 +189,8 @@ For a complete documentation of all modules available)
 
 In zhinst-qcodes these modules can be accessed through the ``session``. Similar to the
 devices each module can be controlled through a node tree. Some of the modules have
-toolkit specific functionallities (e.g. reading the aquired data automatically).
-To see an overview of the module specific functionionalities take a look at the dedicated
+toolkit specific functionalities (e.g. reading the acquired data automatically).
+To see an overview of the module specific functionalities take a look at the dedicated
 examples.
 
 .. note::

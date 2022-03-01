@@ -9,3 +9,12 @@ from zhinst.qcodes.driver.devices.uhfli import UHFLI
 from zhinst.qcodes.driver.devices.uhfqa import UHFQA
 
 DeviceType = t.Union[ZIBaseInstrument, HDAWG, PQSC, SHFQA, SHFSG, UHFLI, UHFQA]
+
+DEVICE_CLASS_BY_MODEL = {
+    "SHFQA": SHFQA,
+    "SHFSG": SHFSG,
+    "HDAWG": HDAWG,
+    "PQSC":  PQSC,
+    "UHFQA": UHFQA,
+    "UHFLI": UHFLI,
+}

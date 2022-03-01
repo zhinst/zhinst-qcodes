@@ -5,13 +5,13 @@ Renaming for SHFQA
 
     The automatic sequencer code generation was removed since it was unstable
     and did not bring the expected user experience. Instead one can upload
-    sequencer programms directly with shfqa.qachannels[n].generator.load_sequencer_program
+    sequencer programs directly with shfqa.qachannels[n].generator.load_sequencer_program
     and waveforms through shfqa.qachannels[n].generator.write_to_waveform_memory.
-    Please refer to the zhinst-toolkit documentation for an indepth explanation.
+    Please refer to the zhinst-toolkit documentation for an in-depth explanation.
 
 .. note::
 
-    The intergration of modules has been refactored. The modules are now
+    The integration of modules has been refactored. The modules are now
     independent of the devices. For the SHFQA this means sweeper usage now
     requires to access the modules through the session. (session.modules.shfqa_sweeper)
 

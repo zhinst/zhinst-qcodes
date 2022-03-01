@@ -5,9 +5,9 @@ Renaming for SHFSG
 
     The automatic sequencer code generation was removed since it was unstable
     and did not bring the expected user experience. Instead one can upload
-    sequencer programms directly with shfsg.sgchannels[n].awg.load_sequencer_program
+    sequencer programs directly with shfsg.sgchannels[n].awg.load_sequencer_program
     and waveforms through shfsg.sgchannels[n].awg.write_to_waveform_memory.
-    Please refer to the zhinst-toolkit documentation for an indepth explanation.
+    Please refer to the zhinst-toolkit documentation for an in-depth explanation.
 
 Node Renaming
 --------------

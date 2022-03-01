@@ -5,9 +5,9 @@ Renaming for HDAWG
 
     The automatic sequencer code generation was removed since it was unstable
     and did not bring the expected user experience. Instead one can upload
-    sequencer programms directly with hdawg.awgs[n].load_sequencer_program
+    sequencer programs directly with hdawg.awgs[n].load_sequencer_program
     and waveforms through hdawg.awgs[n].write_to_waveform_memory.
-    Please refer to the zhinst-toolkit documentation for an indepth explanation.
+    Please refer to the zhinst-toolkit documentation for an in-depth explanation.
 
 Node Renaming
 --------------

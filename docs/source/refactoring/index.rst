@@ -5,7 +5,7 @@ The zhinst-qcodes package exists for several years and as grown a lot in that
 time. More and more device where added and the expectations and stability request
 got stronger and stronger. zhinst-qcodes is based on zhinst-toolkit a high level
 driver on top of the native LabOne ziPython package. Meaning it shares the same
-functionallities but also the same problems.
+functionalities but also the same problems.
 
 To just mention a few of them:
 
@@ -17,19 +17,19 @@ To just mention a few of them:
 Since more and more people start using python to interface with our instruments
 we decided that zhinst-toolkit should become the package that can be used by
 all of our customers for all of our devices. So ensure long term stability and
-also full feature support a complete redesign of the architecture was neccessary.
+also full feature support a complete redesign of the architecture was necessary.
 The new zhinst-toolkit now offer full feature support for all our devices, is
-stable, properly tested and activly maintained by the LabOne team at Zurich
+stable, properly tested and actively maintained by the LabOne team at Zurich
 Instruments.
 
 zhinst-qcodes also benefits from the redesign since it is based on zhinst-toolkit
-since the beginning. The benedfits include low setup times and fast responses,
+since the beginning. The benefits include low setup times and fast responses,
 similar to the low level ziPython API. But these benefits also come with the
 price of a sever api changes. The architecture and the way to use zhinst-qcodes
-from a user prespective more or less completly changes. In the follwoing we
+from a user perspective more or less completly changes. In the following we
 will try to help with the transition to the new zhinst-qcodes driver. But we
 know that a lot of feature have been removed in order to align with LabOne and
-if you encounter any functionallity no longer accessible feel free to contact
+if you encounter any functionality no longer accessible feel free to contact
 the Zurich Instruments support so we can help you out.
 
 The biggest change is probably the starting point. Instead of creating instances
@@ -57,9 +57,9 @@ them.
     >>> session.connect_device('dev5678')
     <ZIBaseInstrument: zi_XXXX_dev5678>
 
-Since all devices share the same session the ressource consumtion is kept to
+Since all devices share the same session the resource consumption is kept to
 a minimum. Of course one can create multiple data server sessions at once if
-neccessary.
+necessary.
 
 The instrument classes behave similar to the one from the old toolkit. But now
 they by default automatically expose **all** available nodes from the device.

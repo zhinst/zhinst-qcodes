@@ -18,12 +18,12 @@ The drivers are based on `zhinst-toolkit <https://github.com/zhinst/zhinst-toolk
 a generic high level python driver for LabOne. Except for the node tree which in
 case for the zhinst-qcodes driver is implemented with the native QCoDeS
 Parameters both driver behave the same. To be even more precise the
-zhinst-qcodes forwards all calls (functions, parametersm ...) to zhinst qcodes
-and has no logic buildin what so ever.
+zhinst-qcodes forwards all calls (functions, parameters ...) to zhinst qcodes
+and has no logic builtin what so ever.
 
 For the most cases the
 `zhinst-toolkit documentation <https://docs.zhinst.com/zhinst-toolkit/en/latest/>`_
-will therfor serve as a reference for this package as well. If you can not find
+will therefor serve as a reference for this package as well. If you can not find
 a answer to your question here please refer to the
 `zhinst-toolkit documentation <https://docs.zhinst.com/zhinst-toolkit/en/latest/>`_
 instead.

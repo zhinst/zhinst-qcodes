@@ -37,14 +37,6 @@ class Devices(MutableMapping):
         self._session = session
         self._devices = {}
         self._default_properties = {}
-        self._device_classes = {
-            "SHFQA": ZIDevices.SHFQA,
-            "SHFSG": ZIDevices.SHFSG,
-            "HDAWG": ZIDevices.HDAWG,
-            "PQSC": ZIDevices.PQSC,
-            "UHFQA": ZIDevices.UHFQA,
-            "UHFLI": ZIDevices.UHFLI,
-        }
 
     def __getitem__(self, key) -> ZIDevices.DeviceType:
         key = key.lower()
@@ -52,7 +44,7 @@ class Devices(MutableMapping):
             if key not in self._devices:
                 tk_device = self._tk_devices[key]
                 name, raw = self._default_properties.get(key, (None, False))
-                self._devices[key] = self._device_classes.get(
+                self._devices[key] = ZIDevices.DEVICE_CLASS_BY_MODEL.get(
                     tk_device.__class__.__name__, ZIDevices.ZIBaseInstrument
                 )(tk_device, self._session, name=name, raw=raw)
             return self._devices[key]
