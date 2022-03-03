@@ -42,6 +42,30 @@ class QAS(ZINode):
         """
         return self._tk_object.crosstalk_matrix(matrix=matrix)
 
+    def adjusted_delay(self, value: int = None) -> int:
+        """Set or get the adjustment in the quantum analyzer delay.
+
+        Adjusts the delay that defines the time at which the integration starts
+        in relation to the trigger signal of the weighted integration units.
+
+        Depending if the deskew matrix is bypassed there exists a different
+        default delay. This function can be used to add an additional delay to
+        the default delay.
+
+        Args:
+            value: Number of additional samples to adjust the delay. If not
+                specified this function will just return the additional delay
+                currently set.
+
+        Returns:
+            The adjustment in delay in units of samples.
+
+        Raises:
+            ValueError: If the adjusted quantum analyzer delay is outside the
+                allowed range of 1021 samples.
+
+        """
+        return self._tk_object.adjusted_delay(value=value)
 
 class CommandTableNode(ZINode):
     """CommandTable node.

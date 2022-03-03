@@ -40,6 +40,8 @@ def getPropertyInfo(
     ):
         try:
             item_class = typehint["return"].__args__[0]
+            if "typing.Sequence" in str(item_class):
+                return submodule_tuple(item_class.__args__[0], name, True)
             if issubclass(item_class, Node):
                 # list of submodules
                 return submodule_tuple(item_class, name, True)
@@ -421,3 +423,4 @@ def instrument_class(name):
 
 if __name__ == "__main__":
     main()
+

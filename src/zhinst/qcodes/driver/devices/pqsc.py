@@ -117,23 +117,22 @@ class PQSC(ZIBaseInstrument):
         timeout: int = 30,
         sleep_time: int = 1
     ) -> Union[List[bool], bool]:
-        """Check if the ZSync connection on the given port is successful.
+        """Check if the ZSync connection on the given port(s) is established.
 
-        This function checks the current status of the instrument
-        connected to the given port.
+        This function checks the current status of the instrument connected to
+        the given ports.
 
         Args:
-            ports: The port numbers to check the ZSync
-                connection for. It can either be a single port number given
-                as integer or a list of several port numbers. (default: 0)
-            timeout: Maximum time in seconds the program waits
-                (default: 30).
-            sleep_time: Time in seconds to wait between
-                requesting the reference clock status (default: 1)
+            ports: The port numbers to check the ZSync connection for.
+                It can either be a single port number given as integer or a list
+                of several port numbers. (default: 0)
+            timeout: Maximum time in seconds the program waits (default: 30).
+            sleep_time: Time in seconds to wait between requesting the reference
+                clock status (default: 1)
 
         Raises:
-            TimeoutError: If the process of establishing a TSync connection on
-                one of the specified ports exceeds the specified timeout
+            TimeoutError: If the process of establishing a ZSync connection on
+                one of the specified ports exceeds the specified timeout.
         """
         return self._tk_object.check_zsync_connection(
             ports=ports, timeout=timeout, sleep_time=sleep_time
