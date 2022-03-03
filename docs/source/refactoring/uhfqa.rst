@@ -35,7 +35,7 @@ Node Renaming
    * - uhfqa.averaging_mode
      - uhfaq.qas[0].result.mode
    * - uhfqa.qa_delay
-     - **Removed** (Part of sequence generation)
+     - uhfaq.qas[0].adjusted_delay
    * - uhfqa.ref_clock
      - uhfqa.system.extclk
    * - uhfqa.scope.single
