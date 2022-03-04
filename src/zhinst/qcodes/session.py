@@ -665,3 +665,7 @@ class Session(ZIInstrument):
     def server_port(self) -> int:
         """Server port"""
         return self._tk_object.server_port
+
+    @property
+    def toolkit_session(self) -> TKSession:
+        return self._tk_object
