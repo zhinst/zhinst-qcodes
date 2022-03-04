@@ -111,41 +111,6 @@ to have a separate session for a device one can use the ``new_session`` flag.
 But it is preferred to work in such cases with the session directly and not use
 the helper classes, since it is simpler to understand and recreate.
 
-Custom Device Classes
-----------------------
-Since the exposed helper classes only serve as a creator and can not be instantiated
-directly, it is **not** possible to derive from them directly.
-
-One needs to derive from the underlying device driver directly. The device drivers
-are located under ``zhinst.qcodes.driver.devices``.
-
-.. code-block:: python
-
-    >>> from zhinst.qcodes.driver.devices.shfqa import SHFQA as ZISHFQADriver
-    >>> class SHFQADriver(ZISHFQADriver):
-    >>>     def tester(self):
-    >>>         print("I am just a tester")
-
-Since the session takes care of the device object creation it needs to be made
-aware of the new class. This can easily be done be changing the underlying device
-mapping dictionary.
-
-.. code-block:: python
-
-    >>> from zhinst.qcodes.driver.devices import DEVICE_CLASS_BY_MODEL
-    >>> DEVICE_CLASS_BY_MODEL["SHFQA"] = SHFQADriver
-
-After that one can use the above described ways to create a device connection.
-For example, by using the exposed helper class:
-
-.. code-block:: python
-
-    >>> from zhinst.qcodes import SHFQA
-    >>> device = SHFQA("DEV1234", "localhost")
-    >>> device.tester()
-    I am just a tester
-
-
 Node Tree
 ---------
 

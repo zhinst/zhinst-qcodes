@@ -2,16 +2,16 @@
 
 from zhinst.qcodes.session import ZISession
 from zhinst.qcodes.device_creator import (
-    ZIDevice as HDAWG,
-    ZIDevice as MFLI,
-    ZIDevice as MFIA,
-    ZIDevice as PQSC,
-    ZIDevice as SHFQA,
-    ZIDevice as SHFSG,
-    ZIDevice as UHFLI,
-    ZIDevice as UHFQA,
+    HDAWG,
+    MFLI,
+    MFIA,
+    PQSC,
+    SHFQA,
+    SHFSG,
+    UHFLI,
+    UHFQA,
     ZIDevice,
-    ZIDeviceHF2 as HF2,
+    HF2,
 )
 
 from zhinst.toolkit import (
