@@ -11,7 +11,7 @@ import setuptools
 requirements = [
     "numpy>=1.13",
     "zhinst>=22.02",
-    "zhinst-toolkit>=0.3",
+    "zhinst-toolkit>=0.3.1",
     "qcodes>=0.30.0",
 ]
 
