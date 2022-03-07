@@ -1,5 +1,8 @@
 # zhinst-qcodes Changelog
 
+## Version 0.3.2
+* Adapt to toolkit 0.3.1
+
 ## Version 0.3.1
 * Outsource device class mapping into zhinst.qcodes.driver.devices
   (This enables the user to derive from the device classes easily the same
