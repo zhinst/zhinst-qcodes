@@ -547,13 +547,18 @@ def _get_submodule(
                 )
                 current_layer.add_submodule(name, channel_list)
             if len(current_layer.submodules[name]) <= number:
-                module = ZINode(
-                    current_layer,
-                    node,
-                    zi_node="/".join(parents[:i] + [name, str(number)]),
-                    snapshot_cache=snapshot_cache,
-                )
-                current_layer.submodules[name].append(module)
+                # Add new items to list until the required length is reached. (#31)
+                current_length = len(current_layer.submodules[name])
+                for item in range(number - current_length + 1):
+                    module = ZINode(
+                        current_layer,
+                        name + str(current_length + item),
+                        zi_node="/".join(
+                            parents[:i] + [name, str(current_length + item)]
+                        ),
+                        snapshot_cache=snapshot_cache,
+                    )
+                    current_layer.submodules[name].append(module)
             current_layer = current_layer.submodules[name][number]
         elif node not in current_layer.submodules:
             module = ZINode(
