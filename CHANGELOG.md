@@ -2,6 +2,7 @@
 ## Version 0.3.3
 * Make device class stubs derivable. This enables the user to directly deriv
   from the exposed classes.
+* Fixed [#31](https://github.com/zhinst/zhinst-qcodes/issues/31).
 
 ## Version 0.3.2
 * Adapt to toolkit 0.3.1

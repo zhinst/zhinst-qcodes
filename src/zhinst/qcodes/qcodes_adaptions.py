@@ -483,6 +483,8 @@ def tk_node_to_qcodes_list(tk_node: Node):
     else:
         parents = tk_node.raw_tree[:-1]
         name = tk_node.raw_tree[-1]
+        # Attributes are not allowed to start with a number (#31)
+        name = "_" + name if name[0].isdigit() else name
     parents = list(parents)
     numbers = [subnode for subnode in parents if subnode.isdigit()]
     while numbers:
