@@ -60,7 +60,9 @@ class Generator(ZINode):
         """
         return self._tk_object.wait_done(timeout=timeout, sleep_time=sleep_time)
 
-    def load_sequencer_program(self, sequencer_program, *, timeout: float = 10) -> None:
+    def load_sequencer_program(
+        self, sequencer_program: str, *, timeout: float = 10
+    ) -> None:
         """Compiles and loads a sequencer program.
 
         Args:

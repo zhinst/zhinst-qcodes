@@ -7,6 +7,50 @@ from zhinst.qcodes.qcodes_adaptions import ZINode, ZIChannelList
 Numpy2DArray = TypeVar("Numpy2DArray")
 
 
+class Integration(ZINode):
+    """Integration part for the UHFQA.
+
+    Args:
+        root: Underlying node tree.
+        tree: tree (node path as tuple) of the coresponding node.
+
+    .. versionadded:: 0.3.2
+    """
+
+    def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
+        ZINode.__init__(
+            self, parent, f"integration", snapshot_cache=snapshot_cache, zi_node=zi_node
+        )
+        self._tk_object = tk_object
+
+    def write_integration_weights(self, weights: Union[Waveforms, dict]) -> None:
+        """Upload complex integration weights.
+
+        The weight functions are applied to the real and imaginary part of
+        the input signal. In the hardware the weights are implemented as 17-bit integers.
+
+        Args:
+            weights: Dictionary containing the weight functions, where
+                keys correspond to the indices of the integration weights to be
+                configured.
+
+        note:
+
+            Does not raise an error when sample limit is exceeded, but applies only
+            the maximum number of samples. Please refer to LabOne node documentation
+            for the number of maximum integration weight samples.
+
+        note:
+
+            This function calls both `/qas/n/integration/weights/n/real` and
+            `/qas/n/integration/weights/n/imag` nodes.
+
+            If only real or imaginary part is defined, the number of defined samples
+            from the other one is zeroed.
+        """
+        return self._tk_object.write_integration_weights(weights=weights)
+
+
 class QAS(ZINode):
     """Quantum Analyser Channel for the UHFQA.
 
@@ -20,6 +64,18 @@ class QAS(ZINode):
             self, parent, f"qas_{index}", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
+
+        if self._tk_object.integration:
+
+            self.add_submodule(
+                "integration",
+                Integration(
+                    self,
+                    self._tk_object.integration,
+                    zi_node=self._tk_object.integration.node_info.path,
+                    snapshot_cache=self._snapshot_cache,
+                ),
+            )
 
     def crosstalk_matrix(self, matrix: Numpy2DArray = None) -> Optional[Numpy2DArray]:
         """Sets or gets the crosstalk matrix of the UHFQA as a 2D array.
