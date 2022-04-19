@@ -1,4 +1,7 @@
 # zhinst-qcodes Changelog
+
+## Version 0.3.4
+* Add SHFQC device-utils and toolkit functionalities.
 ## Version 0.3.3
 * Adapt to toolkit 0.3.2
 * Make device class stubs derivable. This enables the user to directly derive

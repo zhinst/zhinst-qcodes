@@ -7,6 +7,7 @@ from zhinst.qcodes.device_creator import (
     MFIA,
     PQSC,
     SHFQA,
+    SHFQC,
     SHFSG,
     UHFLI,
     UHFQA,

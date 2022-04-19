@@ -8,6 +8,7 @@ from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
 from zhinst.qcodes.driver.devices.hdawg import HDAWG as HDAWGDriver
 from zhinst.qcodes.driver.devices.pqsc import PQSC as PQSCDriver
 from zhinst.qcodes.driver.devices.shfqa import SHFQA as SHFQADriver
+from zhinst.qcodes.driver.devices.shfqc import SHFQC as SHFQCDriver
 from zhinst.qcodes.driver.devices.shfsg import SHFSG as SHFSGDriver
 from zhinst.qcodes.driver.devices.uhfli import UHFLI as UHFLIDriver
 from zhinst.qcodes.driver.devices.uhfqa import UHFQA as UHFQADriver
@@ -87,6 +88,9 @@ class PQSC(PQSCDriver):
 class SHFQA(SHFQADriver):
     pass
 
+@zi_device
+class SHFQC(SHFQCDriver):
+    pass
 
 @zi_device
 class SHFSG(SHFSGDriver):
