@@ -1,5 +1,6 @@
 autoflake
 jinja2
+numpy
 black
 click
 setuptools
