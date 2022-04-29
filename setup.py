@@ -3,8 +3,6 @@
 # This software may be modified and distributed under the terms
 # of the MIT license. See the LICENSE file for details.
 
-
-import os
 import setuptools
 
 
@@ -21,7 +19,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="zhinst-qcodes",
-    description="Zurich Instruents drivers for QCoDeS",
+    description="Zurich Instruments drivers for QCoDeS",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/zhinst/zhinst-qcodes",
