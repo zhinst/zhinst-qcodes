@@ -10,5 +10,5 @@ build/
 */*/_build/
 _version.py
 *.ipynb
-
+venv*/
 _autosummary/
