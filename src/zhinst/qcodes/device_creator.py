@@ -2,6 +2,8 @@
 
 The classes can be used without creating as session to a data server first.
 """
+import typing as t
+
 from zhinst.qcodes.session import ZISession
 
 from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
@@ -46,7 +48,7 @@ def zi_device(cls):
         host: str,
         port: int = 8004,
         *,
-        interface: str = None,
+        interface: t.Optional[str] = None,
         name=None,
         raw=None,
         new_session: bool = False,
@@ -88,9 +90,11 @@ class PQSC(PQSCDriver):
 class SHFQA(SHFQADriver):
     pass
 
+
 @zi_device
 class SHFQC(SHFQCDriver):
     pass
+
 
 @zi_device
 class SHFSG(SHFSGDriver):
@@ -142,7 +146,7 @@ class HF2(ZIBaseInstrument):
         host: str,
         port: int = 8005,
         *,
-        interface: str = None,
+        interface: t.Optional[str] = None,
         name=None,
         raw=None,
         new_session: bool = False,

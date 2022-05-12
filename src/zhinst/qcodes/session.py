@@ -22,7 +22,7 @@ from zhinst.qcodes.qcodes_adaptions import (
 class Devices(MutableMapping):
     """Mapping class for the connected devices.
 
-    Mapps the connected devices from data server to lazy device objects.
+    Maps the connected devices from data server to lazy device objects.
     On every access the connected devices are read from the data server. This
     ensures that even if devices get connected/disconnected through another
     session the list will be up to date.
@@ -415,13 +415,13 @@ class ZISession:
     information on the architecture please refer to the user manual
     http://docs.zhinst.com/labone_programming_manual/introduction.html)
 
-    The entry point into any connection is therfor a client session to a
+    The entry point into any connection is therefor a client session to a
     existing data sever. This class represents a single client session to a
     data server. The session enables the user to connect to one or multiple
-    instruments (also creates the deticated objects for each device), access
+    instruments (also creates the dedicated objects for each device), access
     the LabOne modules and poll data.
 
-    Since QCoDeS normally instanciate the device specific objects directly
+    Since QCoDeS normally instantiate the device specific objects directly
     this driver also exposes helper classes for that directly. These helper
     classes create a session and connect the specified device to it. To avoid
     that each device has a own session by default ``ZISession`` only creates one
@@ -449,7 +449,7 @@ class ZISession:
 
             Warning:
 
-                Creating a new session should be done cearfully since it
+                Creating a new session should be done carefully since it
                 requires more ressources and can create unwanted side effects.
 
         connection: Existing daq server object. If specified the session will
@@ -460,9 +460,9 @@ class ZISession:
     def __new__(
         cls,
         server_host: str,
-        server_port: int = None,
+        server_port: t.Optional[int] = None,
         *,
-        hf2: bool = None,
+        hf2: t.Optional[bool] = None,
         new_session=False,
         connection: ziDAQServer = None,
     ):
@@ -489,10 +489,10 @@ class Session(ZIInstrument):
     information on the architecture please refer to the user manual
     http://docs.zhinst.com/labone_programming_manual/introduction.html)
 
-    The entry point into for any connection is therfor a client session to a
+    The entry point into for any connection is therefor a client session to a
     existing data sever. This class represents a single client session to a
     data server. The session enables the user to connect to one or multiple
-    instruments (also creates the deticated objects for each device), access
+    instruments (also creates the dedicated objects for each device), access
     the LabOne modules and poll data. In short it is the only object the user
     need to create by himself.
 
@@ -520,9 +520,9 @@ class Session(ZIInstrument):
     def __init__(
         self,
         server_host: str,
-        server_port: int = None,
+        server_port: t.Optional[int] = None,
         *,
-        hf2: bool = None,
+        hf2: t.Optional[bool] = None,
         connection: ziDAQServer = None,
     ):
         self._tk_object = TKSession(
@@ -534,7 +534,12 @@ class Session(ZIInstrument):
         init_nodetree(self, self._tk_object.root, self._snapshot_cache)
 
     def connect_device(
-        self, serial: str, *, interface: str = None, name: str = None, raw: bool = None
+        self,
+        serial: str,
+        *,
+        interface: t.Optional[str] = None,
+        name: t.Optional[str] = None,
+        raw: t.Optional[bool] = None,
     ) -> ZIDevices.DeviceType:
         """Establish a connection to a device.
 
@@ -585,13 +590,13 @@ class Session(ZIInstrument):
             * Ensures that all set commands have been flushed to the device
             * Ensures that get and poll commands only return data which was
               recorded after the sync command. (ALL poll buffers are cleared!)
-            * Blocks until all devices have cleared their bussy flag.
+            * Blocks until all devices have cleared their busy flag.
 
         Warning:
             The sync is performed for all devices connected to the daq server
 
         Warning:
-            This command is a blocking command that can take a substential
+            This command is a blocking command that can take a substantial
             amount of time.
 
         Raises:
@@ -613,7 +618,7 @@ class Session(ZIInstrument):
 
         Args:
             recording_time: defines the duration of the poll. (Note that not
-                only the newly recorder values are polled but all vaules since
+                only the newly recorder values are polled but all values since
                 either subscribing or the last pill). Needs to be larger than
                 zero. (default = 0.1)
             timeout: Adds an additional timeout in seconds on top of

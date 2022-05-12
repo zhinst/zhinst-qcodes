@@ -1,4 +1,4 @@
-""" Base modules for the Zurich Instrument specific qcodes driver. """
+"""Base modules for the Zurich Instrument specific QCodes driver. """
 import re
 from datetime import datetime
 import typing as t
@@ -76,15 +76,15 @@ class ZISnapshotHelper:
         self._is_running = False
         self._value_dict = {}
 
-    def get(self, parameter: Parameter, fallback_get: callable) -> t.Any:
+    def get(self, parameter: Parameter, fallback_get: t.Callable) -> t.Any:
         """Get the value for a specific QCodes Parameter.
 
-        Tries to mimic the behaviour of a normal get (e.g. update cache).
+        Tries to mimic the behavior of a normal get (e.g. update cache).
         If the value is not found in the dictionary the fallback get is called.
         The fallback get should get the value from the device.
 
         Args:
-            parameter: Qcodes Parameter object
+            parameter: QCodes Parameter object
             fallback_get: fallback function to get the value from the device
         Returns:
             Value for the Node
@@ -120,7 +120,7 @@ class ZISnapshotHelper:
 
         Args:
             qcodes_object (object): Object for which the snapshot should be printed.
-            update (bool): Flag if the state should be queryed from the
+            update (bool): Flag if the state should be queried from the
                            instrument.
             max_chars (int): The maximum number of characters per line. The
                 readable snapshot will be cropped if this value is exceeded.
@@ -175,10 +175,10 @@ class ZISnapshotHelper:
 
 
 class ZIParameter(Parameter):
-    """Zurich Instrument specific Qcodes Parameter
+    """Zurich Instrument specific QCodes Parameter
 
     Overwrite the snaphot functionality to use the ZISnapshotHelper.
-    Forwards all args and kwargs to the Qcodes Parameter class.
+    Forwards all args and kwargs to the QCodes Parameter class.
 
     Args:
         snapshot_cache (ZISnapshotHelper): ZI specific SnapshotHelper object
@@ -188,8 +188,8 @@ class ZIParameter(Parameter):
     def __init__(
         self,
         *arg,
-        snapshot_cache: ZISnapshotHelper = None,
-        zi_node: str = None,
+        snapshot_cache: t.Optional[ZISnapshotHelper] = None,
+        zi_node: t.Optional[str] = None,
         tk_node: Node = None,
         **kwargs,
     ):
@@ -284,7 +284,7 @@ class ZIParameter(Parameter):
         invert: bool = False,
         timeout: float = 2,
         sleep_time: float = 0.005,
-    ) -> bool:
+    ) -> None:
         """Waits until the node has the expected state/value.
 
         WARNING: Only supports integer values as reference.
@@ -293,9 +293,6 @@ class ZIParameter(Parameter):
             value (int): expected value of the node.
             timeout (float): max wait time. (default = 2)
             sleep_time (float): sleep interval in seconds. (default = 0.006)
-
-        Returns:
-            bool: Flag if the value/state of the node has the expected value.
         """
         self._tk_node.wait_for_state_change(
             value, invert=invert, timeout=timeout, sleep_time=sleep_time
@@ -318,10 +315,10 @@ class ZIParameter(Parameter):
 
 
 class ZINode(InstrumentChannel):
-    """Zurich Instrument specific Qcodes InstrumentChannel
+    """Zurich Instrument specific QCodes InstrumentChannel
 
     Overwrite the snaphot functionality to use the ZISnapshotHelper.
-    Forwards all args and kwargs to the Qcodes InstrumentChannel class.
+    Forwards all args and kwargs to the QCodes InstrumentChannel class.
 
     Args:
         snapshot_cache (ZISnapshotHelper): ZI specific SnapshotHelper object
@@ -331,7 +328,7 @@ class ZINode(InstrumentChannel):
     def __init__(
         self,
         *arg,
-        snapshot_cache: ZISnapshotHelper = None,
+        snapshot_cache: t.Optional[ZISnapshotHelper] = None,
         zi_node: Node = None,
         **kwargs,
     ):
@@ -375,10 +372,10 @@ class ZINode(InstrumentChannel):
 
 
 class ZIChannelList(ChannelList):
-    """Zurich Instrument specific Qcodes InstrumentChannel
+    """Zurich Instrument specific QCodes InstrumentChannel
 
     Overwrite the snaphot functionality to use the ZISnapshotHelper.
-    Forwards all args and kwargs to the Qcodes InstrumentChannel class.
+    Forwards all args and kwargs to the QCodes InstrumentChannel class.
 
     Args:
         snapshot_cache (ZISnapshotHelper): ZI specific SnapshotHelper object
@@ -499,7 +496,7 @@ def tk_node_to_qcodes_list(tk_node: Node):
 
 
 def tk_node_to_parameter(root, tk_node: Node):
-    """Convert a Toolkit node into a Qcodes Parameter"""
+    """Convert a Toolkit node into a QCodes Parameter"""
     qcodes_list = list(tk_node.raw_tree)
     if qcodes_list[-1].isdigit():
         qcodes_list.append("value")
