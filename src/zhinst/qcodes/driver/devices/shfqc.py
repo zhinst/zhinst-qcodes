@@ -28,7 +28,7 @@ class CommandTableNode(ZINode):
         ZINode.__init__(
             self,
             parent,
-            f"commandtablenode",
+            f"commandtable",
             snapshot_cache=snapshot_cache,
             zi_node=zi_node,
         )

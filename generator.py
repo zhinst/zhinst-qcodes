@@ -281,9 +281,14 @@ def generate_qcodes_class_info(
     )
     function_info = generate_functions_info(tk_class_info.functions, class_type)
 
+    display_name_replacements = {"CommandTableNode": "commandtable"}
+
     gathered_info.append(
         {
             "name": class_type.__name__,
+            "display_name": display_name_replacements.get(
+                class_type.__name__, class_type.__name__.lower()
+            ),
             "is_instrument_class": not is_submodule,
             "docstring": class_type.__doc__,
             "modules": submodule_info,
@@ -423,4 +428,3 @@ def instrument_class(name):
 
 if __name__ == "__main__":
     main()
-
