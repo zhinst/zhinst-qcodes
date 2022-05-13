@@ -2,6 +2,7 @@
 
 ## Version 0.3.5
 * Fix Display name for the commandtable node. (`commandtablenode` -> `commandtable`)
+* Fix Display name for the awg node. (`awgcore` -> `awg`)
 
 ## Version 0.3.4
 * Add SHFQC device-utils and toolkit functionalities.

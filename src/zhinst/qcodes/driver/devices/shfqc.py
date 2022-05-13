@@ -89,7 +89,7 @@ class AWGCore(ZINode):
 
     def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
         ZINode.__init__(
-            self, parent, f"awgcore", snapshot_cache=snapshot_cache, zi_node=zi_node
+            self, parent, f"awg", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
 

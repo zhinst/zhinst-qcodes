@@ -281,7 +281,7 @@ def generate_qcodes_class_info(
     )
     function_info = generate_functions_info(tk_class_info.functions, class_type)
 
-    display_name_replacements = {"CommandTableNode": "commandtable"}
+    display_name_replacements = {"CommandTableNode": "commandtable", "AWGCore": "awg"}
 
     gathered_info.append(
         {
