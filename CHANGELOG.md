@@ -1,5 +1,8 @@
 # zhinst-qcodes Changelog
 
+## Version 0.3.5
+* Fix Display name for the commandtable node. (`commandtablenode` -> `commandtable`)
+
 ## Version 0.3.4
 * Add SHFQC device-utils and toolkit functionalities.
 ## Version 0.3.3
