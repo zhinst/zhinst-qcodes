@@ -19,6 +19,9 @@ submodule_tuple = namedtuple("submodule", ["subclass", "name", "is_list"])
 function_tuple = namedtuple("function", ["name", "is_deprecated"])
 class_tuple = namedtuple("toolkit_class", ["functions", "parameters", "sub_modules"])
 
+_PKG_ROOT = Path(__file__).parent
+TEMPLATE_PATH = _PKG_ROOT / "templates"
+OUTPUT_DIR_DEVICES_DRIVER_ = _PKG_ROOT.parent / "src/zhinst/qcodes/driver/devices/"
 
 def getPropertyInfo(
     name: str, property: object, class_type: object
@@ -314,11 +317,6 @@ def camel_to_snake(name: str) -> str:
     """
     name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
-
-
-_PKG_ROOT = Path(__file__).parent.parent
-TEMPLATE_PATH = _PKG_ROOT / "templates"
-OUTPUT_DIR_DEVICES_DRIVER_ = _PKG_ROOT.parent / "src/zhinst/qcodes/driver/devices/"
 
 
 def generate_qcodes_driver(
