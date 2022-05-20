@@ -1,4 +1,4 @@
-"""Autogenerate the qcodes drivers from toolkit and ziPython"""
+"""Autogenerate the QCodes drivers from toolkit and ziPython"""
 from collections import namedtuple
 import typing
 import inspect
@@ -8,6 +8,8 @@ import jinja2
 import black
 import autoflake
 import click
+from pathlib import Path
+
 from zhinst.toolkit.driver.devices.base import BaseInstrument
 from zhinst.toolkit.driver.modules.base_module import BaseModule
 from zhinst.toolkit.nodetree import Node, NodeTree
@@ -17,11 +19,14 @@ submodule_tuple = namedtuple("submodule", ["subclass", "name", "is_list"])
 function_tuple = namedtuple("function", ["name", "is_deprecated"])
 class_tuple = namedtuple("toolkit_class", ["functions", "parameters", "sub_modules"])
 
+_PKG_ROOT = Path(__file__).parent
+TEMPLATE_PATH = _PKG_ROOT / "templates"
+OUTPUT_DIR_DEVICES_DRIVER_ = _PKG_ROOT.parent / "src/zhinst/qcodes/driver/devices/"
 
 def getPropertyInfo(
     name: str, property: object, class_type: object
 ) -> typing.Union[parameter_tuple, submodule_tuple]:
-    """Get all neccessary information for a toolkit property.
+    """Get all necessary information for a toolkit property.
 
     Args:
         name (str): Name of the property
@@ -78,7 +83,7 @@ def getPropertyInfo(
 def getInfo(
     class_type: object, existing_names: list
 ) -> typing.Tuple[class_tuple, list]:
-    """Get all neccessary information for a toolkit class.
+    """Get all necessary information for a toolkit class.
 
     Args:
         class_type (object) toolkit class
@@ -202,7 +207,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
     Returns:
         (list) list dict with information for each function.
     """
-    # Enums from toolkit should be expposed also in the qcodes driver
+    # Enums from toolkit should be exposed also in the QCodes driver
     enums = {
         "SHFQAChannelMode": "zhinst.toolkit.interface.SHFQAChannelMode",
         "MappingMode": "zhinst.toolkit.interface.MappingMode",
@@ -302,7 +307,7 @@ def generate_qcodes_class_info(
 
 
 def camel_to_snake(name: str) -> str:
-    """Convert cammelcase into snake case
+    """Convert camelcase into snake case
 
     Args:
         name  (str): name in camel case
@@ -316,8 +321,8 @@ def camel_to_snake(name: str) -> str:
 
 def generate_qcodes_driver(
     toolkit_class: object,
-    template_path: str = "templates/",
-    output_dir: str = "src/zhinst/qcodes/driver/devices/",
+    template_path: typing.Union[str, Path] = TEMPLATE_PATH,
+    output_dir: typing.Union[str, Path] = OUTPUT_DIR_DEVICES_DRIVER_,
 ) -> None:
     """Generates the Qcodes drivers for the toolkit instrument classes.
 
@@ -338,8 +343,11 @@ def generate_qcodes_driver(
     result = black.format_str(result, mode=black.FileMode())
     result = autoflake.fix_code(result, remove_all_unused_imports=True)
     module_name = camel_to_snake(toolkit_class.__name__)
-    open(output_dir + module_name.lower() + ".py", "w").write(result)
-    print(f"Module {output_dir + module_name.lower()}.py created.")
+
+    py_filename = str(output_dir) + "/" + module_name.lower() + ".py"
+    with open(py_filename, "w+") as outfile:
+        outfile.write(result)
+    print(f"{py_filename} created.")
 
 
 # def generate_qcodes_driver_modules(
