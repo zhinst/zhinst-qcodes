@@ -14,74 +14,21 @@ page for your instrument(s).
 Before you continue make sure a LabOne® data server is running in your network and
 all of your devices are visible.
 
-Session To The Data Server
----------------------------
+Device connection
+------------------
 
-Zurich Instruments devices use a server-based connectivity methodology. Server-based
-means that all communication between the user and the instrument takes place via a
-computer program called a server, the Data Server. The Data Server recognizes available
-instruments and manages all communication between the instrument and the host computer
-on one side, and communication to all the connected clients on the other side.
-(see `Architecture <https://docs.zhinst.com/labone_programming_manual/introduction.html#pm.intro.architecture>`_
-in the LabOne Programming Manual)
+Although all Zurich Instruments follow a session based approach the zhinst-qcodes
+tries to adapt this to the QCoDeS native device based one. The following guide will
+follow the device based approach. However it is still possible to use the
+session based approach through the exported `ZISession` object. Please take a
+look at the
+`zhinst-toolkit documentation <https://docs.zhinst.com/zhinst-toolkit/en/latest/first_steps/quickstart.html>`_
+for more information on the usage of the session based approach.
 
-The entry point into zhinst-qcodes is therefor a API client session to a data server:
+To create a Zurich Instruments device the following information's are needed:
 
-.. code-block:: python
-
-    >>> from zhinst.qcodes import ZISession
-    >>> session = ZISession("localhost")
-
-(if your data server runs on a remote computer (e.g. an MFLI directly) replace
-``localhost`` with the correct address.)
-
-The data server can be connected to one or multiple devices. By connecting, or accessing
-an already connected, device a new device object for that device is created by
-zhinst-qcodes.
-
-.. code-block:: python
-
-    >>> session.devices.visible()
-    ['dev1234', 'dev5678']
-    >>> session.devices.connected()
-    ['dev1234']
-    >>> session.devices['dev1234']
-    <ZIBaseInstrument: zi_XXXX_dev1234>
-    >>> session.connect_device('dev5678')
-    <ZIBaseInstrument: zi_XXXX_dev5678>
-
-The created device object holds all device specific nodes and depending on the device
-type also implements additional functionalities (e.g. exposes the
-``zhinst.deviceutils`` functions).
-
-.. code-block:: python
-
-    >>> device = session.devices['dev1234']
-    >>> device.demods[0].freq()
-    10e6
-
-The drivers are based on `zhinst-toolkit <https://github.com/zhinst/zhinst-toolkit>`_,
-a generic high level python driver for LabOne. Except for the node tree which in
-case for the zhinst-qcodes driver is implemented with the native QCoDeS
-Parameters, both driver behave the same. To be even more precise the
-zhinst-qcodes forwards all calls (functions, parameters ...) to zhinst-toolkit
-and has no logic builtin what so ever.
-
-For the device drivers this means that some device may have additional functionality
-provided by zhinst-toolkit. zhinst-qcodes forwards these functionalities.
-Please take a look at the examples in the
-`zhinst-toolkit examples <https://docs.zhinst.com/zhinst-toolkit/en/latest/examples/index.html>`_
-to see a list of all available functions. As already mentioned they can be used
-with the exact same syntax, which also is the case for all the examples from
-zhinst-toolkit (just replace the imports from zhinst-toolkit with zhinst-qcodes).
-
-Easy Device Setup
------------------
-
-Since QCoDeS by design normally creates device objects directly zhinst-qcodes
-exposes helper classes for each instrument type that can be used to create a
-device object directly, without creating a session first. Note that these classes
-are just wrapper around the server-based connectivity methodology.
+* Serial (Can be found on the back of the instrument)
+* server host address (e.g. "localhost" if LabOne is running on the local computer)
 
 .. code-block:: python
 
@@ -93,8 +40,9 @@ are just wrapper around the server-based connectivity methodology.
     If the instrument you are using does not have a dedicated helper class yet
     you can use the generic one ``ZIDevice``.
 
-Under the hood the helper class just creates a session, connects the device to
-it and returns the device class. It is therefore identical to:
+Under the hood the helper class just creates a session (if necessary),
+connects the device to it and returns the device class. It is therefore
+identical to:
 
 .. code-block:: python
 
@@ -108,8 +56,15 @@ Meaning if one connects two devices to e.g. ``localhost`` they will share the
 same session. For most use cases this is the desired behavior since it saves
 resources and avoids unintended edge cases. In the rare cases where you need
 to have a separate session for a device one can use the ``new_session`` flag.
-But it is preferred to work in such cases with the session directly and not use
-the helper classes, since it is simpler to understand and recreate.
+
+If necessary (e.g. for polling data) on can access the underlying session object
+through the ``session`` attribute.
+
+.. code-block:: python
+
+    >>> from zhinst.qcodes import HDAWG
+    >>> device = HDAWG("DEV1234", "localhost", name="optional_qcodes_name")
+    >>> data = device.session.poll(1)
 
 Node Tree
 ---------
@@ -124,7 +79,7 @@ explanation of Parameter work in QCoDeS.
 
 .. code-block:: python
 
-    >>> session.debug.level()
+    >>> device.session.debug.level()
     'status'
 
 So what did that code do?
@@ -165,7 +120,7 @@ examples.
 
 .. code-block:: python
 
-    >>> daq_module = session.modules.daq
+    >>> daq_module = device.session.modules.daq
     >>> daq_module.grid.mode()
     4
     >>> daq_module.raw_module

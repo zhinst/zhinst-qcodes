@@ -26,10 +26,9 @@ Requirements:
 * feedback cable between Signal Output 1 and Signal Input 1
 
 ```python
-from zhinst.qcodes import ZISession
-
-session = ZISession('localhost')
-device = session.connect_device("DEVXXXX")
+from zhinst.qcodes import MFLI
+# MFLI can be replaced with any other supported device type
+device = MFLI("DEVXXXX", "localhost")
 ```
 
 ```python
@@ -74,7 +73,7 @@ with device.set_transaction():
 # Specify the number of sweeps to perform back-to-back.
 LOOPCOUNT = 2
 
-sweeper = session.modules.sweeper
+sweeper = device.session.modules.sweeper
 sweeper.device(device)
 
 sweeper.gridnode(device.oscs[OSC_INDEX].freq)
