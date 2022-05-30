@@ -36,7 +36,7 @@ Session class the following statement can be used:
 
 .. code-block:: python
 
-    >>> from zhinst.qcodes import Session, HDAWG
+    >>> from zhinst.qcodes import ZISession, HDAWG
 
 Full Package Documentation
 ---------------------------

@@ -25,8 +25,8 @@ Instruments.
 zhinst-qcodes also benefits from the redesign since it is based on zhinst-toolkit
 since the beginning. The benefits include low setup times and fast responses,
 similar to the low level ziPython API. But these benefits also come with the
-price of a sever api changes. The architecture and the way to use zhinst-qcodes
-from a user perspective more or less completly changes. In the following we
+price of a severe api changes. The architecture and the way to use zhinst-qcodes
+from a user perspective more or less completely changes. In the following we
 will try to help with the transition to the new zhinst-qcodes driver. But we
 know that a lot of feature have been removed in order to align with LabOne and
 if you encounter any functionality no longer accessible feel free to contact
@@ -39,8 +39,8 @@ seamlessly integrates into the Zurich Instruments ecosystem.
 
 .. code-block:: python
 
-    >>> from zhinst.qcodes import Session
-    >>> session = Session("localhost")
+    >>> from zhinst.qcodes import ZISession
+    >>> session = ZISession("localhost")
 
 The individual device objects can be created from that session. Either by
 accessing them directly, in case they are already connected, or by connecting
