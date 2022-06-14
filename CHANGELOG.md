@@ -1,6 +1,6 @@
 # zhinst-qcodes Changelog
 
-## Version 0.3.5
+## Version 0.4.0
 * Fix Display name for the commandtable node. (`commandtablenode` -> `commandtable`)
 * Fix Display name for the awg node. (`awgcore` -> `awg`)
 
