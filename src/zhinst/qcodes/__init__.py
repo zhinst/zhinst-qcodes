@@ -27,3 +27,23 @@ try:
     from zhinst.qcodes._version import version as __version__
 except ModuleNotFoundError:
     pass
+
+__all__ = [
+  "ZISession",
+  "HDAWG",
+  "MFLI",
+  "MFIA",
+  "PQSC",
+  "SHFQA",
+  "SHFQC",
+  "SHFSG",
+  "UHFLI",
+  "UHFQA",
+  "ZIDevice",
+  "HF2",
+  "Waveforms",
+  "CommandTable",
+  "PollFlags",
+  "AveragingMode",
+  "SHFQAChannelMode",
+]
