@@ -32,7 +32,7 @@ pip install zhinst-qcodes
 ## Documentation
 See the documentation page [here](https://docs.zhinst.com/zhinst-qcodes/en/latest).
 Since zhinst-qcodes is based on zhinst-toolkit and has exactly the same interface
-and functions, the [documenation](https://docs.zhinst.com/zhinst-toolkit/en/latest)
+and functions, the [documentation](https://docs.zhinst.com/zhinst-toolkit/en/latest)
 for zhinst-toolkit can be applied nearly one to one and has much more examples.
 
 ## Contributing
