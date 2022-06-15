@@ -3,3 +3,4 @@ nbsphinx
 nbsphinx_link
 m2r2
 pydata_sphinx_theme
+sphinx_autodoc_typehints
