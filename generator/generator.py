@@ -217,8 +217,6 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
         "Waveforms": "zhinst.toolkit.waveform.Waveforms",
         "CommandTable": "zhinst.toolkit.command_table.CommandTable",
     }
-    # weird typing infos that can be replaced with the right term
-    replacements = {"<built-in function array>": "np.array"}
     # regex to find deprecation decorator
     deprecated_regex = re.compile(r"(@depreca(.|\n)*?)\s*?(?:def|@)")
 
@@ -246,7 +244,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
                         regex_result.group(0), regex_result.group(1)
                     )
         # replace weird stuff
-        for weird_stuff, replacement in replacements.items():
+        for weird_stuff, replacement in conf.TYPE_HINT_REPLACEMENTS.items():
             signature_str = signature_str.replace(weird_stuff, replacement)
 
         functions_info.append(
