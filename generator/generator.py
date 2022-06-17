@@ -21,9 +21,6 @@ submodule_tuple = namedtuple("submodule", ["subclass", "name", "is_list"])
 function_tuple = namedtuple("function", ["name", "is_deprecated"])
 class_tuple = namedtuple("toolkit_class", ["functions", "parameters", "sub_modules"])
 
-_PKG_ROOT = Path(__file__).parent
-TEMPLATE_PATH = _PKG_ROOT / "templates"
-OUTPUT_DIR_DEVICES_DRIVER_ = _PKG_ROOT.parent / "src/zhinst/qcodes/driver/devices/"
 
 def getPropertyInfo(
     name: str, property: object, class_type: object
@@ -321,8 +318,8 @@ def camel_to_snake(name: str) -> str:
 
 def generate_qcodes_driver(
     toolkit_class: object,
-    template_path: typing.Union[str, Path] = TEMPLATE_PATH,
-    output_dir: typing.Union[str, Path] = OUTPUT_DIR_DEVICES_DRIVER_,
+    template_path: typing.Union[str, Path] = conf.TEMPLATE_PATH,
+    output_dir: typing.Union[str, Path] = conf.OUTPUT_DIR_DEVICES_DRIVER,
 ) -> None:
     """Generates the Qcodes drivers for the toolkit instrument classes.
 
@@ -403,7 +400,7 @@ def generate_qcodes_driver(
 #     #          remove_unused_variables=False, ignore_init_module_imports=False):
 #     print(f"Module {output_dir + name.lower()}.py created.")
 
-def device_api():
+def generate_device_api():
     DEVICE_API_FILEPATH = "src/zhinst/qcodes/device_creator.py"
     data = {
         "classes": [
@@ -430,7 +427,7 @@ def device_api():
             "from zhinst.qcodes.driver.devices.uhfqa import UHFQA as UHFQADriver",
         ]
     }
-    templateLoader = jinja2.FileSystemLoader(searchpath=TEMPLATE_PATH)
+    templateLoader = jinja2.FileSystemLoader(searchpath=conf.TEMPLATE_PATH)
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("device_api.py.j2")
     result = template.render(data)
@@ -460,7 +457,6 @@ def main():
 def instrument_class(name):
     module = importlib.import_module(f"{conf.TOOLKIT_DEVICE_MODULE}.{name.lower()}")
     generate_qcodes_driver(getattr(module, name.upper()))
-    device_api()
 
 
 @main.command(help="Generate all.")
@@ -468,6 +464,7 @@ def generate_all():
     for name in conf.DEVICE_DRIVERS:
         module = importlib.import_module(f"{conf.TOOLKIT_DEVICE_MODULE}.{name.lower()}")
         generate_qcodes_driver(getattr(module, name.upper()))
+    generate_device_api()
 
 if __name__ == "__main__":
     main()
