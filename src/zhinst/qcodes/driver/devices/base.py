@@ -6,7 +6,8 @@ from zhinst.toolkit.driver.devices import DeviceType
 from zhinst.qcodes.qcodes_adaptions import init_nodetree, ZIInstrument
 
 if t.TYPE_CHECKING:
-    from zhinst.qcodes.session import Session
+    from zhinst.qcodes.session import ZISession, Session
+    from qcodes.instrument.base import Instrument
 
 class ZIBaseInstrument(ZIInstrument):
     """Generic QCodes driver for a Zurich Instrument device.
@@ -27,8 +28,8 @@ class ZIBaseInstrument(ZIInstrument):
     def __init__(
         self,
         tk_object: DeviceType,
-        session: "Session",
-        name: str = None,
+        session: t.Union["ZISession", "Session", "Instrument"],
+        name: t.Optional[str] = None,
         raw: bool = False,
     ):
         self._tk_object = tk_object
