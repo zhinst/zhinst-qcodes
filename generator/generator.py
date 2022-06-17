@@ -5,6 +5,7 @@ import inspect
 import re
 import importlib
 import jinja2
+import isort
 import black
 import autoflake
 import click
@@ -402,6 +403,48 @@ def generate_qcodes_driver(
 #     #          remove_unused_variables=False, ignore_init_module_imports=False):
 #     print(f"Module {output_dir + name.lower()}.py created.")
 
+def device_api():
+    DEVICE_API_FILEPATH = "src/zhinst/qcodes/device_creator.py"
+    data = {
+        "classes": [
+            {"name": "ZIDevice", "parent": "ZIBaseInstrument", "is_hf2": False},
+            {"name": "SHFQA", "parent": "SHFQADriver", "is_hf2": False},
+            {"name": "SHFSG", "parent": "SHFSGDriver", "is_hf2": False},
+            {"name": "HDAWG", "parent": "HDAWGDriver", "is_hf2": False},
+            {"name": "PQSC", "parent": "PQSCDriver", "is_hf2": False},
+            {"name": "SHFQC", "parent": "SHFQCDriver", "is_hf2": False},
+            {"name": "UHFLI", "parent": "UHFLIDriver", "is_hf2": False},
+            {"name": "UHFQA", "parent": "UHFQADriver", "is_hf2": False},
+            {"name": "MFLI", "parent": "ZIBaseInstrument", "is_hf2": False},
+            {"name": "MFIA", "parent": "ZIBaseInstrument", "is_hf2": False},
+            {"name": "HF2", "parent": "ZIBaseInstrument", "is_hf2": True}
+        ],
+        "imports": [
+            "from zhinst.qcodes.driver.devices.base import ZIBaseInstrument",
+            "from zhinst.qcodes.driver.devices.hdawg import HDAWG as HDAWGDriver",
+            "from zhinst.qcodes.driver.devices.pqsc import PQSC as PQSCDriver",
+            "from zhinst.qcodes.driver.devices.shfqa import SHFQA as SHFQADriver",
+            "from zhinst.qcodes.driver.devices.shfqc import SHFQC as SHFQCDriver",
+            "from zhinst.qcodes.driver.devices.shfsg import SHFSG as SHFSGDriver",
+            "from zhinst.qcodes.driver.devices.uhfli import UHFLI as UHFLIDriver",
+            "from zhinst.qcodes.driver.devices.uhfqa import UHFQA as UHFQADriver",
+        ]
+    }
+    templateLoader = jinja2.FileSystemLoader(searchpath=TEMPLATE_PATH)
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    template = templateEnv.get_template("device_api.py.j2")
+    result = template.render(data)
+    result = black.format_str(result, mode=black.mode.Mode(
+        target_versions={black.TargetVersion.PY37},
+        line_length=88,
+        string_normalization=False,
+        ))
+    result = autoflake.fix_code(result, remove_all_unused_imports=True)
+    result = isort.code(result)
+    with open(DEVICE_API_FILEPATH, "w+") as outfile:
+        outfile.write(result)
+    print(f"{DEVICE_API_FILEPATH} created.")
+
 
 @click.group()
 def main():
@@ -417,6 +460,7 @@ def main():
 def instrument_class(name):
     module = importlib.import_module(f"{conf.TOOLKIT_DEVICE_MODULE}.{name.lower()}")
     generate_qcodes_driver(getattr(module, name.upper()))
+    device_api()
 
 
 @main.command(help="Generate all.")
