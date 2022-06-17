@@ -13,6 +13,7 @@ from pathlib import Path
 from zhinst.toolkit.driver.devices.base import BaseInstrument
 from zhinst.toolkit.driver.modules.base_module import BaseModule
 from zhinst.toolkit.nodetree import Node, NodeTree
+import conf
 
 parameter_tuple = namedtuple("parameter", ["name", "is_node"])
 submodule_tuple = namedtuple("submodule", ["subclass", "name", "is_list"])
@@ -412,27 +413,19 @@ def main():
 @main.command(help="toolkit instrument class")
 @click.argument(
     "name",
-    required=True,
+    required=False,
     type=str,
 )
 def instrument_class(name):
-    module = importlib.import_module(f"zhinst.toolkit.driver.devices.{name.lower()}")
+    module = importlib.import_module(f"{conf.TOOLKIT_DEVICE_MODULE}.{name.lower()}")
     generate_qcodes_driver(getattr(module, name.upper()))
 
 
-# @main.command(help="toolkit modules")
-# @click.argument(
-#     "name",
-#     required=True,
-#     type=str,
-# )
-# @click.option(
-#     "-t", "--target", type=str, help="QCoDeS class name of the Module", default=None
-# )
-# def zi_module(name, target):
-#     module = importlib.import_module(f"zhinst.toolkit.driver.modules.{name.lower()}")
-#     generate_qcodes_driver_modules(getattr(module, name))
-
+@main.command(help="Generate all.")
+def generate_all():
+    for name in conf.DEVICE_DRIVERS:
+        module = importlib.import_module(f"{conf.TOOLKIT_DEVICE_MODULE}.{name.lower()}")
+        generate_qcodes_driver(getattr(module, name.upper()))
 
 if __name__ == "__main__":
     main()
