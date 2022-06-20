@@ -22,7 +22,7 @@ class ZIDevice(ZIBaseInstrument):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -62,7 +62,7 @@ class SHFQA(SHFQADriver):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -102,7 +102,7 @@ class SHFSG(SHFSGDriver):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -142,7 +142,7 @@ class HDAWG(HDAWGDriver):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -182,7 +182,7 @@ class PQSC(PQSCDriver):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -222,7 +222,7 @@ class SHFQC(SHFQCDriver):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -262,7 +262,7 @@ class UHFLI(UHFLIDriver):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -302,7 +302,7 @@ class UHFQA(UHFQADriver):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -342,7 +342,7 @@ class MFLI(ZIBaseInstrument):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -382,7 +382,7 @@ class MFIA(ZIBaseInstrument):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8004)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -422,7 +422,7 @@ class HF2(ZIBaseInstrument):
             The serial number can be found on the back panel of the instrument.
         server_host: Host address of the data server (e.g. localhost)
         server_port: Port number of the data server. If not specified the session
-            uses the default port 8005. (default = None)
+            uses the default port. (default = 8005)
         interface: Device interface (e.g. = "1GbE"). If not specified
             the default interface from the discover is used.
         name: Name of the instrument in qcodes.
@@ -442,7 +442,7 @@ class HF2(ZIBaseInstrument):
         self,
         serial: str,
         host: str,
-        port: int = 8004,
+        port: int = 8005,
         *,
         interface: t.Optional[str] = None,
         name=None,
