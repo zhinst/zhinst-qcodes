@@ -6,3 +6,4 @@ click
 setuptools
 zhinst-deviceutils
 zhinst-toolkit
+isort
