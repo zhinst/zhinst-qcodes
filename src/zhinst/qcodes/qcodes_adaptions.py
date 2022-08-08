@@ -197,7 +197,7 @@ class ZIParameter(Parameter):
         self.get_raw = kwargs["get_cmd"]
         self.set_raw = kwargs["set_cmd"]
         self.get = self._wrap_get(self.get_raw)
-        self.set = self._wrap_set(self.set_raw)
+        self.set = self._set_zi
         self._snapshot_cache = snapshot_cache
         self._zi_node = zi_node
         self._tk_node = tk_node
@@ -206,18 +206,33 @@ class ZIParameter(Parameter):
         if len(args) == 0:
             if self.gettable:
                 return self.get(**kwargs)
-            else:
-                raise NotImplementedError(
-                    "no get cmd found in" + f" Parameter {self.name}"
-                )
-        else:
-            if self.settable:
-                self.set(*args, **kwargs)
-                return None
-            else:
-                raise NotImplementedError(
-                    "no set cmd found in" + f" Parameter {self.name}"
-                )
+            raise NotImplementedError("no get cmd found in" + f" Parameter {self.name}")
+        if self.settable:
+            return self.set(*args, **kwargs)
+        raise NotImplementedError("no set cmd found in" + f" Parameter {self.name}")
+
+    def _set_zi(self, *args, **kwargs):
+        """ZI specific set that supports returning values
+
+        QCoDeS does not provide a way to return a value for the set command.
+        However a `deep` command in LabOne does return the acknowledged value
+        by the device. This function in combination with the custom `__call__`
+        method bypasses this problem.
+
+        This function simply wraps around the QCoDeS specific set functionality
+        (_wrap_set) stores the returned value by zhinst-toolkit and calls the
+        get functionality with the returned value. Thus is acts as a set and
+        get within on single command without overwriting the QCoDeS specific
+        implementation.
+        """
+        set_return = None
+
+        def set_wrapper(*args, **kwargs) -> None:
+            nonlocal set_return
+            set_return = self.set_raw(*args, **kwargs)
+
+        self._wrap_set(set_wrapper)(*args, **kwargs)
+        return self._wrap_get(lambda: set_return)() if set_return is not None else None
 
     def snapshot_base(
         self, update: bool = True, params_to_skip_update: t.List[str] = None
