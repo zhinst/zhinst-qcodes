@@ -4,7 +4,7 @@ Refactoring
 The zhinst-qcodes package exists for several years and as grown a lot in that
 time. More and more device where added and the expectations and stability request
 got stronger and stronger. zhinst-qcodes is based on zhinst-toolkit a high level
-driver on top of the native LabOne ziPython package. Meaning it shares the same
+driver on top of the native LabOne API package (zhinst-core). Meaning it shares the same
 functionalities but also the same problems.
 
 To just mention a few of them:
@@ -24,7 +24,7 @@ Instruments.
 
 zhinst-qcodes also benefits from the redesign since it is based on zhinst-toolkit
 since the beginning. The benefits include low setup times and fast responses,
-similar to the low level ziPython API. But these benefits also come with the
+similar to the low level LabOne API. But these benefits also come with the
 price of a severe api changes. The architecture and the way to use zhinst-qcodes
 from a user perspective more or less completely changes. In the following we
 will try to help with the transition to the new zhinst-qcodes driver. But we
@@ -34,7 +34,7 @@ the Zurich Instruments support so we can help you out.
 
 The biggest change is probably the starting point. Instead of creating instances
 of the instruments directly the user now starts by creating a session to a
-data server. Since that is the underlying architecture of LabOne as well ist
+data server. Since that is the underlying architecture of LabOne as well it
 seamlessly integrates into the Zurich Instruments ecosystem.
 
 .. code-block:: python

@@ -1,4 +1,4 @@
-"""QCodes Drivers for Zurich Instruments devices."""
+"""QCoDeS Drivers for Zurich Instruments devices."""
 
 from zhinst.qcodes.session import ZISession
 from zhinst.qcodes.device_creator import (
@@ -18,6 +18,7 @@ from zhinst.qcodes.device_creator import (
 from zhinst.toolkit import (
     Waveforms,
     CommandTable,
+    Sequence,
     PollFlags,
     AveragingMode,
     SHFQAChannelMode,
@@ -29,21 +30,22 @@ except ModuleNotFoundError:
     pass
 
 __all__ = [
-  "ZISession",
-  "HDAWG",
-  "MFLI",
-  "MFIA",
-  "PQSC",
-  "SHFQA",
-  "SHFQC",
-  "SHFSG",
-  "UHFLI",
-  "UHFQA",
-  "ZIDevice",
-  "HF2",
-  "Waveforms",
-  "CommandTable",
-  "PollFlags",
-  "AveragingMode",
-  "SHFQAChannelMode",
+    "ZISession",
+    "HDAWG",
+    "MFLI",
+    "MFIA",
+    "PQSC",
+    "SHFQA",
+    "SHFQC",
+    "SHFSG",
+    "UHFLI",
+    "UHFQA",
+    "ZIDevice",
+    "HF2",
+    "Waveforms",
+    "CommandTable",
+    "Sequence",
+    "PollFlags",
+    "AveragingMode",
+    "SHFQAChannelMode",
 ]

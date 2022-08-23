@@ -1,4 +1,4 @@
-"""Autogenerate the QCodes drivers from toolkit and ziPython"""
+"""Autogenerate the QCoDeS drivers from toolkit and zhinst-core."""
 from collections import namedtuple
 import typing
 import inspect
@@ -49,7 +49,7 @@ def getPropertyInfo(
             if issubclass(item_class, Node):
                 # list of submodules
                 return submodule_tuple(item_class, name, True)
-        except:
+        except Exception:
             raise Exception(
                 f"{name} in {class_type} has a type hint list, "
                 "but misses the item typehint"
@@ -86,7 +86,7 @@ def getInfo(
 
     Args:
         class_type (object) toolkit class
-        existing_names (list) list of existing names for the QCodes class.
+        existing_names (list) list of existing names for the QCoDeS class.
 
     Returns:
         class_tuple: functions,parameters,sub_modules
@@ -206,7 +206,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
     Returns:
         (list) list dict with information for each function.
     """
-    # Enums from toolkit should be exposed also in the QCodes driver
+    # Enums from toolkit should be exposed also in the QCoDeS driver
     enums = {
         "SHFQAChannelMode": "zhinst.toolkit.interface.SHFQAChannelMode",
         "MappingMode": "zhinst.toolkit.interface.MappingMode",
@@ -214,6 +214,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
         "AveragingMode": "zhinst.toolkit.interface.AveragingMode",
         "Waveforms": "zhinst.toolkit.waveform.Waveforms",
         "CommandTable": "zhinst.toolkit.command_table.CommandTable",
+        "Sequence": "zhinst.toolkit.sequence.Sequence",
     }
     # regex to find deprecation decorator
     deprecated_regex = re.compile(r"(@depreca(.|\n)*?)\s*?(?:def|@)")
@@ -304,7 +305,7 @@ def generate_qcodes_class_info(
 
 
 def camel_to_snake(name: str) -> str:
-    """Convert camelcase into snake case
+    """Convert camelcase into snake case.
 
     Args:
         name  (str): name in camel case
@@ -400,7 +401,13 @@ def generate_qcodes_driver(
 #     #          remove_unused_variables=False, ignore_init_module_imports=False):
 #     print(f"Module {output_dir + name.lower()}.py created.")
 
+
 def generate_device_api():
+    """Generate device API.
+
+    The device API enables that every ZI device is exposed as a class that
+    can be istanciated directly without a session.
+    """
     DEVICE_API_FILEPATH = "src/zhinst/qcodes/device_creator.py"
     data = {
         "classes": [
@@ -414,7 +421,7 @@ def generate_device_api():
             {"name": "UHFQA", "parent": "UHFQADriver", "is_hf2": False},
             {"name": "MFLI", "parent": "ZIBaseInstrument", "is_hf2": False},
             {"name": "MFIA", "parent": "ZIBaseInstrument", "is_hf2": False},
-            {"name": "HF2", "parent": "ZIBaseInstrument", "is_hf2": True}
+            {"name": "HF2", "parent": "ZIBaseInstrument", "is_hf2": True},
         ],
         "imports": [
             "from zhinst.qcodes.driver.devices.base import ZIBaseInstrument",
@@ -425,17 +432,20 @@ def generate_device_api():
             "from zhinst.qcodes.driver.devices.shfsg import SHFSG as SHFSGDriver",
             "from zhinst.qcodes.driver.devices.uhfli import UHFLI as UHFLIDriver",
             "from zhinst.qcodes.driver.devices.uhfqa import UHFQA as UHFQADriver",
-        ]
+        ],
     }
     templateLoader = jinja2.FileSystemLoader(searchpath=conf.TEMPLATE_PATH)
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("device_api.py.j2")
     result = template.render(data)
-    result = black.format_str(result, mode=black.mode.Mode(
-        target_versions={black.TargetVersion.PY37},
-        line_length=88,
-        string_normalization=False,
-        ))
+    result = black.format_str(
+        result,
+        mode=black.mode.Mode(
+            target_versions={black.TargetVersion.PY37},
+            line_length=88,
+            string_normalization=False,
+        ),
+    )
     result = autoflake.fix_code(result, remove_all_unused_imports=True)
     result = isort.code(result)
     with open(DEVICE_API_FILEPATH, "w+") as outfile:
@@ -445,7 +455,7 @@ def generate_device_api():
 
 @click.group()
 def main():
-    """Autogeneration of QCoDeS driver from zhinst.toolkit"""
+    """Autogeneration of QCoDeS driver from zhinst.toolkit."""
 
 
 @main.command(help="toolkit instrument class")
@@ -455,16 +465,19 @@ def main():
     type=str,
 )
 def instrument_class(name):
+    """Generate a insturment class."""
     module = importlib.import_module(f"{conf.TOOLKIT_DEVICE_MODULE}.{name.lower()}")
     generate_qcodes_driver(getattr(module, name.upper()))
 
 
 @main.command(help="Generate all.")
 def generate_all():
+    """Generate all drivers."""
     for name in conf.DEVICE_DRIVERS:
         module = importlib.import_module(f"{conf.TOOLKIT_DEVICE_MODULE}.{name.lower()}")
         generate_qcodes_driver(getattr(module, name.upper()))
     generate_device_api()
+
 
 if __name__ == "__main__":
     main()

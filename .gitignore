@@ -1,14 +1,69 @@
-*.ipynb_checkpoints
-*.pyc
-*.egg-info/
-.eggs/
+#project files
+.idea
 .vscode
-dist/
+pytest.ini
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
 build/
-*/build/
-*/_build/
-*/*/_build/
+_build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+examples/*.ipynb
+*.ipynb_checkpoints
+.ipynb_*
+
+# pyenv
+.python-version
 _version.py
-*.ipynb
-venv*/
-_autosummary/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+#db, web
+.DS_Store
+
+# documentation
+_autosummary

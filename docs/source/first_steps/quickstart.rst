@@ -52,7 +52,7 @@ zhinst-qcodes.
 
 The created device object holds all device specific nodes and depending on the device
 type also implements additional functionalities (e.g. exposes the
-``zhinst.deviceutils`` functions).
+``zhinst.utils`` functions).
 
 .. code-block:: python
 
@@ -129,7 +129,7 @@ explanation of Parameter work in QCoDeS.
 
 So what did that code do?
 
-1. The ``session`` represents the session to the data server and therefor gives access to its nodes (``/zi/*`` in ziPython).
+1. The ``session`` represents the session to the data server and therefor gives access to its nodes (``/zi/*`` in the LabOne API).
 2. One of these nodes is ``zi/debug/level``. zhinst-qcodes allows it to access that node by attributes.
 3. To get the current value of the node simply make a call operation.
 
@@ -160,7 +160,7 @@ examples.
 
 .. note::
 
-    The underlying LabOne® module (zhinst.ziPython object) can be accessed with the
+    The underlying LabOne® module (zhinst.core object) can be accessed with the
     ``raw_module`` property
 
 .. code-block:: python
@@ -169,7 +169,7 @@ examples.
     >>> daq_module.grid.mode()
     4
     >>> daq_module.raw_module
-    <zhinst.ziPython.DataAcquisitionModule at 0x10edc5630>
+    <zhinst.core.DataAcquisitionModule at 0x10edc5630>
 
 Please take a look at the examples in the
 `zhinst-toolkit examples <https://docs.zhinst.com/zhinst-toolkit/en/latest/examples/index.html>`_

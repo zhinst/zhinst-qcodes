@@ -1,4 +1,3 @@
-
 def test_api_all():
     from zhinst.qcodes import (
         ZIDevice,

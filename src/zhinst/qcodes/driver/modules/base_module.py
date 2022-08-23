@@ -1,6 +1,6 @@
-"""Base Module Driver
+"""Base Module Driver.
 
-Nativly works with all module types and provides the basic functionality like
+Natively works with all module types and provides the basic functionality like
 the module specific nodetree.
 """
 import typing as t
@@ -20,7 +20,7 @@ if t.TYPE_CHECKING:
 
 
 class ZIBaseModule(ZIInstrument):
-    """Generic QCodes driver for the Zurich Instrument LabOne modules.
+    """Generic QCoDeS driver for the Zurich Instrument LabOne modules.
 
     All module specific class are derived from this class.
     It exposes the nodetree and also implements common functions valid for all
@@ -71,12 +71,23 @@ class ZIBaseModule(ZIInstrument):
             str: raw string node
         """
         try:
-            node = signal.zi_node
+            node = signal.zi_node  # type: ignore[union-attr]
         except AttributeError:
             node = signal
         return node
 
-    def device(self, device: t.Union[t.Type[ZIBaseInstrument], str] = None):
+    def device(
+        self, device: t.Optional[t.Union[t.Type[ZIBaseInstrument], str]] = None
+    ) -> t.Optional[t.Union[t.Type[ZIBaseInstrument], str]]:
+        """The device serial to be used with the LabOne module.
+
+        Args:
+            device: device that should be used with the module. If not
+                specified the current device value is returned.
+
+        Returns:
+            Current value of the device if no argument hast been specified.
+        """
         if device is None:
             serial = self._tk_object.device(parse=False)
             try:
@@ -84,6 +95,7 @@ class ZIBaseModule(ZIInstrument):
             except (RuntimeError, KeyError):
                 return serial
         self._tk_object.device(device)
+        return None
 
     def subscribe(self, signal: ZIParameter):
         """Subscribe to a node.
@@ -91,7 +103,7 @@ class ZIBaseModule(ZIInstrument):
         The node can either be a node of this module or of a connected device.
 
         Args:
-            signal (Node): node that should be subcribed.
+            signal (Node): node that should be subscribed.
         """
         self._tk_object.subscribe(signal.tk_node)
 
@@ -112,9 +124,10 @@ class ZIBaseModule(ZIInstrument):
 
         Args:
             timeout (float): The maximum waiting time in seconds for the
-                measurment (default: 20).
+                measurement (default: 20).
             sleep_time (int): Time in seconds to wait between
                 requesting sweeper state. (default: 0.5)
+
         Raises:
             TimeoutError: if the measurement is not completed before
                 timeout.
@@ -123,4 +136,5 @@ class ZIBaseModule(ZIInstrument):
 
     @property
     def raw_module(self) -> t.Any:
+        """Underlying core module."""
         return self._tk_object.raw_module

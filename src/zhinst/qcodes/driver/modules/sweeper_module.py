@@ -16,7 +16,7 @@ class ZISweeperModule(ZIBaseModule):
     """Implements a base Sweeper Module for Lock-In instruments.
 
     The Sweeper Module allows for simple and efficient parameter sweeps while
-    acquiring data streams from mutiple different signal sources. The module
+    acquiring data streams from multiple different signal sources. The module
     supports well defined sweeps of various parameters as well as application
     specific measurement presets. For more information on how to use the Sweeper
     Module, have a look at the LabOne Programming Manual.
@@ -43,11 +43,12 @@ class ZISweeperModule(ZIBaseModule):
     def execute(self) -> None:
         """Start the sweeper.
 
-        Subscription or unsubscription is not possible until the sweep is finished."""
+        Subscription or unsubscription is not possible until the sweep is finished.
+        """
         self._tk_object.execute()
 
     def read(self) -> t.Dict[ZIParameter, t.List]:
-        """Read the aquired data from the module.
+        """Read the acquired data from the module.
 
         The Data is split into bursts.
 

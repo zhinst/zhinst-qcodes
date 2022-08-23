@@ -1,3 +1,4 @@
+"""Module for all device drivers."""
 import typing as t
 
 from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
@@ -16,7 +17,7 @@ DEVICE_CLASS_BY_MODEL = {
     "SHFQC": SHFQC,
     "SHFSG": SHFSG,
     "HDAWG": HDAWG,
-    "PQSC":  PQSC,
+    "PQSC": PQSC,
     "UHFQA": UHFQA,
     "UHFLI": UHFLI,
 }
