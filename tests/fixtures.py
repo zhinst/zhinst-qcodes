@@ -12,7 +12,7 @@ def data_dir(request):
 @pytest.fixture()
 def mock_connection():
     with patch(
-        "zhinst.toolkit.session.ziPython.ziDAQServer", autospec=True
+        "zhinst.toolkit.session.core.ziDAQServer", autospec=True
     ) as connection:
         yield connection
 

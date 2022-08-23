@@ -1,4 +1,4 @@
-"""Connection Manager for the ziPython API"""
+"""Connection Manager for the ziPython API."""
 from collections.abc import MutableMapping
 import typing as t
 
@@ -7,7 +7,7 @@ from zhinst.toolkit.session import PollFlags
 from zhinst.toolkit.session import Session as TKSession
 from zhinst.toolkit.session import ModuleHandler as TKModuleHandler
 from zhinst.toolkit.nodetree.helper import lazy_property
-from zhinst.ziPython import ziDAQServer
+from zhinst.core import ziDAQServer
 
 import zhinst.qcodes.driver.devices as ZIDevices
 import zhinst.qcodes.driver.modules as ZIModules
@@ -35,8 +35,10 @@ class Devices(MutableMapping):
     def __init__(self, session: "Session", tk_devices: TKDevices):
         self._tk_devices = tk_devices
         self._session = session
-        self._devices = {}
-        self._default_properties = {}
+        self._devices: t.Dict[str, ZIDevices.DeviceType] = {}
+        self._default_properties: t.Dict[
+            str, t.Tuple[t.Optional[str], t.Optional[bool]]
+        ] = {}
 
     def __getitem__(self, key) -> ZIDevices.DeviceType:
         key = key.lower()
@@ -64,8 +66,23 @@ class Devices(MutableMapping):
     def __len__(self):
         return len(self.connected())
 
-    def update_device_properties(self, serial: str, name: str, raw: bool) -> None:
-        """ """
+    def update_device_properties(
+        self, serial: str, name: t.Optional[str], raw: t.Optional[bool]
+    ) -> None:
+        """Update the properties for a device.
+
+        The device options are used when the QCoDeS option of a new device
+        is created.
+
+        Args:
+            serial: Serial of the device (e.g. dev1234)
+            name: Optional name of the QCoDeS device object
+            raw: Flag if qcodes instance should only created with the nodes and
+                not forwarding the toolkit functions. (default = False)
+
+        Raises:
+            RuntimeError: If the device is already created
+        """
         if serial in self._devices:
             raise RuntimeError(
                 f"The Qcodes Instance of {serial} already exists.\n"
@@ -91,6 +108,29 @@ class Devices(MutableMapping):
 
 
 class ModuleHandler:
+    """Modules of LabOne.
+
+    Handler for all additional so called modules by LabOne. A LabOne module is
+    bound to a user session but creates a independent session to the Data Server.
+    This has the advantage that they do not interfere with the user session. It
+    also means that creating a session causes additional resources allocation,
+    both at the client and the data server. New modules should therefore only be
+    instantiated with care.
+
+    Toolkit holds a lazy generated instance of all modules. This ensures that
+    not more than one modules of each type gets created by accident and that the
+    access to the modules is optimized.
+
+    Of course there are many use cases where more than one module of a single
+    type is required. This class therefore also exposes a ``create`` function for
+    each LabOne module. These functions create a unmanaged instance of that
+    module (unmanaged means toolkit does not hold an instance of that module).
+
+    Args:
+        session: Active user session
+        tk_modules: Underlying toolkit module handler
+    """
+
     def __init__(self, session: "Session", tk_modules: TKModuleHandler):
         self._session = session
         self._tk_modules = tk_modules
@@ -446,12 +486,8 @@ class ZISession:
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the Flag will create a new session.
-
-            Warning:
-
-                Creating a new session should be done carefully since it
-                requires more ressources and can create unwanted side effects.
-
+            Warning: Creating a new session should be done carefully since it
+            requires more ressources and can create unwanted side effects.
         connection: Existing daq server object. If specified the session will
             not create a new session to the data server but reuse the passed
             one. (default = None)
@@ -466,6 +502,7 @@ class ZISession:
         new_session=False,
         connection: ziDAQServer = None,
     ):
+        """Session creator."""
         if not new_session:
             for instance in Session.instances():
                 if instance.server_host == server_host and (
@@ -610,7 +647,7 @@ class Session(ZIInstrument):
         timeout: float = 0.5,
         flags: PollFlags = PollFlags.DEFAULT,
     ) -> t.Dict[ZIParameter, t.Dict[str, t.Any]]:
-        """Polls all subsribed data
+        """Polls all subsribed data.
 
         Poll the value changes in all subscribed nodes since either subscribing
         or the last poll (assuming no buffer overflow has occurred on the Data
@@ -648,12 +685,12 @@ class Session(ZIInstrument):
 
     @property
     def modules(self) -> ModuleHandler:
-        """LabOne modules"""
+        """Modules of LabOne."""
         return self._modules
 
     @property
     def is_hf2_server(self) -> bool:
-        """Flag if the data server is a HF2 Data Server"""
+        """Flag if the data server is a HF2 Data Server."""
         return self._tk_object.is_hf2_server
 
     @property
@@ -663,14 +700,15 @@ class Session(ZIInstrument):
 
     @property
     def server_host(self) -> str:
-        """Server host"""
+        """Server host."""
         return self._tk_object.server_host
 
     @property
     def server_port(self) -> int:
-        """Server port"""
+        """Server port."""
         return self._tk_object.server_port
 
     @property
     def toolkit_session(self) -> TKSession:
+        """Underlying zhinst-toolkit session."""
         return self._tk_object

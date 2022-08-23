@@ -42,10 +42,13 @@ extensions = [
     "sphinx.ext.autosummary",
 ]
 add_module_names = False
-autodoc_default_options = {"show-inheritance": True}
 
+# Autodoc settings
+autodoc_default_options = {"show-inheritance": True}
+autodoc_typehints = "both"
+autodoc_typehints_format = "short"
 autosummary_generate = True
-set_type_checking_flag = False
+set_type_checking_flag = True
 
 # Make sure the target is unique
 autosectionlabel_prefix_document = True
@@ -76,7 +79,7 @@ html_theme = "pydata_sphinx_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-html_css_files = ['css/custom.css']
+html_css_files = ['zhinst-sphinx-theme/css/custom.css']
 
 # Napoleon settings
 napoleon_google_docstring = True

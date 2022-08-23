@@ -1,4 +1,4 @@
-"""Base modules for the Zurich Instrument specific QCodes driver. """
+"""Base modules for the Zurich Instrument specific QCodes driver."""
 import re
 from datetime import datetime
 import typing as t
@@ -23,14 +23,14 @@ class ZISnapshotHelper:
 
     def __init__(self, nodetree: NodeTree, is_module: bool = False):
         self._is_running = False
-        self._value_dict = {}
+        self._value_dict: t.Dict[str, t.Any] = {}
         self._start = datetime.now()
         self._nodetree = nodetree
         self._is_module = is_module
 
     @contextmanager
     def snapshot(self, name: t.Optional[str] = None):
-
+        """Contex manager for a optimized snapshot with ZI devices."""
         is_owner = not self._is_running
         if is_owner:
             self._start_snapshot(name)
@@ -47,6 +47,7 @@ class ZISnapshotHelper:
             name: Name of the subnode which the snapshot should
                 be taken. If not specified a snapshot of all nodes will be taken.
                 (default = None)
+
         Returns:
             bool: Flag if a new snapshot was started.
         """
@@ -109,10 +110,10 @@ class ZISnapshotHelper:
 
     @staticmethod
     def print_readable_snapshot(
-        qcodes_object: object, update: bool = False, max_chars: int = 80
+        qcodes_object: Instrument, update: bool = False, max_chars: int = 80
     ) -> None:
-        """
-        Prints a readable version of the snapshot.
+        """Prints a readable version of the snapshot.
+
         The readable snapshot includes the name, value and unit of each
         parameter.
         A convenience function to quickly get an overview of the
@@ -162,7 +163,7 @@ class ZISnapshotHelper:
                     msg += f"({unit})"
                 # Truncate the message if it is longer than max length
                 if len(msg) > max_chars and max_chars != -1:
-                    msg = msg[0 : max_chars - 3] + "..."
+                    msg = msg[0 : max_chars - 3] + "..."  # noqa: E203
                 print(msg)
 
         for submodule in qcodes_object.submodules.values():
@@ -170,12 +171,12 @@ class ZISnapshotHelper:
 
     @property
     def is_running(self) -> bool:
-        """Flag if a snapshot is in progress"""
+        """Flag if a snapshot is in progress."""
         return self._is_running
 
 
 class ZIParameter(Parameter):
-    """Zurich Instrument specific QCodes Parameter
+    """Zurich Instrument specific QCodes Parameter.
 
     Overwrite the snaphot functionality to use the ZISnapshotHelper.
     Forwards all args and kwargs to the QCodes Parameter class.
@@ -188,9 +189,9 @@ class ZIParameter(Parameter):
     def __init__(
         self,
         *arg,
-        snapshot_cache: t.Optional[ZISnapshotHelper] = None,
-        zi_node: t.Optional[str] = None,
-        tk_node: Node = None,
+        snapshot_cache: ZISnapshotHelper,
+        zi_node: str,
+        tk_node: Node,
         **kwargs,
     ):
         super().__init__(*arg, **kwargs)
@@ -203,6 +204,36 @@ class ZIParameter(Parameter):
         self._tk_node = tk_node
 
     def __call__(self, *args, **kwargs):
+        """Call operator that either gets (empty) or gets the value of a node.
+
+        Args:
+            value: Optional value that should be set to the node. If not
+                specified the operator will return the value of the node
+                instead.
+            deep: Flag if the operation should block until the device has
+                acknowledged the operation. The operation returns the value
+                acknowledged by the device. This takes significantly longer
+                than a normal operation and should be used carefully.
+            enum: Flag if enumerated values should return the enum value as
+                string or return the raw number.
+            parse: Flag if the GetParser or SetParser, if present, should be
+                applied or not.
+
+        Returns:
+            Value of the node for a get operation. If the deep flag is set the
+            acknowledged value from the device is returned (applies also for
+            the set operation).
+
+        Raises:
+            AttributeError: If the connection does not support the necessary
+                function to get/set the value.
+            RuntimeError: If self.node_info.type if one of the following:
+                [ZIPWAWave, ZITriggerSample, ZICntSample, ZIImpedanceSample,
+                ZIScopeWave, ZIAuxInSample]. The reason is that these nodes can
+                only be polled.
+            TypeError: if the deep command is not available for this node
+                (e.g. sample nodes)
+        """
         if len(args) == 0:
             if self.gettable:
                 return self.get(**kwargs)
@@ -212,7 +243,7 @@ class ZIParameter(Parameter):
         raise NotImplementedError("no set cmd found in" + f" Parameter {self.name}")
 
     def _set_zi(self, *args, **kwargs):
-        """ZI specific set that supports returning values
+        """ZI specific set that supports returning values.
 
         QCoDeS does not provide a way to return a value for the set command.
         However a `deep` command in LabOne does return the acknowledged value
@@ -237,10 +268,10 @@ class ZIParameter(Parameter):
     def snapshot_base(
         self, update: bool = True, params_to_skip_update: t.List[str] = None
     ) -> dict:
-        """
-        State of the parameter as a JSON-compatible dict (everything that
-        the custom JSON encoder class
-        :class:`qcodes.utils.helpers.NumpyJSONEncoder` supports).
+        """State of the parameter as a JSON-compatible dict.
+
+        (everything that the custom JSON encoder class
+        :class:`qcodes.utils.helpers.NumpyJSONEncoder` supports)
 
         If the parameter has been initiated with ``snapshot_value=False``,
         the snapshot will NOT include the ``value`` and ``raw_value`` of the
@@ -259,7 +290,6 @@ class ZIParameter(Parameter):
         Returns:
             base snapshot
         """
-
         get = self.__dict__["get"]
         try:
             self.get = lambda: self._snapshot_cache.get(self, get)
@@ -305,9 +335,13 @@ class ZIParameter(Parameter):
         WARNING: Only supports integer values as reference.
 
         Args:
-            value (int): expected value of the node.
-            timeout (float): max wait time. (default = 2)
-            sleep_time (float): sleep interval in seconds. (default = 0.006)
+            value: expected value of the node.
+            invert: Instead of waiting for the value, the function will wait for
+                any value except the passed value instead. (default = False)
+
+                Useful when waiting for value to change from existing one.
+            timeout: max wait time. (default = 2)
+            sleep_time: sleep interval in seconds. (default = 0.006)
         """
         self._tk_node.wait_for_state_change(
             value, invert=invert, timeout=timeout, sleep_time=sleep_time
@@ -325,12 +359,12 @@ class ZIParameter(Parameter):
 
     @property
     def tk_node(self) -> Node:
-        """toolkit node of the Parameter."""
+        """Toolkit node of the Parameter."""
         return self._tk_node
 
 
 class ZINode(InstrumentChannel):
-    """Zurich Instrument specific QCodes InstrumentChannel
+    """Zurich Instrument specific QCodes InstrumentChannel.
 
     Overwrite the snaphot functionality to use the ZISnapshotHelper.
     Forwards all args and kwargs to the QCodes InstrumentChannel class.
@@ -343,7 +377,7 @@ class ZINode(InstrumentChannel):
     def __init__(
         self,
         *arg,
-        snapshot_cache: t.Optional[ZISnapshotHelper] = None,
+        snapshot_cache: ZISnapshotHelper,
         zi_node: Node = None,
         **kwargs,
     ):
@@ -367,8 +401,8 @@ class ZINode(InstrumentChannel):
             return super().snapshot(update)
 
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
-        """
-        Prints a readable version of the snapshot.
+        """Prints a readable version of the snapshot.
+
         The readable snapshot includes the name, value and unit of each
         parameter.
         A convenience function to quickly get an overview of the
@@ -387,7 +421,7 @@ class ZINode(InstrumentChannel):
 
 
 class ZIChannelList(ChannelList):
-    """Zurich Instrument specific QCodes InstrumentChannel
+    """Zurich Instrument specific QCodes InstrumentChannel.
 
     Overwrite the snaphot functionality to use the ZISnapshotHelper.
     Forwards all args and kwargs to the QCodes InstrumentChannel class.
@@ -418,8 +452,8 @@ class ZIChannelList(ChannelList):
             return super().snapshot(update)
 
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
-        """
-        Prints a readable version of the snapshot.
+        """Prints a readable version of the snapshot.
+
         The readable snapshot includes the name, value and unit of each
         parameter.
         A convenience function to quickly get an overview of the
@@ -438,7 +472,7 @@ class ZIChannelList(ChannelList):
 
 
 class ZIInstrument(Instrument):
-    """Zurich Instrument specific Qcodes Instrument
+    """Zurich Instrument specific Qcodes Instrument.
 
     Overwrite the snaphot functionality to use the ZISnapshotHelper.
 
@@ -468,8 +502,8 @@ class ZIInstrument(Instrument):
             return super().snapshot(update)
 
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
-        """
-        Prints a readable version of the snapshot.
+        """Prints a readable version of the snapshot.
+
         The readable snapshot includes the name, value and unit of each
         parameter.
         A convenience function to quickly get an overview of the
@@ -487,8 +521,15 @@ class ZIInstrument(Instrument):
             return super().print_readable_snapshot(update, max_chars)
 
 
-def tk_node_to_qcodes_list(tk_node: Node):
-    """"""
+def tk_node_to_qcodes_list(tk_node: Node) -> t.List[str]:
+    """Convert a toolkit node to a list of elements that form a QCoDeS object.
+
+    Args:
+        tk_node: Toolkit node to convert.
+
+    Return:
+        List of strings that form a QCoDeS object.
+    """
     if tk_node.raw_tree[-1].isdigit():
         parents = tk_node.raw_tree
         name = "value"
@@ -510,8 +551,16 @@ def tk_node_to_qcodes_list(tk_node: Node):
     return parents
 
 
-def tk_node_to_parameter(root, tk_node: Node):
-    """Convert a Toolkit node into a QCodes Parameter"""
+def tk_node_to_parameter(root: t.Any, tk_node: Node) -> t.Any:
+    """Convert a Toolkit node into a QCodes Parameter.
+
+    Args:
+        root: Root from which the node should be derived.
+        tk_node: Toolkit node to convert.
+
+    Returns:
+        QCoDeS Parameter that matches the given tk node.
+    """
     qcodes_list = list(tk_node.raw_tree)
     if qcodes_list[-1].isdigit():
         qcodes_list.append("value")
@@ -528,16 +577,18 @@ def tk_node_to_parameter(root, tk_node: Node):
 def _get_submodule(
     layer, parents: t.List[str], snapshot_cache: ZISnapshotHelper
 ) -> ZINode:
-    """get the nested parent element for a node.
+    """Get the nested parent element for a node.
 
     Reuse existing subnodes and automatically create them if they don`t
     exist.
 
     Args:
-        parents (tuple[str]): nested parents of a node as str.
+        parents: Nested parents of a node as str.
+        snapshot_cache: Object of the snapshot cache.
 
     Returns:
-        ZINode: direct parent of the node"""
+        ZINode: direct parent of the node
+    """
     weird_nodes = ["tamp0", "tamp1"]
     current_layer = layer
     for i, node in enumerate(parents):
@@ -594,8 +645,14 @@ def init_nodetree(
     snapshot_cache: ZISnapshotHelper,
     blacklist: tuple = tuple(),
 ) -> None:
-    """Generate nested qcodes parameter from the device nodetree."""
+    """Generate nested qcodes parameter from the device nodetree.
 
+    Args:
+        layer: current layer in the nodetree.
+        nodetree: underlying toolkit node tree.
+        snapshot_cache: Instance of the SnapshotHelper.
+        blacklist: nodes to be blacklisted.
+    """
     snapshot_blacklist = ["fwlog", "values"]
 
     is_complex = re.compile("demods/./sample")

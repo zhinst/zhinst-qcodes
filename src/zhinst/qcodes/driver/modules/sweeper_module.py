@@ -43,7 +43,8 @@ class ZISweeperModule(ZIBaseModule):
     def execute(self) -> None:
         """Start the sweeper.
 
-        Subscription or unsubscription is not possible until the sweep is finished."""
+        Subscription or unsubscription is not possible until the sweep is finished.
+        """
         self._tk_object.execute()
 
     def read(self) -> t.Dict[ZIParameter, t.List]:
