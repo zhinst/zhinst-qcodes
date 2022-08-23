@@ -27,15 +27,15 @@ Node Renaming
    * - uhfqa.crosstalk_matrix
      - uhfqa.qas[0].crosstalk_matrix
    * - uhfqa.result_source
-     - uhfaq.qas[0].result.source
+     - uhfqa.qas[0].result.source
    * - uhfqa.integration_time
-     - uhfqa.integration_length (conert time to samples manually)
+     - uhfqa.integration_length (convert time to samples manually)
    * - uhfqa.integration_length
-     - uhfaq.qas[0].integration.length
+     - uhfqa.qas[0].integration.length
    * - uhfqa.averaging_mode
-     - uhfaq.qas[0].result.mode
+     - uhfqa.qas[0].result.mode
    * - uhfqa.qa_delay
-     - uhfaq.qas[0].adjusted_delay
+     - uhfqa.qas[0].adjusted_delay
    * - uhfqa.ref_clock
      - uhfqa.system.extclk
    * - uhfqa.scope.single

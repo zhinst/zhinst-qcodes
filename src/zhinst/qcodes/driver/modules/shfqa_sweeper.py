@@ -25,7 +25,7 @@ class ZISHFQASweeper(ZIInstrument):
     All parameters can be accessed through their corresponding node:
     * device: Device to run the sweeper with
     * sweep: Frequency range settings for a sweep
-    * rf: RF in- and ouput settings for a sweep
+    * rf: RF in- and output settings for a sweep
     * average: Averaging settings for a sweep
     * trigger: Settings for the trigger
     * envelope: Settings for defining a complex envelope for pulsed spectroscopy
@@ -49,7 +49,18 @@ class ZISHFQASweeper(ZIInstrument):
             self, self._tk_object, self._snapshot_cache, blacklist=("/device",)
         )
 
-    def device(self, device: t.Union[t.Type[ZIBaseInstrument], str] = None):
+    def device(
+        self, device: t.Optional[t.Union[t.Type[ZIBaseInstrument], str]] = None
+    ) -> t.Optional[t.Union[t.Type[ZIBaseInstrument], str]]:
+        """The device serial to be used with the LabOne module.
+
+        Args:
+            device: device that should be used with the module. If not
+                specified the current device value is returned.
+
+        Returns:
+            Current value of the device if no argument hast been specified.
+        """
         if device is None:
             serial = self._tk_object.device(parse=False)
             try:
@@ -57,6 +68,7 @@ class ZISHFQASweeper(ZIInstrument):
             except (RuntimeError, KeyError):
                 return serial
         self._tk_object.device(device)
+        return None
 
     def run(self) -> dict:
         """Perform a sweep with the specified settings.

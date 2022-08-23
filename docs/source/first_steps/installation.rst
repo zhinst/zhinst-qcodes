@@ -18,8 +18,6 @@ These distributions will be installed automatically when installing zhinst-qcode
 * `qcodes <https://pypi.org/project/qcodes/>`_ is a Python-based data acquisition
   framework developed by the Copenhagen / Delft / Sydney / Microsoft quantum
   computing consortium. zhinst-qcodes is a third party driver for this framework.
-* `zhinst <https://pypi.org/project/zhinst/>`_ is the low level python api for Zurich
-  Instruments devices.
 * `zhinst-toolkit <https://pypi.org/project/zhinst-toolkit/>`_ is a high level
   driver on top of the LabOne® python api.
 

@@ -69,7 +69,7 @@ Node Renaming
    * - shfqa.qachannels[n].sweeper.oscillator_freq
      - shfqa.qachannels[n].oscs[0].freq
    * - shfqa.qachannels[n].sweeper.integration_time
-     - shfqa.qachannels[n].spectroscopy.length (time needs to be converted manualy to length)
+     - shfqa.qachannels[n].spectroscopy.length (time needs to be converted manually to length)
    * - shfqa.qachannels[n].sweeper.integration_length
      - shfqa.qachannels[n].spectroscopy.length
    * - shfqa.qachannels[n].sweeper.integration_delay
@@ -136,9 +136,9 @@ Function Renaming
    * - shfqa.scope.read
      - shfqa.scopes[0].read
    * - shfqa.scope.channels
-     - **deleted** Set all channels individualy
+     - **deleted** Set all channels individually
    * - shfqa.scope.input_select
-     - **deleted** Set all input select individualy
+     - **deleted** Set all input select individually
    * - shfqa.scope.segments
      - **deleted** shfqa.scopes[0].segments.enable & count
    * - shfqa.scope.averaging

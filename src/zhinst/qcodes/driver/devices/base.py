@@ -1,4 +1,4 @@
-""" Base modules for the Zurich Instrument specific qcodes driver. """
+"""Base modules for the Zurich Instrument specific qcodes driver."""
 import typing as t
 
 from zhinst.toolkit.driver.devices import DeviceType
@@ -8,6 +8,7 @@ from zhinst.qcodes.qcodes_adaptions import init_nodetree, ZIInstrument
 if t.TYPE_CHECKING:
     from zhinst.qcodes.session import ZISession, Session
     from qcodes.instrument.base import Instrument
+
 
 class ZIBaseInstrument(ZIInstrument):
     """Generic QCodes driver for a Zurich Instrument device.
@@ -54,52 +55,77 @@ class ZIBaseInstrument(ZIInstrument):
         }
 
     def _init_additional_nodes(self) -> None:
-        """init additional qcodes parameter."""
+        """Init additional qcodes parameter."""
 
     def factory_reset(self, deep: bool = True) -> None:
         """Load the factory default settings.
 
         Arguments:
-            sync (bool): A flag that specifies if a synchronisation
+            deep (bool): A flag that specifies if a synchronization
                 should be performed between the device and the data
                 server after loading the factory preset (default: True).
         """
         return self._tk_object.factory_reset(deep=deep)
 
     def check_compatibility(self) -> None:
-        """Check if the software stack is compatibil
+        """Check if the software stack is compatible.
 
         Only if all versions and revisions of the software stack match stability
-        can be ensured. The follwing criterias are checked:
+        can be ensured. The following criterias are checked:
 
-        * minimum required zhinst-deviceutils package is installed
-        * minimum required zhinst-ziPython package is installed
+        * minimum required zhinst-utils package is installed
+        * minimum required zhinst-core package is installed
         * zhinst package matches the LabOne Data Server version
         * firmware revision matches the LabOne Data Server version
 
         Raises:
             ConnectionError: If the device is currently updating
             RuntimeError: If one of the above mentioned criterias is not
-                fullfilled
+                fulfilled
         """
         self._tk_object.check_compatibility
 
     def get_streamingnodes(self) -> list:
-        """Create a dictionary with all streaming nodes available"""
+        """Create a dictionary with all streaming nodes available."""
         return self._tk_object.get_streamingnodes()
 
     def set_transaction(self):
+        """Context manager for a transactional set.
+
+        Can be used as a context in a with statement and bundles all node set
+        commands into a single transaction. This reduces the network overhead
+        and often increases the speed.
+
+        Within the with block a set commands to a node will be buffered
+        and bundled into a single command at the end automatically.
+        (All other operations, e.g. getting the value of a node, will not be
+        affected)
+
+        Warning:
+            The set is always performed as deep set if called on device nodes.
+
+        Examples:
+            >>> with device.set_transaction():
+                    device.test[0].a(1)
+                    device.test[1].a(2)
+        """
         return self._tk_object.set_transaction()
 
     @property
     def serial(self) -> str:
+        """Instrument specific serial."""
         return self._tk_object.serial
 
     @property
     def device_type(self) -> str:
+        """Type of the instrument (e.g. MFLI)."""
         return self._tk_object.device_type
+
+    def device_options(self) -> str:
+        """Enabled options of the instrument."""
+        return self._tk_object.device_options
 
     @property
     def session(self) -> "Session":
+        """Underlying session the device is connected through."""
         return self._session
-

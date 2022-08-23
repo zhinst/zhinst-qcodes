@@ -1,7 +1,7 @@
 Examples
 ===========
 
-The follwoing section provides a set of examples.
+The following section provides a set of examples.
 
 .. note::
 
