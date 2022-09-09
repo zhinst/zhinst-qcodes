@@ -6,122 +6,6 @@ from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
 from zhinst.qcodes.qcodes_adaptions import ZINode, ZIChannelList
 
 
-class Integration(ZINode):
-    """Integration part for the UHFQA.
-
-    Args:
-        root: Underlying node tree.
-        tree: tree (node path as tuple) of the corresponding node.
-
-    .. versionadded:: 0.3.2
-    """
-
-    def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
-        ZINode.__init__(
-            self, parent, "integration", snapshot_cache=snapshot_cache, zi_node=zi_node
-        )
-        self._tk_object = tk_object
-
-    def write_integration_weights(self, weights: Union[Waveforms, dict]) -> None:
-        """Upload complex integration weights.
-
-        The weight functions are applied to the real and imaginary part of
-        the input signal. In the hardware the weights are implemented
-        as 17-bit integers.
-
-        Args:
-            weights: Dictionary containing the weight functions, where
-                keys correspond to the indices of the integration weights to be
-                configured.
-
-        Note:
-            Does not raise an error when sample limit is exceeded, but applies only
-            the maximum number of samples. Please refer to LabOne node documentation
-            for the number of maximum integration weight samples.
-
-        Note:
-            This function calls both `/qas/n/integration/weights/n/real` and
-            `/qas/n/integration/weights/n/imag` nodes.
-
-            If only real or imaginary part is defined, the number of defined samples
-            from the other one is zeroed.
-        """
-        return self._tk_object.write_integration_weights(weights=weights)
-
-
-class QAS(ZINode):
-    """Quantum Analyzer Channel for the UHFQA.
-
-    Args:
-        root: Underlying node tree.
-        tree: tree (node path as tuple) of the corresponding node.
-    """
-
-    def __init__(self, parent, tk_object, index, snapshot_cache=None, zi_node=None):
-        ZINode.__init__(
-            self, parent, f"qas_{index}", snapshot_cache=snapshot_cache, zi_node=zi_node
-        )
-        self._tk_object = tk_object
-
-        if self._tk_object.integration:
-
-            self.add_submodule(
-                "integration",
-                Integration(
-                    self,
-                    self._tk_object.integration,
-                    zi_node=self._tk_object.integration.node_info.path,
-                    snapshot_cache=self._snapshot_cache,
-                ),
-            )
-
-    def crosstalk_matrix(self, matrix: np.ndarray = None) -> Optional[np.ndarray]:
-        """Sets or gets the crosstalk matrix of the UHFQA as a 2D array.
-
-        Args:
-            matrix: The 2D matrix used in the digital signal
-                processing path to compensate for crosstalk between the
-                different channels. The given matrix can also be a part
-                of the entire 10 x 10 matrix. Its maximum dimensions
-                are 10 x 10 (default: None).
-
-        Returns:
-            If no argument is given the method returns the current
-            crosstalk matrix as a 2D numpy array.
-
-        Raises:
-            ValueError: If the matrix size exceeds the maximum size of
-                10 x 10
-
-        """
-        return self._tk_object.crosstalk_matrix(matrix=matrix)
-
-    def adjusted_delay(self, value: int = None) -> int:
-        """Set or get the adjustment in the quantum analyzer delay.
-
-        Adjusts the delay that defines the time at which the integration starts
-        in relation to the trigger signal of the weighted integration units.
-
-        Depending if the deskew matrix is bypassed there exists a different
-        default delay. This function can be used to add an additional delay to
-        the default delay.
-
-        Args:
-            value: Number of additional samples to adjust the delay. If not
-                specified this function will just return the additional delay
-                currently set.
-
-        Returns:
-            The adjustment in delay in units of samples.
-
-        Raises:
-            ValueError: If the adjusted quantum analyzer delay is outside the
-                allowed range of 1021 samples.
-
-        """
-        return self._tk_object.adjusted_delay(value=value)
-
-
 class CommandTableNode(ZINode):
     """CommandTable node.
 
@@ -141,11 +25,7 @@ class CommandTableNode(ZINode):
 
     def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
         ZINode.__init__(
-            self,
-            parent,
-            "commandtable",
-            snapshot_cache=snapshot_cache,
-            zi_node=zi_node,
+            self, parent, "commandtable", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
 
@@ -221,7 +101,6 @@ class AWG(ZINode):
             self, parent, f"awg_{index}", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
-
         if self._tk_object.commandtable:
 
             self.add_submodule(
@@ -296,10 +175,10 @@ class AWG(ZINode):
             RuntimeError: `sequencer_program` is empty.
             RuntimeError: If the compilation failed.
 
-        .. versionadded:: 0.4.1
+        .. versionadded:: 0.4.0
         """
         return self._tk_object.compile_sequencer_program(
-            sequencer_program=sequencer_program, kwargs=kwargs
+            sequencer_program=sequencer_program, **kwargs
         )
 
     def load_sequencer_program(
@@ -342,14 +221,14 @@ class AWG(ZINode):
 
             `sequencer_program` does not accept empty strings
 
-        .. versionadded:: 0.4.1
+        .. versionadded:: 0.4.0
 
             Use offline compiler instead of AWG module to compile the sequencer
             program. This speeds of the compilation and also enables parallel
             compilation/upload.
         """
         return self._tk_object.load_sequencer_program(
-            sequencer_program=sequencer_program, kwargs=kwargs
+            sequencer_program=sequencer_program, **kwargs
         )
 
     def write_to_waveform_memory(
@@ -392,32 +271,126 @@ class AWG(ZINode):
         return self._tk_object.read_from_waveform_memory(indexes=indexes)
 
 
+class Integration(ZINode):
+    """Integration part for the UHFQA.
+
+    Args:
+        root: Underlying node tree.
+        tree: tree (node path as tuple) of the corresponding node.
+
+    .. versionadded:: 0.3.2
+    """
+
+    def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
+        ZINode.__init__(
+            self, parent, "integration", snapshot_cache=snapshot_cache, zi_node=zi_node
+        )
+        self._tk_object = tk_object
+
+    def write_integration_weights(self, weights: Union[Waveforms, dict]) -> None:
+        """Upload complex integration weights.
+
+        The weight functions are applied to the real and imaginary part of
+        the input signal. In the hardware the weights are implemented
+        as 17-bit integers.
+
+        Args:
+            weights: Dictionary containing the weight functions, where
+                keys correspond to the indices of the integration weights to be
+                configured.
+
+        Note:
+            Does not raise an error when sample limit is exceeded, but applies only
+            the maximum number of samples. Please refer to LabOne node documentation
+            for the number of maximum integration weight samples.
+
+        Note:
+            This function calls both `/qas/n/integration/weights/n/real` and
+            `/qas/n/integration/weights/n/imag` nodes.
+
+            If only real or imaginary part is defined, the number of defined samples
+            from the other one is zeroed.
+        """
+        return self._tk_object.write_integration_weights(weights=weights)
+
+
+class QAS(ZINode):
+    """Quantum Analyzer Channel for the UHFQA.
+
+    Args:
+        root: Underlying node tree.
+        tree: tree (node path as tuple) of the corresponding node.
+    """
+
+    def __init__(self, parent, tk_object, index, snapshot_cache=None, zi_node=None):
+        ZINode.__init__(
+            self, parent, f"qas_{index}", snapshot_cache=snapshot_cache, zi_node=zi_node
+        )
+        self._tk_object = tk_object
+        if self._tk_object.integration:
+
+            self.add_submodule(
+                "integration",
+                Integration(
+                    self,
+                    self._tk_object.integration,
+                    zi_node=self._tk_object.integration.node_info.path,
+                    snapshot_cache=self._snapshot_cache,
+                ),
+            )
+
+    def crosstalk_matrix(self, matrix: np.ndarray = None) -> Optional[np.ndarray]:
+        """Sets or gets the crosstalk matrix of the UHFQA as a 2D array.
+
+        Args:
+            matrix: The 2D matrix used in the digital signal
+                processing path to compensate for crosstalk between the
+                different channels. The given matrix can also be a part
+                of the entire 10 x 10 matrix. Its maximum dimensions
+                are 10 x 10 (default: None).
+
+        Returns:
+            If no argument is given the method returns the current
+            crosstalk matrix as a 2D numpy array.
+
+        Raises:
+            ValueError: If the matrix size exceeds the maximum size of
+                10 x 10
+
+        """
+        return self._tk_object.crosstalk_matrix(matrix=matrix)
+
+    def adjusted_delay(self, value: int = None) -> int:
+        """Set or get the adjustment in the quantum analyzer delay.
+
+        Adjusts the delay that defines the time at which the integration starts
+        in relation to the trigger signal of the weighted integration units.
+
+        Depending if the deskew matrix is bypassed there exists a different
+        default delay. This function can be used to add an additional delay to
+        the default delay.
+
+        Args:
+            value: Number of additional samples to adjust the delay. If not
+                specified this function will just return the additional delay
+                currently set.
+
+        Returns:
+            The adjustment in delay in units of samples.
+
+        Raises:
+            ValueError: If the adjusted quantum analyzer delay is outside the
+                allowed range of 1021 samples.
+
+        """
+        return self._tk_object.adjusted_delay(value=value)
+
+
 class UHFQA(ZIBaseInstrument):
     """QCoDeS driver for the Zurich Instruments UHFQA."""
 
     def _init_additional_nodes(self):
         """Init class specific modules and parameters."""
-        if self._tk_object.qas:
-            channel_list = ZIChannelList(
-                self,
-                "qas",
-                QAS,
-                zi_node=self._tk_object.qas.node_info.path,
-                snapshot_cache=self._snapshot_cache,
-            )
-            for i, x in enumerate(self._tk_object.qas):
-                channel_list.append(
-                    QAS(
-                        self,
-                        x,
-                        i,
-                        zi_node=self._tk_object.qas[i].node_info.path,
-                        snapshot_cache=self._snapshot_cache,
-                    )
-                )
-            # channel_list.lock()
-            self.add_submodule("qas", channel_list)
-
         if self._tk_object.awgs:
 
             channel_list = ZIChannelList(
@@ -439,6 +412,28 @@ class UHFQA(ZIBaseInstrument):
                 )
             # channel_list.lock()
             self.add_submodule("awgs", channel_list)
+
+        if self._tk_object.qas:
+
+            channel_list = ZIChannelList(
+                self,
+                "qas",
+                QAS,
+                zi_node=self._tk_object.qas.node_info.path,
+                snapshot_cache=self._snapshot_cache,
+            )
+            for i, x in enumerate(self._tk_object.qas):
+                channel_list.append(
+                    QAS(
+                        self,
+                        x,
+                        i,
+                        zi_node=self._tk_object.qas[i].node_info.path,
+                        snapshot_cache=self._snapshot_cache,
+                    )
+                )
+            # channel_list.lock()
+            self.add_submodule("qas", channel_list)
 
     def enable_qccs_mode(self) -> None:
         """Configure the instrument to work with PQSC.

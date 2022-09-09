@@ -26,11 +26,7 @@ class CommandTableNode(ZINode):
 
     def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
         ZINode.__init__(
-            self,
-            parent,
-            "commandtable",
-            snapshot_cache=snapshot_cache,
-            zi_node=zi_node,
+            self, parent, "commandtable", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
 
@@ -92,7 +88,6 @@ class AWGCore(ZINode):
             self, parent, "awg", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
-
         if self._tk_object.commandtable:
 
             self.add_submodule(
@@ -167,10 +162,10 @@ class AWGCore(ZINode):
             RuntimeError: `sequencer_program` is empty.
             RuntimeError: If the compilation failed.
 
-        .. versionadded:: 0.4.1
+        .. versionadded:: 0.4.0
         """
         return self._tk_object.compile_sequencer_program(
-            sequencer_program=sequencer_program, kwargs=kwargs
+            sequencer_program=sequencer_program, **kwargs
         )
 
     def load_sequencer_program(
@@ -213,14 +208,14 @@ class AWGCore(ZINode):
 
             `sequencer_program` does not accept empty strings
 
-        .. versionadded:: 0.4.1
+        .. versionadded:: 0.4.0
 
             Use offline compiler instead of AWG module to compile the sequencer
             program. This speeds of the compilation and also enables parallel
             compilation/upload.
         """
         return self._tk_object.load_sequencer_program(
-            sequencer_program=sequencer_program, kwargs=kwargs
+            sequencer_program=sequencer_program, **kwargs
         )
 
     def write_to_waveform_memory(
@@ -321,7 +316,6 @@ class SGChannel(ZINode):
             zi_node=zi_node,
         )
         self._tk_object = tk_object
-
         if self._tk_object.awg:
 
             self.add_submodule(
@@ -466,18 +460,6 @@ class Generator(ZINode):
         )
         self._tk_object = tk_object
 
-        if self._tk_object.commandtable:
-
-            self.add_submodule(
-                "commandtable",
-                CommandTableNode(
-                    self,
-                    self._tk_object.commandtable,
-                    zi_node=self._tk_object.commandtable.node_info.path,
-                    snapshot_cache=self._snapshot_cache,
-                ),
-            )
-
     def enable_sequencer(self, *, single: bool) -> None:
         """Starts the sequencer of a specific channel.
 
@@ -540,10 +522,10 @@ class Generator(ZINode):
             RuntimeError: `sequencer_program` is empty.
             RuntimeError: If the compilation failed.
 
-        .. versionadded:: 0.4.1
+        .. versionadded:: 0.4.0
         """
         return self._tk_object.compile_sequencer_program(
-            sequencer_program=sequencer_program, kwargs=kwargs
+            sequencer_program=sequencer_program, **kwargs
         )
 
     def load_sequencer_program(
@@ -586,14 +568,14 @@ class Generator(ZINode):
 
             `sequencer_program` does not accept empty strings
 
-        .. versionadded:: 0.4.1
+        .. versionadded:: 0.4.0
 
             Use offline compiler instead of AWG module to compile the sequencer
             program. This speeds of the compilation and also enables parallel
             compilation/upload.
         """
         return self._tk_object.load_sequencer_program(
-            sequencer_program=sequencer_program, kwargs=kwargs
+            sequencer_program=sequencer_program, **kwargs
         )
 
     def write_to_waveform_memory(
@@ -782,11 +764,7 @@ class Spectroscopy(ZINode):
 
     def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
         ZINode.__init__(
-            self,
-            parent,
-            "spectroscopy",
-            snapshot_cache=snapshot_cache,
-            zi_node=zi_node,
+            self, parent, "spectroscopy", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
 
@@ -881,7 +859,6 @@ class QAChannel(ZINode):
             zi_node=zi_node,
         )
         self._tk_object = tk_object
-
         if self._tk_object.generator:
 
             self.add_submodule(

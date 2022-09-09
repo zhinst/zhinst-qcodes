@@ -27,7 +27,7 @@ class {{ class.name }}(ZIBaseInstrument):
 class {{ class.name }}(ZINode):
     """{{ class.docstring }}"""
     def __init__(self, parent, tk_object{% if class.is_list %} , index{% endif %}, snapshot_cache=None, zi_node=None):
-        ZINode.__init__(self, parent, f"{{ class.display_name }}{% if class.is_list %}_{index}{% endif %}", snapshot_cache=snapshot_cache, zi_node=zi_node)
+        ZINode.__init__(self, parent, {% if class.is_list %}f{% endif %}"{{ class.display_name }}{% if class.is_list %}_{index}{% endif %}", snapshot_cache=snapshot_cache, zi_node=zi_node)
         self._tk_object =  tk_object
         {% filter indent(width=8) -%}{% include 'init_module.py.j2' %}{% endfilter %}
 
@@ -37,6 +37,7 @@ class {{ class.name }}(ZINode):
 {% for parameter in class.parameters %}
     @property
     def {{ parameter.name }} (self) -> {{parameter.return_annotation}}:
+        """{{parameter.docstring}}"""
         return self._tk_object.{{ parameter.name }}
 {% endfor %}
 {% endfor %}

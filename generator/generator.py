@@ -140,7 +140,9 @@ def getInfo(
     return result_tuple, existing_names
 
 
-def generate_submodules_info(sub_modules: list) -> typing.List[list]:
+def generate_submodules_info(
+    sub_modules: list, base_class: object
+) -> typing.List[list]:
     """Gather information for the submodules.
 
     Args:
@@ -153,13 +155,17 @@ def generate_submodules_info(sub_modules: list) -> typing.List[list]:
     parent_info = []  # information for the parent class
     submodule_info = []  # information about the submodule classes
     for module, name, is_list in sub_modules:
+        if name == "commandtable" and base_class.__name__ == "Generator":
+            continue
         if "typing.Optional" in str(module):
             module = module.__args__[0]
         parent_info.append(
             {"name": name, "class_name": module.__name__, "is_list": is_list}
         )
         submodule_info += generate_qcodes_class_info(
-            module, is_submodule=True, is_list_element=is_list
+            module,
+            is_submodule=True,
+            is_list_element=is_list,
         )
     return parent_info, submodule_info
 
@@ -246,15 +252,25 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
         for weird_stuff, replacement in conf.TYPE_HINT_REPLACEMENTS.items():
             signature_str = signature_str.replace(weird_stuff, replacement)
 
+        call_parameter_str = []
+        for param in signature.parameters:
+            if param == "self":
+                continue
+            if param == "kwargs":
+                call_parameter_str.append("**kwargs")
+            elif param == "args":
+                call_parameter_str.append("*args")
+            else:
+                call_parameter_str.append(f"{param}={param}")
+        call_signature = ", ".join(call_parameter_str)
+
         functions_info.append(
             {
                 "name": name,
                 "decorator": decorator,
                 "signature": signature_str,
                 "docstring": docstring if docstring else "",
-                "call_signature": ", ".join(
-                    [f"{x}={x}" for x in signature.parameters][1:]
-                ),
+                "call_signature": call_signature,
                 "return_annotation": str(signature.return_annotation)
                 if signature.return_annotation
                 else "",
@@ -264,7 +280,9 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
 
 
 def generate_qcodes_class_info(
-    class_type: object, is_submodule: bool = False, is_list_element: bool = False
+    class_type: object,
+    is_submodule: bool = False,
+    is_list_element: bool = False,
 ):
     """Gather information for a qcodes class from a toolkit class.
 
@@ -278,7 +296,9 @@ def generate_qcodes_class_info(
         (list) list of dicts with information for the class and its subclasses.
     """
     tk_class_info, _ = getInfo(class_type, [])
-    submodule_info, gathered_info = generate_submodules_info(tk_class_info.sub_modules)
+    submodule_info, gathered_info = generate_submodules_info(
+        tk_class_info.sub_modules, class_type
+    )
     parameter_info, has_node_param = generate_parameter_info(
         tk_class_info.parameters, class_type
     )
@@ -341,7 +361,6 @@ def generate_qcodes_driver(
     result = black.format_str(result, mode=black.FileMode())
     result = autoflake.fix_code(result, remove_all_unused_imports=True)
     module_name = camel_to_snake(toolkit_class.__name__)
-
     py_filename = str(output_dir) + "/" + module_name.lower() + ".py"
     with open(py_filename, "w+") as outfile:
         outfile.write(result)

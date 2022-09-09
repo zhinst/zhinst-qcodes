@@ -24,11 +24,7 @@ class CommandTableNode(ZINode):
 
     def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
         ZINode.__init__(
-            self,
-            parent,
-            "commandtable",
-            snapshot_cache=snapshot_cache,
-            zi_node=zi_node,
+            self, parent, "commandtable", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
 
@@ -104,7 +100,6 @@ class AWG(ZINode):
             self, parent, f"awg_{index}", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
-
         if self._tk_object.commandtable:
 
             self.add_submodule(
@@ -179,10 +174,10 @@ class AWG(ZINode):
             RuntimeError: `sequencer_program` is empty.
             RuntimeError: If the compilation failed.
 
-        .. versionadded:: 0.4.1
+        .. versionadded:: 0.4.0
         """
         return self._tk_object.compile_sequencer_program(
-            sequencer_program=sequencer_program, kwargs=kwargs
+            sequencer_program=sequencer_program, **kwargs
         )
 
     def load_sequencer_program(
@@ -225,14 +220,14 @@ class AWG(ZINode):
 
             `sequencer_program` does not accept empty strings
 
-        .. versionadded:: 0.4.1
+        .. versionadded:: 0.4.0
 
             Use offline compiler instead of AWG module to compile the sequencer
             program. This speeds of the compilation and also enables parallel
             compilation/upload.
         """
         return self._tk_object.load_sequencer_program(
-            sequencer_program=sequencer_program, kwargs=kwargs
+            sequencer_program=sequencer_program, **kwargs
         )
 
     def write_to_waveform_memory(
@@ -281,6 +276,7 @@ class UHFLI(ZIBaseInstrument):
     def _init_additional_nodes(self):
         """Init class specific modules and parameters."""
         if self._tk_object.awgs:
+
             channel_list = ZIChannelList(
                 self,
                 "awgs",
