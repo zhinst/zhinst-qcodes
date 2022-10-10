@@ -1,0 +1,17 @@
+example_sweeper_module:
+  device_type: ["MFLI", "UHFLI"]
+
+hf2:
+  device_type: "HF2LI"
+
+shfqa_qubit_readout_measurement:
+  device_type: "SHFQA2"
+
+shfqa_qubit_readout_weights:
+  device_type: "SHFQA2"
+
+shfqa_sweeper:
+  device_type: "SHFQA2"
+
+shfsg_rabi:
+  device_type: "SHFSG"
