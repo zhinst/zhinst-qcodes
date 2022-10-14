@@ -14,4 +14,4 @@ shfqa_sweeper:
   device_type: "SHFQA2"
 
 shfsg_rabi:
-  device_type: "SHFSG"
+  device_type: "SHFSG4"
