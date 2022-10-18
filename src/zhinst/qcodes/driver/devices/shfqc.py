@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Tuple, Union
 import numpy as np
 from zhinst.toolkit import CommandTable, Waveforms, Sequence
 from zhinst.toolkit.interface import AveragingMode, SHFQAChannelMode
+from zhinst.utils.shfqa.multistate import QuditSettings
 from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
 from zhinst.qcodes.qcodes_adaptions import ZINode, ZIChannelList
 
@@ -50,7 +51,11 @@ class CommandTableNode(ZINode):
         return self._tk_object.load_validation_schema()
 
     def upload_to_device(
-        self, ct: Union[CommandTable, str, dict], *, validate: bool = True
+        self,
+        ct: Union[CommandTable, str, dict],
+        *,
+        validate: bool = False,
+        check_upload: bool = True,
     ) -> None:
         """Upload command table into the device.
 
@@ -64,12 +69,24 @@ class CommandTableNode(ZINode):
             validate: Flag if the command table should be validated. (Only
                 applies if the command table is passed as a raw json string or
                 json dict)
+            check_upload: Flag if the upload should be validated by calling
+                `check_status`. This is not mandatory bat strongly recommended
+                since the device does not raise an error when it rejects the
+                command table. This Flag is ignored when called from within a
+                transaction.
 
         Raises:
             RuntimeError: If the command table upload into the device failed.
             zhinst.toolkit.exceptions.ValidationError: Incorrect schema.
+
+        .. versionchanged:: 0.4.2
+
+            New Flag `check_upload` that makes the upload check optional.
+            `check_status` is only called when not in a ongoing transaction.
         """
-        return self._tk_object.upload_to_device(ct=ct, validate=validate)
+        return self._tk_object.upload_to_device(
+            ct=ct, validate=validate, check_upload=check_upload
+        )
 
     def load_from_device(self) -> CommandTable:
         """Load command table from the device.
@@ -219,7 +236,7 @@ class AWGCore(ZINode):
         )
 
     def write_to_waveform_memory(
-        self, waveforms: Waveforms, indexes: list = None, validate: bool = True
+        self, waveforms: Waveforms, indexes: list = None
     ) -> None:
         """Writes waveforms to the waveform memory.
 
@@ -230,19 +247,14 @@ class AWGCore(ZINode):
             indexes: Specify a list of indexes that should be uploaded. If
                 nothing is specified all available indexes in waveforms will
                 be uploaded. (default = None)
-            validate: Enable sanity check preformed by toolkit, based on the
-                waveform descriptors on the device. Can be disabled for e.g.
-                speed optimizations. Does not affect the checks happen in LabOne
-                and or the firmware. (default = True)
 
-        Raises:
-            IndexError: The index of a waveform exceeds the one on the device
-                and `validate` is True.
-            RuntimeError: One of the waveforms index points to a
-                filler(placeholder) and `validate` is True.
+        .. versionchanged:: 0.4.2
+
+            Removed `validate` flag and functionality. The validation check is
+            now done in the `Waveforms.validate` function.
         """
         return self._tk_object.write_to_waveform_memory(
-            waveforms=waveforms, indexes=indexes, validate=validate
+            waveforms=waveforms, indexes=indexes
         )
 
     def read_from_waveform_memory(self, indexes: List[int] = None) -> Waveforms:
@@ -624,6 +636,92 @@ class Generator(ZINode):
         return self._tk_object.available_aux_trigger_inputs
 
 
+class Qudit(ZINode):
+    """Single Qudit node.
+
+    Implements basic functionality of a single qudit node, e.g applying the
+    basic configuration.
+
+    Args:
+        root: Root of the nodetree.
+        tree: Tree (node path as tuple) of the current node.
+        serial: Serial of the device.
+        readout_channel: Index of the readout channel this qudit belongs to.
+    """
+
+    def __init__(self, parent, tk_object, index, snapshot_cache=None, zi_node=None):
+        ZINode.__init__(
+            self,
+            parent,
+            f"qudit_{index}",
+            snapshot_cache=snapshot_cache,
+            zi_node=zi_node,
+        )
+        self._tk_object = tk_object
+
+    def configure(self, qudit_settings: QuditSettings, enable: bool = True) -> None:
+        """Compiles a list of transactions to apply the qudit settings to the device.
+
+        Args:
+            qudit_settings: The qudit settings to be configured.
+            enable: Whether to enable the qudit. (default: True)
+
+        """
+        return self._tk_object.configure(qudit_settings=qudit_settings, enable=enable)
+
+
+class MultiState(ZINode):
+    """MultiState node.
+
+    Implements basic functionality of the MultiState node.
+
+    Args:
+        root: Root of the nodetree.
+        tree: Tree (node path as tuple) of the current node.
+        serial: Serial of the device.
+        index: Index of the corresponding readout channel.
+    """
+
+    def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
+        ZINode.__init__(
+            self, parent, "multistate", snapshot_cache=snapshot_cache, zi_node=zi_node
+        )
+        self._tk_object = tk_object
+        if self._tk_object.qudits:
+
+            channel_list = ZIChannelList(
+                self,
+                "qudits",
+                Qudit,
+                zi_node=self._tk_object.qudits.node_info.path,
+                snapshot_cache=self._snapshot_cache,
+            )
+            for i, x in enumerate(self._tk_object.qudits):
+                channel_list.append(
+                    Qudit(
+                        self,
+                        x,
+                        i,
+                        zi_node=self._tk_object.qudits[i].node_info.path,
+                        snapshot_cache=self._snapshot_cache,
+                    )
+                )
+            # channel_list.lock()
+            self.add_submodule("qudits", channel_list)
+
+    def get_qudits_results(self) -> Dict[int, np.ndarray]:
+        """Downloads the qudit results from the device and group them by qudit.
+
+        This function accesses the multistate nodes to determine which
+        integrators were used for which qudit to able to group the results by
+        qudit.
+
+        Returns:
+            A dictionary with the qudit index keys and result vector values.
+        """
+        return self._tk_object.get_qudits_results()
+
+
 class Readout(ZINode):
     """Readout node.
 
@@ -643,6 +741,17 @@ class Readout(ZINode):
             self, parent, "readout", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
+        if self._tk_object.multistate:
+
+            self.add_submodule(
+                "multistate",
+                MultiState(
+                    self,
+                    self._tk_object.multistate,
+                    zi_node=self._tk_object.multistate.node_info.path,
+                    snapshot_cache=self._snapshot_cache,
+                ),
+            )
 
     def configure_result_logger(
         self,

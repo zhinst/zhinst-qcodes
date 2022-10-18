@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Tuple, Union
 import numpy as np
 from zhinst.toolkit import Sequence, Waveforms
 from zhinst.toolkit.interface import AveragingMode, SHFQAChannelMode
+from zhinst.utils.shfqa.multistate import QuditSettings
 from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
 from zhinst.qcodes.qcodes_adaptions import ZINode, ZIChannelList
 
@@ -198,6 +199,92 @@ class Generator(ZINode):
         return self._tk_object.available_aux_trigger_inputs
 
 
+class Qudit(ZINode):
+    """Single Qudit node.
+
+    Implements basic functionality of a single qudit node, e.g applying the
+    basic configuration.
+
+    Args:
+        root: Root of the nodetree.
+        tree: Tree (node path as tuple) of the current node.
+        serial: Serial of the device.
+        readout_channel: Index of the readout channel this qudit belongs to.
+    """
+
+    def __init__(self, parent, tk_object, index, snapshot_cache=None, zi_node=None):
+        ZINode.__init__(
+            self,
+            parent,
+            f"qudit_{index}",
+            snapshot_cache=snapshot_cache,
+            zi_node=zi_node,
+        )
+        self._tk_object = tk_object
+
+    def configure(self, qudit_settings: QuditSettings, enable: bool = True) -> None:
+        """Compiles a list of transactions to apply the qudit settings to the device.
+
+        Args:
+            qudit_settings: The qudit settings to be configured.
+            enable: Whether to enable the qudit. (default: True)
+
+        """
+        return self._tk_object.configure(qudit_settings=qudit_settings, enable=enable)
+
+
+class MultiState(ZINode):
+    """MultiState node.
+
+    Implements basic functionality of the MultiState node.
+
+    Args:
+        root: Root of the nodetree.
+        tree: Tree (node path as tuple) of the current node.
+        serial: Serial of the device.
+        index: Index of the corresponding readout channel.
+    """
+
+    def __init__(self, parent, tk_object, snapshot_cache=None, zi_node=None):
+        ZINode.__init__(
+            self, parent, "multistate", snapshot_cache=snapshot_cache, zi_node=zi_node
+        )
+        self._tk_object = tk_object
+        if self._tk_object.qudits:
+
+            channel_list = ZIChannelList(
+                self,
+                "qudits",
+                Qudit,
+                zi_node=self._tk_object.qudits.node_info.path,
+                snapshot_cache=self._snapshot_cache,
+            )
+            for i, x in enumerate(self._tk_object.qudits):
+                channel_list.append(
+                    Qudit(
+                        self,
+                        x,
+                        i,
+                        zi_node=self._tk_object.qudits[i].node_info.path,
+                        snapshot_cache=self._snapshot_cache,
+                    )
+                )
+            # channel_list.lock()
+            self.add_submodule("qudits", channel_list)
+
+    def get_qudits_results(self) -> Dict[int, np.ndarray]:
+        """Downloads the qudit results from the device and group them by qudit.
+
+        This function accesses the multistate nodes to determine which
+        integrators were used for which qudit to able to group the results by
+        qudit.
+
+        Returns:
+            A dictionary with the qudit index keys and result vector values.
+        """
+        return self._tk_object.get_qudits_results()
+
+
 class Readout(ZINode):
     """Readout node.
 
@@ -217,6 +304,17 @@ class Readout(ZINode):
             self, parent, "readout", snapshot_cache=snapshot_cache, zi_node=zi_node
         )
         self._tk_object = tk_object
+        if self._tk_object.multistate:
+
+            self.add_submodule(
+                "multistate",
+                MultiState(
+                    self,
+                    self._tk_object.multistate,
+                    zi_node=self._tk_object.multistate.node_info.path,
+                    snapshot_cache=self._snapshot_cache,
+                ),
+            )
 
     def configure_result_logger(
         self,

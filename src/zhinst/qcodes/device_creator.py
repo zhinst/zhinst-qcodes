@@ -1,7 +1,6 @@
-"""Device instance module.
+"""Device instance module
 
-The classes can be used without creating as session to a data server.
-"""
+The classes can be used without creating as session to a data server."""
 import typing as t
 
 from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
@@ -32,9 +31,11 @@ class ZIDevice(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -51,7 +52,6 @@ class ZIDevice(ZIBaseInstrument):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class SHFQA(SHFQADriver):
@@ -71,9 +71,11 @@ class SHFQA(SHFQADriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -90,7 +92,6 @@ class SHFQA(SHFQADriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class SHFSG(SHFSGDriver):
@@ -110,9 +111,11 @@ class SHFSG(SHFSGDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -129,7 +132,6 @@ class SHFSG(SHFSGDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class HDAWG(HDAWGDriver):
@@ -149,9 +151,11 @@ class HDAWG(HDAWGDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -168,7 +172,6 @@ class HDAWG(HDAWGDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class PQSC(PQSCDriver):
@@ -188,9 +191,11 @@ class PQSC(PQSCDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -207,7 +212,6 @@ class PQSC(PQSCDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class SHFQC(SHFQCDriver):
@@ -227,9 +231,11 @@ class SHFQC(SHFQCDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -246,7 +252,6 @@ class SHFQC(SHFQCDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class UHFLI(UHFLIDriver):
@@ -266,9 +271,11 @@ class UHFLI(UHFLIDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -285,7 +292,6 @@ class UHFLI(UHFLIDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class UHFQA(UHFQADriver):
@@ -305,9 +311,11 @@ class UHFQA(UHFQADriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -324,7 +332,6 @@ class UHFQA(UHFQADriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class MFLI(ZIBaseInstrument):
@@ -344,9 +351,11 @@ class MFLI(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -363,7 +372,6 @@ class MFLI(ZIBaseInstrument):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class MFIA(ZIBaseInstrument):
@@ -383,9 +391,11 @@ class MFIA(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -402,7 +412,6 @@ class MFIA(ZIBaseInstrument):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self
 
 
 class HF2(ZIBaseInstrument):
@@ -422,9 +431,11 @@ class HF2(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
-            Warning: Creating a new session should be done carefully and
-            reusing the created session is not possible. Consider instantiating
-            a new session directly.
+
+            Warning:
+                Creating a new session should be done carefully and reusing
+                the created session is not possible. Consider instantiating a
+                new session directly.
     """
 
     def __init__(
@@ -441,4 +452,3 @@ class HF2(ZIBaseInstrument):
         session = ZISession(host, port, hf2=True, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
-        session.devices[self.serial] = self

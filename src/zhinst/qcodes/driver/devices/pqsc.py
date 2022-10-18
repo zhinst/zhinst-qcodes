@@ -115,7 +115,7 @@ class PQSC(ZIBaseInstrument):
         ports: Union[List[int], int] = 0,
         *,
         timeout: int = 30,
-        sleep_time: int = 1,
+        sleep_time: int = 1
     ) -> Union[List[bool], bool]:
         """Check if the ZSync connection on the given port(s) is established.
 
