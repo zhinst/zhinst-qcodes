@@ -1,6 +1,7 @@
-"""Device instance module
+"""Device instance module.
 
-The classes can be used without creating as session to a data server."""
+The classes can be used without creating as session to a data server.
+"""
 import typing as t
 
 from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
@@ -32,10 +33,10 @@ class ZIDevice(ZIBaseInstrument):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -72,10 +73,10 @@ class SHFQA(SHFQADriver):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -112,10 +113,10 @@ class SHFSG(SHFSGDriver):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -152,10 +153,10 @@ class HDAWG(HDAWGDriver):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -192,10 +193,10 @@ class PQSC(PQSCDriver):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -232,10 +233,10 @@ class SHFQC(SHFQCDriver):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -272,10 +273,10 @@ class UHFLI(UHFLIDriver):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -312,10 +313,10 @@ class UHFQA(UHFQADriver):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -352,10 +353,10 @@ class MFLI(ZIBaseInstrument):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -392,10 +393,10 @@ class MFIA(ZIBaseInstrument):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
@@ -432,10 +433,10 @@ class HF2(ZIBaseInstrument):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
 
     def __init__(
