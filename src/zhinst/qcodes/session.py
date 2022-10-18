@@ -52,10 +52,12 @@ class Devices(MutableMapping):
             return self._devices[key]
         raise KeyError(key)
 
-    def __setitem__(self, *_):
-        raise LookupError(
-            "Illegal operation. Devices must be connected through the session."
-        )
+    def __setitem__(self, key: str, device: ZIDevices.DeviceType) -> None:
+        if device.serial not in self.connected():
+            raise LookupError(
+                "Illegal operation. Devices must be connected through the session."
+            )
+        self._devices[key] = device
 
     def __delitem__(self, key):
         self._devices.pop(key, None)
@@ -673,6 +675,7 @@ class Session(ZIInstrument):
         )
         polled_data = {}
         for tk_node, data in polled_data_tk.items():
+            tk_node = self._tk_object.raw_path_to_node(tk_node)
             device = self.devices[tk_node.root.prefix_hide]
             parameter = tk_node_to_parameter(device, tk_node)
             polled_data[parameter] = data
