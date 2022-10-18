@@ -49,7 +49,11 @@ class CommandTableNode(ZINode):
         return self._tk_object.load_validation_schema()
 
     def upload_to_device(
-        self, ct: Union[CommandTable, str, dict], *, validate: bool = True
+        self,
+        ct: Union[CommandTable, str, dict],
+        *,
+        validate: bool = False,
+        check_upload: bool = True,
     ) -> None:
         """Upload command table into the device.
 
@@ -63,12 +67,24 @@ class CommandTableNode(ZINode):
             validate: Flag if the command table should be validated. (Only
                 applies if the command table is passed as a raw json string or
                 json dict)
+            check_upload: Flag if the upload should be validated by calling
+                `check_status`. This is not mandatory bat strongly recommended
+                since the device does not raise an error when it rejects the
+                command table. This Flag is ignored when called from within a
+                transaction.
 
         Raises:
             RuntimeError: If the command table upload into the device failed.
             zhinst.toolkit.exceptions.ValidationError: Incorrect schema.
+
+        .. versionchanged:: 0.4.2
+
+            New Flag `check_upload` that makes the upload check optional.
+            `check_status` is only called when not in a ongoing transaction.
         """
-        return self._tk_object.upload_to_device(ct=ct, validate=validate)
+        return self._tk_object.upload_to_device(
+            ct=ct, validate=validate, check_upload=check_upload
+        )
 
     def load_from_device(self) -> CommandTable:
         """Load command table from the device.
@@ -232,7 +248,7 @@ class AWG(ZINode):
         )
 
     def write_to_waveform_memory(
-        self, waveforms: Waveforms, indexes: list = None, validate: bool = True
+        self, waveforms: Waveforms, indexes: list = None
     ) -> None:
         """Writes waveforms to the waveform memory.
 
@@ -243,19 +259,14 @@ class AWG(ZINode):
             indexes: Specify a list of indexes that should be uploaded. If
                 nothing is specified all available indexes in waveforms will
                 be uploaded. (default = None)
-            validate: Enable sanity check preformed by toolkit, based on the
-                waveform descriptors on the device. Can be disabled for e.g.
-                speed optimizations. Does not affect the checks happen in LabOne
-                and or the firmware. (default = True)
 
-        Raises:
-            IndexError: The index of a waveform exceeds the one on the device
-                and `validate` is True.
-            RuntimeError: One of the waveforms index points to a
-                filler(placeholder) and `validate` is True.
+        .. versionchanged:: 0.4.2
+
+            Removed `validate` flag and functionality. The validation check is
+            now done in the `Waveforms.validate` function.
         """
         return self._tk_object.write_to_waveform_memory(
-            waveforms=waveforms, indexes=indexes, validate=validate
+            waveforms=waveforms, indexes=indexes
         )
 
     def read_from_waveform_memory(self, indexes: List[int] = None) -> Waveforms:

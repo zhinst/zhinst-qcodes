@@ -214,6 +214,8 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
     """
     # Enums from toolkit should be exposed also in the QCoDeS driver
     enums = {
+        "np.": "numpy.",
+        "QuditSettings": "zhinst.utils.shfqa.multistate.QuditSettings",
         "SHFQAChannelMode": "zhinst.toolkit.interface.SHFQAChannelMode",
         "MappingMode": "zhinst.toolkit.interface.MappingMode",
         "TriggerImpedance": "zhinst.toolkit.interface.TriggerImpedance",
@@ -236,12 +238,12 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
         signature = inspect.signature(getattr(toolkit_class, name))
         signature_str = str(signature)
         # replace toolkit enum typehint with direct typehint
-        for enum in enums.keys():
-            if enum in signature_str:
-                signature_str = signature_str.replace(enums[enum], enum)
+        for new, old in enums.items():
+            signature_str = signature_str.replace(old, new)
+            if new in signature_str:
                 # search for enum typehint in function arguments
                 regex_result = re.search(
-                    f"<({enum}.*?):.*?>",
+                    f"<({new}.*?):.*?>",
                     signature_str,
                 )
                 if regex_result:
