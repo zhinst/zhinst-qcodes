@@ -53,6 +53,7 @@ class ZIDevice(ZIBaseInstrument):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class SHFQA(SHFQADriver):
@@ -93,6 +94,7 @@ class SHFQA(SHFQADriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class SHFSG(SHFSGDriver):
@@ -133,6 +135,7 @@ class SHFSG(SHFSGDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class HDAWG(HDAWGDriver):
@@ -173,6 +176,7 @@ class HDAWG(HDAWGDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class PQSC(PQSCDriver):
@@ -213,6 +217,7 @@ class PQSC(PQSCDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class SHFQC(SHFQCDriver):
@@ -253,6 +258,7 @@ class SHFQC(SHFQCDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class UHFLI(UHFLIDriver):
@@ -293,6 +299,7 @@ class UHFLI(UHFLIDriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class UHFQA(UHFQADriver):
@@ -333,6 +340,7 @@ class UHFQA(UHFQADriver):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class MFLI(ZIBaseInstrument):
@@ -373,6 +381,7 @@ class MFLI(ZIBaseInstrument):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class MFIA(ZIBaseInstrument):
@@ -413,6 +422,7 @@ class MFIA(ZIBaseInstrument):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 
 class HF2(ZIBaseInstrument):
@@ -453,3 +463,4 @@ class HF2(ZIBaseInstrument):
         session = ZISession(host, port, hf2=True, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
