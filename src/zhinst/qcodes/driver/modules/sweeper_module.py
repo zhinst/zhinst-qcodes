@@ -58,6 +58,9 @@ class ZISweeperModule(ZIBaseModule):
         tk_result = self._tk_object.read()
         results = {}
         for tk_node, data in tk_result.items():
+            tk_node = self._session.toolkit_session.raw_path_to_node(
+                tk_node, module=self._tk_object
+            )
             if tk_node.raw_tree == ("device",):
                 results["device"] = data
             else:
