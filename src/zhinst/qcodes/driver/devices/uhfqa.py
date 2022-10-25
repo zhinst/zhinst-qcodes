@@ -132,11 +132,23 @@ class AWG(ZINode):
     def enable_sequencer(self, *, single: bool) -> None:
         """Starts the sequencer of a specific channel.
 
-        Waits until the sequencer is enabled.
+        Warning:
+            This function is synchronous and blocks until the sequencer is enabled.
+            When working with multiple instruments this function is the wrong
+            approach and the sequencer should be enabled asynchronously.
+            (For more information please take a look at the awg example in the
+            toolkit documentation.)
 
         Args:
             single: Flag if the sequencer should be disabled after finishing
             execution.
+
+        Raises:
+            RuntimeError: If the sequencer could not be enabled.
+
+        .. versionchanged:: 0.4.4
+
+            Check the acknowledged value instead of using `wait_for_state_change`.
         """
         return self._tk_object.enable_sequencer(single=single)
 
@@ -270,7 +282,7 @@ class AWG(ZINode):
         )
 
     def read_from_waveform_memory(self, indexes: List[int] = None) -> Waveforms:
-        """Read waveforms to the waveform memory.
+        """Read waveforms from the waveform memory.
 
         Args:
             indexes: List of waveform indexes to read from the device. If not
