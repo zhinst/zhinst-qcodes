@@ -1,7 +1,8 @@
 {{ prefix }}
-"""Device instance module
+"""Device instance module.
 
-The classes can be used without creating as session to a data server."""
+The classes can be used without creating as session to a data server.
+"""
 import typing as t
 from zhinst.qcodes.session import ZISession
 {% for import in imports %}
@@ -34,10 +35,10 @@ class {{ class.name }}({{ class.parent }}):
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
 
-            Warning:
-                Creating a new session should be done carefully and reusing
-                the created session is not possible. Consider instantiating a
-                new session directly.
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
     """
     def __init__(
         self,
@@ -53,5 +54,6 @@ class {{ class.name }}({{ class.parent }}):
         session = ZISession(host, port, hf2={{ class.is_hf2 }}, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
 
 {% endfor %}

@@ -17,13 +17,12 @@ jupyter:
 
 Requirements:
 
-* LabOne Version >= 22.02
 * Instruments:
     1 x SHFQA Instrument
 
 Create a toolkit session to the data server and connect the device:
 
-```python vscode={"languageId": "python"}
+```python
 from zhinst.qcodes import SHFQA
 
 device = SHFQA("DEVXXXX", 'localhost')
@@ -60,7 +59,7 @@ used in the same way.
 (Besides the measurement specific parameters the device that the sweeper will use
 must be specfied as well.)
 
-```python vscode={"languageId": "python"}
+```python
 sweeper.device(device)
 
 sweeper.sweep.start_freq(200e6)
@@ -84,7 +83,7 @@ sweeper.rf.center_freq(4e9)
 
 ### Turn on the input / output channel
 
-```python vscode={"languageId": "python"}
+```python
 with device.set_transaction():
     device.qachannels[CHANNEL].input.on(1)
     device.qachannels[CHANNEL].output.on(1)
@@ -92,13 +91,13 @@ with device.set_transaction():
 
 ### Execute the sweeper
 
-```python vscode={"languageId": "python"}
+```python
 result = sweeper.run()
 num_points_result = len(result["vector"])
 print(f"Measured at {num_points_result} frequency points.")
 ```
 
-```python vscode={"languageId": "python"}
+```python
 sweeper.plot()
 ```
 
@@ -106,7 +105,7 @@ sweeper.plot()
 
 ### Create the envelope
 
-```python vscode={"languageId": "python"}
+```python
 from scipy.signal import gaussian
 import numpy as np
 
@@ -124,7 +123,7 @@ flat_top_gaussian[-rise_fall_len:] = gauss[-rise_fall_len:]
 
 #### Plot Envelope
 
-```python vscode={"languageId": "python"}
+```python
 import matplotlib.pyplot as plt
 plt.plot(flat_top_gaussian)
 plt.show()
@@ -132,7 +131,7 @@ plt.show()
 
 ### Reconfigure the sweeper
 
-```python vscode={"languageId": "python"}
+```python
 sweeper.device(device)
 
 sweeper.sweep.start_freq(-200e6)
@@ -158,7 +157,7 @@ sweeper.envelope.delay(0.0)
 
 ### Turn on the input / output channel again
 
-```python vscode={"languageId": "python"}
+```python
 with device.set_transaction():
     device.qachannels[CHANNEL].input.on(1)
     device.qachannels[CHANNEL].output.on(1)
@@ -166,12 +165,12 @@ with device.set_transaction():
 
 ### Reexecute the sweeper
 
-```python vscode={"languageId": "python"}
+```python
 result = sweeper.run()
 num_points_result = len(result["vector"])
 print(f"Measured at {num_points_result} frequency points.")
 ```
 
-```python vscode={"languageId": "python"}
+```python
 sweeper.plot()
 ```
