@@ -99,8 +99,8 @@ daq_module.save.saveonread(1)
 #### Subscribing to the nodes
 
 ```python
-for node in sample_nodes:
-    daq_module.subscribe(node)
+for signal in signals:
+    daq_module.subscribe(signal)
 ```
 
 ```python
