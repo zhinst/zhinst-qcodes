@@ -18,7 +18,6 @@ jupyter:
 
 Requirements:
 
-* LabOne Version >= 22.02
 * Instruments:
     1 x SHFSG Instrument
 

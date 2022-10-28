@@ -20,7 +20,6 @@ Perform a frequency sweep and record demodulator data.
 
 Requirements:
 
-* LabOne Version >= 22.02
 * Instruments:
     1 x Instrument with demodulators
 * feedback cable between Signal Output 1 and Signal Input 1
@@ -30,6 +29,13 @@ from zhinst.qcodes import ZISession
 
 session = ZISession('localhost')
 device = session.connect_device("DEVXXXX")
+
+# Instead of using creating the session first and then connecting a device to
+# it one can also create the device directly. 
+
+# from zhinst.qcodes import MFLI
+# device = MFLI("DEVXXXX", host = "localhost")
+# session = device.session
 ```
 
 ### Instrument configuration
@@ -112,6 +118,17 @@ sweeper.save.fileformat('hdf5')
 
 ### Executing the sweeper
 
+Setup logging to see the progress of the `wait_done` function.
+
+```python
+import logging
+import sys
+
+handler = logging.StreamHandler(sys.stdout)
+logging.getLogger("zhinst.toolkit").setLevel(logging.INFO)
+logging.getLogger("zhinst.toolkit").addHandler(handler)
+```
+
 ```python
 sweeper.execute()
 print(f"Perform {LOOPCOUNT} sweeps")
@@ -143,8 +160,8 @@ in this case sweep data up to that time point is returned. It's still necessary
 to issue read() at the end to fetch the remaining data.
 
 ```python
-data = sweeper.read()
 sweeper.unsubscribe(sample_node)
+data = sweeper.read()
 ```
 
 Verify that the number of sweeps is correct.

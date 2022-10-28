@@ -214,6 +214,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
     """
     # Enums from toolkit should be exposed also in the QCoDeS driver
     enums = {
+        "NodeDict": "zhinst.toolkit.nodetree.helper.NodeDict",
         "np.": "numpy.",
         "QuditSettings": "zhinst.utils.shfqa.multistate.QuditSettings",
         "SHFQAChannelMode": "zhinst.toolkit.interface.SHFQAChannelMode",
@@ -237,6 +238,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
         docstring = getattr(toolkit_class, name).__doc__
         signature = inspect.signature(getattr(toolkit_class, name))
         signature_str = str(signature)
+        is_node_doc = False
         # replace toolkit enum typehint with direct typehint
         for new, old in enums.items():
             signature_str = signature_str.replace(old, new)
@@ -250,6 +252,9 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
                     signature_str = signature_str.replace(
                         regex_result.group(0), regex_result.group(1)
                     )
+                if new == "NodeDict":
+                    is_node_doc = True
+
         # replace weird stuff
         for weird_stuff, replacement in conf.TYPE_HINT_REPLACEMENTS.items():
             signature_str = signature_str.replace(weird_stuff, replacement)
@@ -276,6 +281,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
                 "return_annotation": str(signature.return_annotation)
                 if signature.return_annotation
                 else "",
+                "is_node_dict": is_node_doc,
             }
         )
     return functions_info
@@ -360,7 +366,14 @@ def generate_qcodes_driver(
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("instrument_class.py.j2")
     result = template.render(data)
-    result = black.format_str(result, mode=black.FileMode())
+    # result = black.format_str(result, mode=black.FileMode())
+    result = black.format_str(
+        result,
+        mode=black.mode.Mode(
+            target_versions={black.TargetVersion.PY310},
+            line_length=88,
+        ),
+    )
     result = autoflake.fix_code(result, remove_all_unused_imports=True)
     module_name = camel_to_snake(toolkit_class.__name__)
     py_filename = str(output_dir) + "/" + module_name.lower() + ".py"
@@ -369,58 +382,66 @@ def generate_qcodes_driver(
     print(f"{py_filename} created.")
 
 
-# def generate_qcodes_driver_modules(
-#     zi_module_class: object,
-#     module_name: str,
-#     template_path: str = "templates/",
-#     output_dir: str = "src/zhinst/qcodes/modules/",
-#     name: str = None,
-# ) -> None:
-#     """Generates the Qcodes drivers for the ziPython modules.
+def generate_qcodes_driver_modules(
+    zi_module_class: object,
+    template_path: typing.Union[str, Path] = conf.TEMPLATE_PATH,
+    output_dir: typing.Union[str, Path] = conf.OUTPUT_DIR_MODULE_DRIVER,
+) -> None:
+    """Generates the Qcodes drivers for the ziPython modules.
 
-#     The drivers forward all function (except the one in black_list) and
-#     initialises the nodes a nested qcodes prameter.
+    The drivers forward all function (except the one in black_list) and
+    initialises the nodes a nested qcodes prameter.
 
-#     Args:
-#         zi_module_class (object): ziPython module class
-#         template_path (str):  jinja template location (default = "templates/")
-#         output_dir (str): output directory (default = "src/zhinst/qcodes/modules/")
-#         name (str): name for the module. default is the original class name
-#     """
-#     ignored_functions = []
-#     if zi_module_class == BaseModule:
-#         ignored_functions.append("subscribe")
-#         ignored_functions.append("unsubscribe")
-#     tk_class_info, _ = getInfo(zi_module_class, [])
-#     qcodes_functions = []
-#     for function in tk_class_info.functions:
-#         if function.name not in ignored_functions:
-#             qcodes_functions.append(function)
+    Args:
+        zi_module_class (object): ziPython module class
+        template_path (str):  jinja template location (default = "templates/")
+        output_dir (str): output directory (default = "src/zhinst/qcodes/modules/")
+    """
+    ignored_functions = []
+    if zi_module_class == BaseModule:
+        ignored_functions.append("subscribe")
+        ignored_functions.append("unsubscribe")
+    tk_class_info, _ = getInfo(zi_module_class, [])
+    qcodes_functions = []
+    for function in tk_class_info.functions:
+        if function.name not in ignored_functions:
+            qcodes_functions.append(function)
 
-#     function_info = generate_functions_info(qcodes_functions, zi_module_class)
-#     name = name if name else zi_module_class.__name__
-#     data = {
-#         "name": name,
-#         "module_name": module_name,
-#         "base_module": "Instrument"
-#         if zi_module_class == BaseModule
-#         else "BaseInstrument",
-#         "functions": function_info,
-#     }
-
-#     templateLoader = jinja2.FileSystemLoader(searchpath=template_path)
-#     templateEnv = jinja2.Environment(loader=templateLoader)
-#     template = templateEnv.get_template("module_class.py.j2")
-#     result = template.render(data)
-#     # result = black.format_str(result, mode=black.FileMode())
-#     # result = autoflake.fix_code(result, remove_all_unused_imports=True)
-#     module_name = camel_to_snake(name)
-#     open(output_dir + module_name.lower() + ".py", "w").write(result)
-
-#     # source, additional_imports=None, expand_star_imports=False,
-#     #          remove_all_unused_imports=False, remove_duplicate_keys=False,
-#     #          remove_unused_variables=False, ignore_init_module_imports=False):
-#     print(f"Module {output_dir + name.lower()}.py created.")
+    function_info = generate_functions_info(qcodes_functions, zi_module_class)
+    name = zi_module_class.__name__
+    module_name = camel_to_snake(zi_module_class.__name__)
+    module_docstring = zi_module_class.__doc__.split("Args:")[0]
+    node_param = []
+    if module_name == "sweeper_module":
+        node_param.append("gridnode")
+    if module_name == "daq_module":
+        node_param.append("triggernode")
+    data = {
+        "name": name,
+        "module_name": module_name,
+        "module_docstring": module_docstring,
+        "base_module": "ZIInstrument"
+        if zi_module_class == BaseModule
+        else "ZIBaseModule",
+        "functions": function_info,
+        "node_param": node_param,
+    }
+    templateLoader = jinja2.FileSystemLoader(searchpath=template_path)
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    template = templateEnv.get_template("module_class.py.j2")
+    result = template.render(data)
+    result = black.format_str(
+        result,
+        mode=black.mode.Mode(
+            target_versions={black.TargetVersion.PY310},
+            line_length=88,
+        ),
+    )
+    result = autoflake.fix_code(result, remove_all_unused_imports=True)
+    py_filename = str(output_dir) + "/" + module_name.lower() + ".py"
+    with open(py_filename, "w+") as outfile:
+        outfile.write(result)
+    print(f"{py_filename} created.")
 
 
 def generate_device_api():
@@ -491,6 +512,18 @@ def instrument_class(name):
     generate_qcodes_driver(getattr(module, name.upper()))
 
 
+@main.command(help="toolkit module class")
+@click.argument(
+    "name",
+    required=False,
+    type=str,
+)
+def module_class(name):
+    """Generate a module class."""
+    module = importlib.import_module(f"{conf.TOOLKIT_MODULE_MODULE}.{name}")
+    generate_qcodes_driver_modules(getattr(module, name.upper()))
+
+
 @main.command(help="Generate all.")
 def generate_all():
     """Generate all drivers."""
@@ -498,6 +531,12 @@ def generate_all():
         module = importlib.import_module(f"{conf.TOOLKIT_DEVICE_MODULE}.{name.lower()}")
         generate_qcodes_driver(getattr(module, name.upper()))
     generate_device_api()
+
+    for name in conf.MODULE_DRIVERS:
+        module = importlib.import_module(
+            f"{conf.TOOLKIT_MODULE_MODULE}.{camel_to_snake(name)}"
+        )
+        generate_qcodes_driver_modules(getattr(module, name))
 
 
 if __name__ == "__main__":

@@ -15,7 +15,9 @@ The following section provides a set of examples.
    :maxdepth: 2
 
    hf2
-   example_sweeper_module
+   daq_module
+   scope_module
+   sweeper_module
    shfqa_qubit_readout_measurement
    shfqa_qubit_readout_weights
    shfqa_sweeper
