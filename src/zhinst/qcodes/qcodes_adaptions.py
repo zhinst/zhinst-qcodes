@@ -501,7 +501,6 @@ class ZIInstrument(Instrument):
         with self._snapshot_cache.snapshot() if update else nullcontext():
             return super().snapshot(update)
 
-
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
         """Prints a readable version of the snapshot.
 
