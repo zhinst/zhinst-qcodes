@@ -151,9 +151,9 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_awg_module()
-        return ZIModules.ZIBaseModule(module, self._session, name="awgmodule")
+        return ZIModules.ZIBaseModule(module, self._session, name="awg_module")
 
-    def create_daq_module(self) -> ZIModules.ZIBaseModule:
+    def create_daq_module(self) -> ZIModules.ZIDAQModule:
         """Create a QCoDeS instance of the DAQModule.
 
         The new instance creates a new session to the DataServer.
@@ -167,7 +167,7 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_daq_module()
-        return ZIModules.ZIBaseModule(module, self._session, name="daqmodule")
+        return ZIModules.ZIDAQModule(module, self._session)
 
     def create_device_settings_module(self) -> ZIModules.ZIBaseModule:
         """Create a QCoDeS instance of the DeviceSettingsModule.
@@ -201,7 +201,7 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_device_settings_module()
-        return ZIModules.ZIBaseModule(module, self._session, name="impedancemodule")
+        return ZIModules.ZIBaseModule(module, self._session, name="impedance_module")
 
     def create_mds_module(self) -> ZIModules.ZIBaseModule:
         """Create a QCoDeS instance of the PIDAdvisorModule.
@@ -217,7 +217,7 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_mds_module()
-        return ZIModules.ZIBaseModule(module, self._session, name="mdsmodule")
+        return ZIModules.ZIBaseModule(module, self._session, name="mds_module")
 
     def create_pid_advisor_module(self) -> ZIModules.ZIBaseModule:
         """Create a QCoDeS instance of the PIDAdvisorModule.
@@ -233,7 +233,7 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_pid_advisor_module()
-        return ZIModules.ZIBaseModule(module, self._session, name="pidadvisormodule")
+        return ZIModules.ZIBaseModule(module, self._session, name="pidadvisor_module")
 
     def create_precompensation_advisor_module(self) -> ZIModules.ZIBaseModule:
         """Create a QCoDeS instance of the PrecompensationAdvisorModule.
@@ -267,9 +267,9 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_qa_module()
-        return ZIModules.ZIBaseModule(module, self._session, name="qamodule")
+        return ZIModules.ZIBaseModule(module, self._session, name="qa_module")
 
-    def create_scope_module(self) -> ZIModules.ZIBaseModule:
+    def create_scope_module(self) -> ZIModules.ZIScopeModule:
         """Create a QCoDeS instance of the AwgModule.
 
         The new instance creates a new session to the DataServer.
@@ -283,7 +283,7 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_scope_module()
-        return ZIModules.ZIBaseModule(module, self._session, name="scopemodule")
+        return ZIModules.ZIScopeModule(module, self._session)
 
     def create_sweeper_module(self) -> ZIModules.ZISweeperModule:
         """Create a QCoDeS instance of the SweeperModule.

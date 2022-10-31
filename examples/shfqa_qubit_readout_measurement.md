@@ -19,7 +19,6 @@ Parallel read-out of qubits.
 
 Requirements:
 
-* LabOne Version >= 22.02
 * Instruments:
     1 x SHFQA Instrument
 * Loopback configuration between input and output of channel 0

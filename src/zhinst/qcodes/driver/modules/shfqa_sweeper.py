@@ -45,30 +45,25 @@ class ZISHFQASweeper(ZIInstrument):
         )
         self._tk_object = tk_object
         self._session = session
-        init_nodetree(
-            self, self._tk_object, self._snapshot_cache, blacklist=("/device",)
+        init_nodetree(self, self._tk_object, self._snapshot_cache)
+        self._tk_object.root.update_nodes(
+            {"/device": {"GetParser": lambda value: self._get_device(value)}}
         )
 
-    def device(
-        self, device: t.Optional[t.Union[t.Type[ZIBaseInstrument], str]] = None
-    ) -> t.Optional[t.Union[t.Type[ZIBaseInstrument], str]]:
-        """The device serial to be used with the LabOne module.
+    def _get_device(self, serial: str) -> t.Union[t.Type[ZIBaseInstrument], str]:
+        """Convert a device serial into a QCoDeS device object.
 
         Args:
-            device: device that should be used with the module. If not
-                specified the current device value is returned.
+            serial: Serial of the device
 
         Returns:
-            Current value of the device if no argument hast been specified.
+            QCoDeS device object. If the serial does not
+                match to a connected device the serial is returned instead.
         """
-        if device is None:
-            serial = self._tk_object.device(parse=False)
-            try:
-                return self._session.devices[serial]
-            except (RuntimeError, KeyError):
-                return serial
-        self._tk_object.device(device)
-        return None
+        try:
+            return self._session.devices[serial]
+        except (RuntimeError, KeyError):
+            return serial
 
     def run(self) -> dict:
         """Perform a sweep with the specified settings.

@@ -1,4 +1,10 @@
-example_sweeper_module:
+daq_module:
+  device_type: ["MFLI", "UHFLI"]
+
+scope_module:
+  device_type: ["MFLI", "UHFLI"]
+
+sweeper_module:
   device_type: ["MFLI", "UHFLI"]
 
 hf2:

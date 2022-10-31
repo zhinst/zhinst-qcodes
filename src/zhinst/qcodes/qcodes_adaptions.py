@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 import typing as t
 from contextlib import contextmanager, nullcontext
+from collections.abc import Mapping
 
 import numpy as np
 from qcodes.instrument.base import Instrument
@@ -10,6 +11,7 @@ from qcodes.instrument.channel import ChannelList, InstrumentChannel
 from qcodes.instrument.parameter import Parameter
 from qcodes.utils.validators import ComplexNumbers
 from zhinst.toolkit.nodetree import Node, NodeTree
+from zhinst.toolkit.nodetree.helper import NodeDict as TKNodeDict
 from zhinst.toolkit.nodetree.node import NodeInfo
 
 
@@ -519,6 +521,41 @@ class ZIInstrument(Instrument):
         """
         with self._snapshot_cache.snapshot() if update else nullcontext():
             return super().print_readable_snapshot(update, max_chars)
+
+
+class NodeDict(Mapping):
+    """Mapping of dictionary structure results.
+
+    The mapping allows to access data with both the string and the qcodes
+    parameter objects.
+    """
+
+    def __init__(self, tk_result: t.Union[t.Dict[str, t.Any], TKNodeDict]):
+        if not isinstance(tk_result, TKNodeDict):
+            self._result = TKNodeDict(tk_result)
+        else:
+            self._result = tk_result
+
+    def __repr__(self):
+        return repr(self._result)
+
+    def __getitem__(self, key: t.Union[str, ZIParameter]):
+        if isinstance(key, ZIParameter):
+            return self._result[key.zi_node.lower()]
+        return self._result[key]
+
+    def __iter__(self):
+        return iter(self._result)
+
+    def __len__(self):
+        return len(self._result)
+
+    def to_dict(self) -> t.Dict[str, t.Any]:
+        """Convert the WildcardResult to a dictionary.
+
+        After conversion, :class:`Node` objects cannot be used to get items.
+        """
+        return self._result.to_dict()
 
 
 def tk_node_to_qcodes_list(tk_node: Node) -> t.List[str]:

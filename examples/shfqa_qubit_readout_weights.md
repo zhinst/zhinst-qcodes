@@ -19,7 +19,6 @@ Measure the integration weights for a qubit readout by using gaussian flat top p
 
 Requirements:
 
-* LabOne Version >= 22.02
 * Instruments:
     1 x SHFQA Instrument
 * Loopback configuration between input and output of channel 0
