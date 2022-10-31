@@ -1,5 +1,12 @@
 # zhinst-qcodes Changelog
 
+## Version 0.5.0
+* Updated to zhinst-toolkit 0.5.0
+* Added support for LabOne DAQ module
+* Added support for LabOne Sweeper module
+* Added support for LabOne Scope module
+* Avoid connecting to node when cache update set to false
+
 ## Version 0.4.1
 * Add new class `zhinst.toolkit.Sequence` that allows a more flexible use of 
   sequences in toolkit (`#141`).

@@ -50,7 +50,7 @@ class ZIDAQModule(ZIBaseModule):
     def finish(self) -> None:
         """Stop the module.
 
-        .. versionadded:: 0.4.4
+        .. versionadded:: 0.5.0
         """
         return self._tk_object.finish()
 
@@ -60,7 +60,7 @@ class ZIDAQModule(ZIBaseModule):
         Returns:
             Flag if the acquisition has finished.
 
-        .. versionadded:: 0.4.4
+        .. versionadded:: 0.5.0
         """
         return self._tk_object.finished()
 
@@ -70,14 +70,14 @@ class ZIDAQModule(ZIBaseModule):
         Returns:
             Progress of the execution with a number between 0 and 1
 
-        .. versionadded:: 0.4.4
+        .. versionadded:: 0.5.0
         """
         return self._tk_object.progress()
 
     def trigger(self) -> None:
         """Execute a manual trigger.
 
-        .. versionadded:: 0.4.4
+        .. versionadded:: 0.5.0
         """
         return self._tk_object.trigger()
 

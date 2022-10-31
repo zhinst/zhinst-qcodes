@@ -54,7 +54,7 @@ class ZISweeperModule(ZIBaseModule):
     def finish(self) -> None:
         """Stop the module.
 
-        .. versionadded:: 0.4.4
+        .. versionadded:: 0.5.0
         """
         return self._tk_object.finish()
 
@@ -64,7 +64,7 @@ class ZISweeperModule(ZIBaseModule):
         Returns:
             Progress of the execution with a number between 0 and 1
 
-        .. versionadded:: 0.4.4
+        .. versionadded:: 0.5.0
         """
         return self._tk_object.progress()
 
@@ -76,6 +76,6 @@ class ZISweeperModule(ZIBaseModule):
         Returns:
             Sweeper data.
 
-        .. versionchanged:: 0.4.4 return NodeDict instead of raw dict.
+        .. versionchanged:: 0.5.0 return NodeDict instead of raw dict.
         """
         return NodeDict(self._tk_object.read())

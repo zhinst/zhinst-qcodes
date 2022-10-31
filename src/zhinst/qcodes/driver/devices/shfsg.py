@@ -131,7 +131,7 @@ class AWGCore(ZINode):
         Raises:
             RuntimeError: If the sequencer could not be enabled.
 
-        .. versionchanged:: 0.4.4
+        .. versionchanged:: 0.5.0
 
             Check the acknowledged value instead of using `wait_for_state_change`.
         """
