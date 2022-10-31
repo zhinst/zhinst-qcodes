@@ -2,7 +2,7 @@
 import re
 from datetime import datetime
 import typing as t
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from collections.abc import Mapping
 
 import numpy as np
@@ -399,7 +399,7 @@ class ZINode(InstrumentChannel):
         Returns:
             dict: Base snapshot.
         """
-        with self._snapshot_cache.snapshot(self._zi_node):
+        with self._snapshot_cache.snapshot(self._zi_node) if update else nullcontext():
             return super().snapshot(update)
 
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
@@ -418,7 +418,7 @@ class ZINode(InstrumentChannel):
                 readable snapshot will be cropped if this value is exceeded.
                 Defaults to 80 to be consistent with default terminal width.
         """
-        with self._snapshot_cache.snapshot(self._zi_node):
+        with self._snapshot_cache.snapshot(self._zi_node) if update else nullcontext():
             return super().print_readable_snapshot(update, max_chars)
 
 
@@ -450,7 +450,7 @@ class ZIChannelList(ChannelList):
         Returns:
             dict: Base snapshot.
         """
-        with self._snapshot_cache.snapshot(self._zi_node):
+        with self._snapshot_cache.snapshot(self._zi_node) if update else nullcontext():
             return super().snapshot(update)
 
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
@@ -469,7 +469,7 @@ class ZIChannelList(ChannelList):
                 readable snapshot will be cropped if this value is exceeded.
                 Defaults to 80 to be consistent with default terminal width.
         """
-        with self._snapshot_cache.snapshot(self._zi_node):
+        with self._snapshot_cache.snapshot(self._zi_node) if update else nullcontext():
             return super().print_readable_snapshot(update, max_chars)
 
 
@@ -500,7 +500,7 @@ class ZIInstrument(Instrument):
         Returns:
             dict: Base snapshot.
         """
-        with self._snapshot_cache.snapshot():
+        with self._snapshot_cache.snapshot() if update else nullcontext():
             return super().snapshot(update)
 
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
@@ -519,7 +519,7 @@ class ZIInstrument(Instrument):
                 readable snapshot will be cropped if this value is exceeded.
                 Defaults to 80 to be consistent with default terminal width.
         """
-        with self._snapshot_cache.snapshot():
+        with self._snapshot_cache.snapshot() if update else nullcontext():
             return super().print_readable_snapshot(update, max_chars)
 
 
