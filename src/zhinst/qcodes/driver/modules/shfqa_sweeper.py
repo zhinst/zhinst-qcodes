@@ -45,16 +45,9 @@ class ZISHFQASweeper(ZIInstrument):
         )
         self._tk_object = tk_object
         self._session = session
-        init_nodetree(
-            self, self._tk_object, self._snapshot_cache, blacklist=("/device",)
-        )
+        init_nodetree(self, self._tk_object, self._snapshot_cache)
         self._tk_object.root.update_nodes(
-            {
-                "/device": {
-                    "GetParser": lambda value: self._get_device(value),
-                    "SetParser": lambda value: TKSHFQASweeper._set_device(value),
-                }
-            }
+            {"/device": {"GetParser": lambda value: self._get_device(value)}}
         )
 
     def _get_device(self, serial: str) -> t.Union[t.Type[ZIBaseInstrument], str]:
