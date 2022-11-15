@@ -8,6 +8,7 @@ from zhinst.toolkit.nodetree import Node as TKNode
 
 from zhinst.qcodes.qcodes_adaptions import (
     ZIParameter,
+    NodeDict,
     ZIInstrument,
     init_nodetree,
     tk_node_to_parameter,
@@ -145,6 +146,14 @@ class ZIBaseModule(ZIInstrument):
         """
         return self._tk_object.wait_done(timeout=timeout, sleep_time=sleep_time)
 
+    def progress(self) -> float:
+        """Progress of the execution.
+
+        Returns:
+            Progress of the execution with a number between 0 and 1
+        """
+        return self._tk_object.progress()
+
     def execute(self) -> None:
         """Start the module execution.
 
@@ -154,3 +163,13 @@ class ZIBaseModule(ZIInstrument):
         .. versionadded:: 0.4.1
         """
         return self._tk_object.execute()
+
+    def read(self) -> NodeDict:
+        """Read scope data.
+
+        If the recording is still ongoing only a subset of data is returned.
+
+        Returns:
+            Scope data.
+        """
+        return NodeDict(self._tk_object.read())

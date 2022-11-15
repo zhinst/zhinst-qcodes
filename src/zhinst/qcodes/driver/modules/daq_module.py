@@ -64,16 +64,6 @@ class ZIDAQModule(ZIBaseModule):
         """
         return self._tk_object.finished()
 
-    def progress(self) -> float:
-        """Progress of the execution.
-
-        Returns:
-            Progress of the execution with a number between 0 and 1
-
-        .. versionadded:: 0.5.0
-        """
-        return self._tk_object.progress()
-
     def trigger(self) -> None:
         """Execute a manual trigger.
 
