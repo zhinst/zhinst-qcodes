@@ -76,7 +76,7 @@ class ZIDeviceSettingsModule(ZIBaseModule):
     def save_to_file(
         self,
         filename: Union[str, Path],
-        device: Union[str, "DeviceType"],
+        device: Union["DeviceType", str],
         timeout: int = 30,
     ) -> None:
         """Save the device settings to a LabOne settings file.

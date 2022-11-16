@@ -288,3 +288,8 @@ averager
 historylength
 demods
 natively
+subtree
+misconfiguration
+pre
+forwardwave
+backwardwave
