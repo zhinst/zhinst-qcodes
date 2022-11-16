@@ -3,10 +3,10 @@ import typing as t
 
 from zhinst.toolkit.driver.modules.shfqa_sweeper import SHFQASweeper as TKSHFQASweeper
 
-from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
 from zhinst.qcodes.qcodes_adaptions import init_nodetree, ZIInstrument
 
 if t.TYPE_CHECKING:
+    from zhinst.qcodes.driver.devices import DeviceType
     from zhinst.qcodes.session import Session
 
 
@@ -50,7 +50,7 @@ class ZISHFQASweeper(ZIInstrument):
             {"/device": {"GetParser": lambda value: self._get_device(value)}}
         )
 
-    def _get_device(self, serial: str) -> t.Union[t.Type[ZIBaseInstrument], str]:
+    def _get_device(self, serial: str) -> t.Union["DeviceType", str]:
         """Convert a device serial into a QCoDeS device object.
 
         Args:

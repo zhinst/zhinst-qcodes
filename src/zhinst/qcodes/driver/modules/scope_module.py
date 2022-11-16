@@ -4,9 +4,6 @@ from zhinst.toolkit.driver.modules.scope_module import ScopeModule as TKScopeMod
 
 from zhinst.qcodes.driver.modules.base_module import ZIBaseModule
 
-from zhinst.qcodes.qcodes_adaptions import (
-    NodeDict,
-)
 
 if t.TYPE_CHECKING:
     from zhinst.qcodes.session import Session
@@ -65,21 +62,3 @@ class ZIScopeModule(ZIBaseModule):
     def finish(self) -> None:
         """Stop the module."""
         return self._tk_object.finish()
-
-    def progress(self) -> float:
-        """Progress of the execution.
-
-        Returns:
-            Progress of the execution with a number between 0 and 1
-        """
-        return self._tk_object.progress()
-
-    def read(self) -> NodeDict:
-        """Read scope data.
-
-        If the recording is still ongoing only a subset of data is returned.
-
-        Returns:
-            Scope data.
-        """
-        return NodeDict(self._tk_object.read())

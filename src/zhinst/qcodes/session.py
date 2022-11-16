@@ -169,7 +169,7 @@ class ModuleHandler:
         module = self._tk_modules.create_daq_module()
         return ZIModules.ZIDAQModule(module, self._session)
 
-    def create_device_settings_module(self) -> ZIModules.ZIBaseModule:
+    def create_device_settings_module(self) -> ZIModules.ZIDeviceSettingsModule:
         """Create a QCoDeS instance of the DeviceSettingsModule.
 
         The new instance creates a new session to the DataServer.
@@ -183,11 +183,9 @@ class ModuleHandler:
             DeviceSettingsModule: created module
         """
         module = self._tk_modules.create_device_settings_module()
-        return ZIModules.ZIBaseModule(
-            module, self._session, name="devicesettingsmodule"
-        )
+        return ZIModules.ZIDeviceSettingsModule(module, self._session)
 
-    def create_impedance_module(self) -> ZIModules.ZIBaseModule:
+    def create_impedance_module(self) -> ZIModules.ZIImpedanceModule:
         """Create a QCoDeS instance of the ImpedanceModule.
 
         The new instance creates a new session to the DataServer.
@@ -201,7 +199,7 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_device_settings_module()
-        return ZIModules.ZIBaseModule(module, self._session, name="impedance_module")
+        return ZIModules.ZIImpedanceModule(module, self._session)
 
     def create_mds_module(self) -> ZIModules.ZIBaseModule:
         """Create a QCoDeS instance of the PIDAdvisorModule.
@@ -219,7 +217,7 @@ class ModuleHandler:
         module = self._tk_modules.create_mds_module()
         return ZIModules.ZIBaseModule(module, self._session, name="mds_module")
 
-    def create_pid_advisor_module(self) -> ZIModules.ZIBaseModule:
+    def create_pid_advisor_module(self) -> ZIModules.ZIPIDAdvisorModule:
         """Create a QCoDeS instance of the PIDAdvisorModule.
 
         The new instance creates a new session to the DataServer.
@@ -233,9 +231,11 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_pid_advisor_module()
-        return ZIModules.ZIBaseModule(module, self._session, name="pidadvisor_module")
+        return ZIModules.ZIPIDAdvisorModule(module, self._session)
 
-    def create_precompensation_advisor_module(self) -> ZIModules.ZIBaseModule:
+    def create_precompensation_advisor_module(
+        self,
+    ) -> ZIModules.ZIPrecompensationAdvisorModule:
         """Create a QCoDeS instance of the PrecompensationAdvisorModule.
 
         The new instance creates a new session to the DataServer.
@@ -249,9 +249,7 @@ class ModuleHandler:
             created module
         """
         module = self._tk_modules.create_precompensation_advisor_module()
-        return ZIModules.ZIBaseModule(
-            module, self._session, name="precompensationadvisormodule"
-        )
+        return ZIModules.ZIPrecompensationAdvisorModule(module, self._session)
 
     def create_qa_module(self) -> ZIModules.ZIBaseModule:
         """Create a QCoDeS instance of the AwgModule.
@@ -346,7 +344,7 @@ class ModuleHandler:
         return self.create_daq_module()
 
     @lazy_property
-    def device_settings(self) -> ZIModules.ZIBaseModule:
+    def device_settings(self) -> ZIModules.ZIDeviceSettingsModule:
         """Managed instance of the zhinst.core.DeviceSettingsModule.
 
         Managed in this sense means that only one instance is created
@@ -357,7 +355,7 @@ class ModuleHandler:
         return self.create_device_settings_module()
 
     @lazy_property
-    def impedance(self) -> ZIModules.ZIBaseModule:
+    def impedance(self) -> ZIModules.ZIImpedanceModule:
         """Managed instance of the zhinst.core.ImpedanceModule.
 
         Managed in this sense means that only one instance is created
@@ -379,7 +377,7 @@ class ModuleHandler:
         return self.create_mds_module()
 
     @lazy_property
-    def pid_advisor(self) -> ZIModules.ZIBaseModule:
+    def pid_advisor(self) -> ZIModules.ZIPIDAdvisorModule:
         """Managed instance of the zhinst.core.PidAdvisorModule.
 
         Managed in this sense means that only one instance is created
@@ -390,7 +388,7 @@ class ModuleHandler:
         return self.create_pid_advisor_module()
 
     @lazy_property
-    def precompensation_advisor(self) -> ZIModules.ZIBaseModule:
+    def precompensation_advisor(self) -> ZIModules.ZIPrecompensationAdvisorModule:
         """Managed instance of the zhinst.core.PrecompensationAdvisorModule.
 
         Managed in this sense means that only one instance is created
@@ -412,7 +410,7 @@ class ModuleHandler:
         return self.create_qa_module()
 
     @lazy_property
-    def scope(self) -> ZIModules.ZIBaseModule:
+    def scope(self) -> ZIModules.ZIScopeModule:
         """Managed instance of the zhinst.core.ScopeModule.
 
         Managed in this sense means that only one instance is created

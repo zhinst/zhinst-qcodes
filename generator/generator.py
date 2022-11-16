@@ -1,6 +1,6 @@
 """Autogenerate the QCoDeS drivers from toolkit and zhinst-core."""
 from collections import namedtuple
-import typing
+import typing as t
 import inspect
 import re
 import importlib
@@ -24,7 +24,7 @@ class_tuple = namedtuple("toolkit_class", ["functions", "parameters", "sub_modul
 
 def getPropertyInfo(
     name: str, property: object, class_type: object
-) -> typing.Union[parameter_tuple, submodule_tuple]:
+) -> t.Union[parameter_tuple, submodule_tuple]:
     """Get all necessary information for a toolkit property.
 
     Args:
@@ -35,7 +35,7 @@ def getPropertyInfo(
     Returns:
         Union[parameter_tuple,submodule_tuple]
     """
-    typehint = typing.get_type_hints(property.fget)
+    typehint = t.get_type_hints(property.fget)
     if "deprecated" in inspect.getsource(property.fget):
         # TODO decide if we should keep them or remove them?
         print(f"WARNING {name}: deprecated property -> ignored")
@@ -79,9 +79,7 @@ def getPropertyInfo(
     return parameter_tuple(name, False)
 
 
-def getInfo(
-    class_type: object, existing_names: list
-) -> typing.Tuple[class_tuple, list]:
+def getInfo(class_type: object, existing_names: list) -> t.Tuple[class_tuple, list]:
     """Get all necessary information for a toolkit class.
 
     Args:
@@ -140,9 +138,7 @@ def getInfo(
     return result_tuple, existing_names
 
 
-def generate_submodules_info(
-    sub_modules: list, base_class: object
-) -> typing.List[list]:
+def generate_submodules_info(sub_modules: list, base_class: object) -> t.List[list]:
     """Gather information for the submodules.
 
     Args:
@@ -189,7 +185,7 @@ def generate_parameter_info(parameters: list, class_type: object) -> list:
             return_annotation = signature.return_annotation.__name__
         except AttributeError:
             return_annotation = str(signature.return_annotation)
-            return_annotation = return_annotation.replace("typing.", "")
+            return_annotation = return_annotation.replace("typing.", "t.")
 
         parameter_info.append(
             {
@@ -224,6 +220,8 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
         "Waveforms": "zhinst.toolkit.waveform.Waveforms",
         "CommandTable": "zhinst.toolkit.command_table.CommandTable",
         "Sequence": "zhinst.toolkit.sequence.Sequence",
+        "Path": "pathlib.Path",
+        '"DeviceType"': "ForwardRef('DeviceType')",
     }
     # regex to find deprecation decorator
     deprecated_regex = re.compile(r"(@depreca(.|\n)*?)\s*?(?:def|@)")
@@ -347,8 +345,8 @@ def camel_to_snake(name: str) -> str:
 
 def generate_qcodes_driver(
     toolkit_class: object,
-    template_path: typing.Union[str, Path] = conf.TEMPLATE_PATH,
-    output_dir: typing.Union[str, Path] = conf.OUTPUT_DIR_DEVICES_DRIVER,
+    template_path: t.Union[str, Path] = conf.TEMPLATE_PATH,
+    output_dir: t.Union[str, Path] = conf.OUTPUT_DIR_DEVICES_DRIVER,
 ) -> None:
     """Generates the Qcodes drivers for the toolkit instrument classes.
 
@@ -384,8 +382,8 @@ def generate_qcodes_driver(
 
 def generate_qcodes_driver_modules(
     zi_module_class: object,
-    template_path: typing.Union[str, Path] = conf.TEMPLATE_PATH,
-    output_dir: typing.Union[str, Path] = conf.OUTPUT_DIR_MODULE_DRIVER,
+    template_path: t.Union[str, Path] = conf.TEMPLATE_PATH,
+    output_dir: t.Union[str, Path] = conf.OUTPUT_DIR_MODULE_DRIVER,
 ) -> None:
     """Generates the Qcodes drivers for the ziPython modules.
 

@@ -16,7 +16,16 @@ TOOLKIT_DEVICE_MODULE = "zhinst.toolkit.driver.devices"
 OUTPUT_DIR_MODULE_DRIVER = PKG_ROOT.parent / "src/zhinst/qcodes/driver/modules/"
 
 # module API
-MODULE_DRIVERS = ["BaseModule", "DAQModule", "ScopeModule", "SweeperModule"]
+MODULE_DRIVERS = [
+    "BaseModule",
+    "DAQModule",
+    "ScopeModule",
+    "SweeperModule",
+    "ImpedanceModule",
+    "DeviceSettingsModule",
+    "PIDAdvisorModule",
+    "PrecompensationAdvisorModule",
+]
 TOOLKIT_MODULE_MODULE = "zhinst.toolkit.driver.modules"
 
 # Typing
