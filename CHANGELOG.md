@@ -1,5 +1,9 @@
 # zhinst-qcodes Changelog
 
+## Version 0.5.2
+* Updated to zhinst-toolkit 0.5.2
+* Added `find_zsync_worker_port` function to the PQSC
+
 ## Version 0.5.0
 * Updated to zhinst-toolkit 0.5.0
 * Added support for LabOne DAQ module

@@ -105,7 +105,7 @@ class PQSC(ZIBaseInstrument):
                 requesting the reference clock status (default: 1)
 
         Raises:
-            ToolkitError: If the process of locking to the reference clock
+            TimeoutError: If the process of locking to the reference clock
                 exceeds the specified timeout.
         """
         return self._tk_object.check_ref_clock(timeout=timeout, sleep_time=sleep_time)
@@ -137,3 +137,21 @@ class PQSC(ZIBaseInstrument):
         return self._tk_object.check_zsync_connection(
             ports=ports, timeout=timeout, sleep_time=sleep_time
         )
+
+    def find_zsync_worker_port(self, device: ZIBaseInstrument) -> int:
+        """Find the ID of the PQSC ZSync port connected to a given device.
+
+        Args:
+            pqsc: PQSC device over whose ports the research shall be done.
+            device: device for which the connected ZSync port shall be found.
+
+        Returns:
+            Integer value represent the ID of the searched PQSC Zsync port.
+
+        Raises:
+            ToolkitError: If the given device doesn't appear to be connected
+                to the PQSC via ZSync.
+
+        .. versionadded:: 0.5.1
+        """
+        return self._tk_object.find_zsync_worker_port(device=device._tk_object)
