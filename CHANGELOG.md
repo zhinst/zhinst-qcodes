@@ -1,5 +1,8 @@
 # zhinst-qcodes Changelog
 
+## Version 0.5.3
+* Added `py.typed` type information marker file (`#63`).
+
 ## Version 0.5.2
 * Updated to zhinst-toolkit 0.5.2
 * Added `find_zsync_worker_port` function to the PQSC
@@ -12,9 +15,9 @@
 * Avoid connecting to node when cache update set to false
 
 ## Version 0.4.1
-* Add new class `zhinst.toolkit.Sequence` that allows a more flexible use of 
+* Add new class `zhinst.toolkit.Sequence` that allows a more flexible use of
   sequences in toolkit (`#141`).
-* Add support for session wide transactions that bundle set command from all 
+* Add support for session wide transactions that bundle set command from all
   devices connected to the data server. (`#134`)
 * Add `from_existing_connection()` to `zhinst.toolkit.Session` to help reusing the existing DataServer connection.
 * Bugfix: Nodes with nameless options don't raise an exception when their enum attribute is called (`#165`).
@@ -27,9 +30,9 @@
 ## Version 0.3.5
 * Adapt AWG Waveform upload (`write_to_waveform_memory`) to append to existing transactions.
 * Make consistency validate during waveform upload optional (new flag `validate` in `write_to_waveform_memory`).
-* Add `get_sequence_snippet` function to `zhinst.toolkit.Waveforms` class. 
+* Add `get_sequence_snippet` function to `zhinst.toolkit.Waveforms` class.
   The function is able to generated a sequence code snippet that defines and assigns
-  the waveforms for this object. Additional meta information like an optional name 
+  the waveforms for this object. Additional meta information like an optional name
   or the output configuration can be specified through a newly added `Wave` class from `zhinst.toolkit.Waveforms`.
 * Getting a value by calling a wildcard node now returns `zhinst.toolkit.nodetree.node.WildcardResult`
 
