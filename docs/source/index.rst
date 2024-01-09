@@ -10,7 +10,7 @@ Zurich Instruments QCoDeS driver |version| Documentation
 The Zurich Instruments drivers for QCoDeS (zhinst-qcodes) is a package of
 instrument drivers for devices produced by
 `Zurich Instruments <https://www.zhinst.com>`_ for QCoDeS.
-`QCoDeS <http://qcodes.github.io/Qcodes>`_ is a Python-based data acquisition
+`QCoDeS <http://microsoft.github.io/Qcodes>`_ is a Python-based data acquisition
 framework developed to serve the needs of nanoelectronic device experiments,
 but not limited to that.
 

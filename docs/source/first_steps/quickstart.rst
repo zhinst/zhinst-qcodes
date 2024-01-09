@@ -119,7 +119,7 @@ hierarchical structure called the node tree. zhinst-qcodes implements the node t
 the by QCoDeS provided nested dictionary like structure. All leaf nodes are
 ``qcodes.instrument.parameter.Parameter`` nested in
 ``qcodes.instrument.baseInstrumentChannel`` s. Please refer to the
-`QCoDeS Documentation <https://qcodes.github.io/Qcodes//>`_ for a detailed
+`QCoDeS Documentation <https://microsoft.github.io/Qcodes//>`_ for a detailed
 explanation of Parameter work in QCoDeS.
 
 .. code-block:: python
