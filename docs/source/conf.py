@@ -83,7 +83,7 @@ html_theme = "pydata_sphinx_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-html_css_files = ['zhinst-sphinx-theme/css/custom.css']
+html_css_files = ["zhinst-sphinx-theme/css/custom.css"]
 
 html_theme_options = {
     "logo": {
@@ -111,7 +111,13 @@ highlight_language = "none"
 
 # Spelling
 # sphinxcontrib.spelling configuration file
-spelling_word_list_filename='spelling_wordlist.txt'
+spelling_word_list_filename = "spelling_wordlist.txt"
 # Show suggestion in console output
-spelling_show_suggestions=False
-spelling_exclude_patterns=['examples/*.nblink', 'source/_static/zhinst-sphinx-theme/**/*']
+spelling_show_suggestions = False
+spelling_exclude_patterns = [
+    "examples/*.nblink",
+    "source/_static/zhinst-sphinx-theme/**/*",
+]
+
+# Warnings
+suppress_warnings = ["config.cache"]
