@@ -1,4 +1,5 @@
 """Base modules for the Zurich Instrument specific QCoDeS driver."""
+
 import re
 from datetime import datetime
 import typing as t
@@ -707,18 +708,23 @@ def init_nodetree(
                 and "Read" in info.get("Properties")
                 and not any(x in node.raw_tree for x in snapshot_blacklist)
             )
+            name = name + "_" if hasattr(parent, name) else name
             parent.add_parameter(
                 parameter_class=ZIParameter,
                 name=name,
                 docstring=info.get("Description"),
-                unit=info.get("Unit")
-                if info.get("Unit") not in ["None", "Dependent"]
-                else None,
+                unit=(
+                    info.get("Unit")
+                    if info.get("Unit") not in ["None", "Dependent"]
+                    else None
+                ),
                 get_cmd=node._get,
                 set_cmd=node._set,
-                vals=ComplexNumbers()
-                if re.match(is_complex, info.get("Node").lower())
-                else None,
+                vals=(
+                    ComplexNumbers()
+                    if re.match(is_complex, info.get("Node").lower())
+                    else None
+                ),
                 snapshot_value=do_snapshot,
                 snapshot_get=do_snapshot,
                 zi_node=info.get("Node"),
