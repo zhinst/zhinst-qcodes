@@ -1,5 +1,9 @@
 # zhinst-qcodes Changelog
 
+## Version 0.5.4
+* Fix issue that cause node names to collide with native attributes. (`/zi/debug/log` 
+  collided with the native log attribute on Nodes)
+
 ## Version 0.5.3
 * Added `py.typed` type information marker file (`#63`).
 
