@@ -1,12 +1,13 @@
 """Connection Manager for the LabOne Python API."""
+
 from collections.abc import MutableMapping
+from functools import cached_property
 import typing as t
 
 from zhinst.toolkit.session import Devices as TKDevices
 from zhinst.toolkit.session import PollFlags
 from zhinst.toolkit.session import Session as TKSession
 from zhinst.toolkit.session import ModuleHandler as TKModuleHandler
-from zhinst.toolkit.nodetree.helper import lazy_property
 from zhinst.core import ziDAQServer
 
 import zhinst.qcodes.driver.devices as ZIDevices
@@ -321,7 +322,7 @@ class ModuleHandler:
         module = self._tk_modules.create_shfqa_sweeper()
         return ZIModules.ZISHFQASweeper(module, self._session)
 
-    @lazy_property
+    @cached_property
     def awg(self) -> ZIModules.ZIBaseModule:
         """Managed instance of the zhinst.core.AwgModule.
 
@@ -332,7 +333,7 @@ class ModuleHandler:
         """
         return self.create_awg_module()
 
-    @lazy_property
+    @cached_property
     def daq(self) -> ZIModules.ZIBaseModule:
         """Managed instance of the zhinst.core.DataAcquisitionModule.
 
@@ -343,7 +344,7 @@ class ModuleHandler:
         """
         return self.create_daq_module()
 
-    @lazy_property
+    @cached_property
     def device_settings(self) -> ZIModules.ZIDeviceSettingsModule:
         """Managed instance of the zhinst.core.DeviceSettingsModule.
 
@@ -354,7 +355,7 @@ class ModuleHandler:
         """
         return self.create_device_settings_module()
 
-    @lazy_property
+    @cached_property
     def impedance(self) -> ZIModules.ZIImpedanceModule:
         """Managed instance of the zhinst.core.ImpedanceModule.
 
@@ -365,7 +366,7 @@ class ModuleHandler:
         """
         return self.create_impedance_module()
 
-    @lazy_property
+    @cached_property
     def mds(self) -> ZIModules.ZIBaseModule:
         """Managed instance of the zhinst.core.MultiDeviceSyncModule.
 
@@ -376,7 +377,7 @@ class ModuleHandler:
         """
         return self.create_mds_module()
 
-    @lazy_property
+    @cached_property
     def pid_advisor(self) -> ZIModules.ZIPIDAdvisorModule:
         """Managed instance of the zhinst.core.PidAdvisorModule.
 
@@ -387,7 +388,7 @@ class ModuleHandler:
         """
         return self.create_pid_advisor_module()
 
-    @lazy_property
+    @cached_property
     def precompensation_advisor(self) -> ZIModules.ZIPrecompensationAdvisorModule:
         """Managed instance of the zhinst.core.PrecompensationAdvisorModule.
 
@@ -398,7 +399,7 @@ class ModuleHandler:
         """
         return self.create_precompensation_advisor_module()
 
-    @lazy_property
+    @cached_property
     def qa(self) -> ZIModules.ZIBaseModule:
         """Managed instance of the zhinst.core.QuantumAnalyzerModule.
 
@@ -409,7 +410,7 @@ class ModuleHandler:
         """
         return self.create_qa_module()
 
-    @lazy_property
+    @cached_property
     def scope(self) -> ZIModules.ZIScopeModule:
         """Managed instance of the zhinst.core.ScopeModule.
 
@@ -420,7 +421,7 @@ class ModuleHandler:
         """
         return self.create_scope_module()
 
-    @lazy_property
+    @cached_property
     def sweeper(self) -> ZIModules.ZISweeperModule:
         """Managed instance of the zhinst.core.SweeperModule.
 
@@ -431,7 +432,7 @@ class ModuleHandler:
         """
         return self.create_sweeper_module()
 
-    @lazy_property
+    @cached_property
     def shfqa_sweeper(self) -> ZIModules.ZISHFQASweeper:
         """Managed instance of the zhinst.core.SweeperModule.
 
