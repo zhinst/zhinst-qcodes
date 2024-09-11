@@ -501,7 +501,7 @@ class ZISession:
         *,
         hf2: t.Optional[bool] = None,
         new_session=False,
-        connection: ziDAQServer = None,
+        connection: ziDAQServer | None = None,
     ):
         """Session creator."""
         if not new_session:
@@ -561,7 +561,7 @@ class Session(ZIInstrument):
         server_port: t.Optional[int] = None,
         *,
         hf2: t.Optional[bool] = None,
-        connection: ziDAQServer = None,
+        connection: ziDAQServer | None = None,
     ):
         self._tk_object = TKSession(
             server_host, server_port, connection=connection, hf2=hf2
