@@ -199,7 +199,7 @@ class ModuleHandler:
         Returns:
             created module
         """
-        module = self._tk_modules.create_device_settings_module()
+        module = self._tk_modules.create_impedance_module()
         return ZIModules.ZIImpedanceModule(module, self._session)
 
     def create_mds_module(self) -> ZIModules.ZIBaseModule:
