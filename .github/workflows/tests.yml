@@ -14,15 +14,9 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: py38
-          python: 3.8
-          tox: py38
-        - name: py39
-          python: 3.9
-          coverage: true
-          tox: py39
         - name: py310
           python: "3.10"
+          coverage: true
           tox: py310
         - name: py311
           python: "3.11"
