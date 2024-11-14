@@ -1,6 +1,9 @@
 # zhinst-qcodes Changelog
 
 ## Version 0.5.4
+* Fix issue that prevented connecting to different data server on the same host.
+
+## Version 0.5.4
 * Fix issue that cause node names to collide with native attributes. (`/zi/debug/log` 
   collided with the native log attribute on Nodes)
 
