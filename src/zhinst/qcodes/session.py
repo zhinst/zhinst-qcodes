@@ -507,7 +507,7 @@ class ZISession:
         if not new_session:
             for instance in Session.instances():
                 if instance.server_host == server_host and (
-                    instance.is_hf2_server == hf2
+                    (instance.is_hf2_server and hf2)
                     or server_port is None
                     or instance.server_port == server_port
                 ):
