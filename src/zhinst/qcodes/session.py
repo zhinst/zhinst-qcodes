@@ -454,7 +454,7 @@ class ZISession:
     communication between the instrument and the host computer on one side, and
     communication to all the connected clients on the other side. (For more
     information on the architecture please refer to the user manual
-    https://docs.zhinst.com/labone_api_user_manual/description_and_guidelines/software_architecture.html) # noqa
+    https://docs.zhinst.com/labone_api_user_manual/description_and_guidelines/software_architecture.html)
 
     The entry point into any connection is therefor a client session to a
     existing data sever. This class represents a single client session to a
@@ -492,6 +492,10 @@ class ZISession:
         connection: Existing daq server object. If specified the session will
             not create a new session to the data server but reuse the passed
             one. (default = None)
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
     """
 
     def __new__(
@@ -502,6 +506,7 @@ class ZISession:
         hf2: t.Optional[bool] = None,
         new_session=False,
         connection: t.Optional[ziDAQServer] = None,
+        allow_version_mismatch: bool = False,
     ):
         """Session creator."""
         if not new_session:
@@ -512,7 +517,13 @@ class ZISession:
                     or instance.server_port == server_port
                 ):
                     return instance
-        return Session(server_host, server_port, hf2=hf2, connection=connection)
+        return Session(
+            server_host,
+            server_port,
+            hf2=hf2,
+            connection=connection,
+            allow_version_mismatch=allow_version_mismatch,
+        )
 
 
 class Session(ZIInstrument):
@@ -525,7 +536,7 @@ class Session(ZIInstrument):
     communication between the instrument and the host computer on one side, and
     communication to all the connected clients on the other side. (For more
     information on the architecture please refer to the user manual
-    https://docs.zhinst.com/labone_api_user_manual/description_and_guidelines/software_architecture.html) # noqa
+    https://docs.zhinst.com/labone_api_user_manual/description_and_guidelines/software_architecture.html)
 
     The entry point into for any connection is therefor a client session to a
     existing data sever. This class represents a single client session to a
@@ -553,6 +564,10 @@ class Session(ZIInstrument):
         connection: Existing daq server object. If specified the session will
             not create a new session to the data server but reuse the passed
             one. (default = None)
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
     """
 
     def __init__(
@@ -562,10 +577,20 @@ class Session(ZIInstrument):
         *,
         hf2: t.Optional[bool] = None,
         connection: t.Optional[ziDAQServer] = None,
+        allow_version_mismatch: bool = False,
     ):
-        self._tk_object = TKSession(
-            server_host, server_port, connection=connection, hf2=hf2
-        )
+        try:
+            self._tk_object = TKSession(
+                server_host,
+                server_port,
+                connection=connection,
+                hf2=hf2,
+                allow_version_mismatch=allow_version_mismatch,
+            )
+        except TypeError:
+            self._tk_object = TKSession(
+                server_host, server_port, connection=connection, hf2=hf2
+            )
         super().__init__(f"zi_session_{len(self.instances())}", self._tk_object.root)
         self._devices = Devices(self, self._tk_object.devices)
         self._modules = ModuleHandler(self, self._tk_object.modules)
