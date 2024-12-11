@@ -32,6 +32,10 @@ class ZIDevice(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -49,8 +53,15 @@ class ZIDevice(ZIBaseInstrument):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
