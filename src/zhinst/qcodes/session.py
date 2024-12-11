@@ -454,7 +454,7 @@ class ZISession:
     communication between the instrument and the host computer on one side, and
     communication to all the connected clients on the other side. (For more
     information on the architecture please refer to the user manual
-    http://docs.zhinst.com/labone_programming_manual/introduction.html)
+    https://docs.zhinst.com/labone_api_user_manual/description_and_guidelines/software_architecture.html) # noqa
 
     The entry point into any connection is therefor a client session to a
     existing data sever. This class represents a single client session to a
@@ -525,7 +525,7 @@ class Session(ZIInstrument):
     communication between the instrument and the host computer on one side, and
     communication to all the connected clients on the other side. (For more
     information on the architecture please refer to the user manual
-    http://docs.zhinst.com/labone_programming_manual/introduction.html)
+    https://docs.zhinst.com/labone_api_user_manual/description_and_guidelines/software_architecture.html) # noqa
 
     The entry point into for any connection is therefor a client session to a
     existing data sever. This class represents a single client session to a
