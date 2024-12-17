@@ -13,6 +13,8 @@ from zhinst.qcodes.device_creator import (
     UHFQA,
     ZIDevice,
     HF2,
+    SHFLI,
+    GHFLI,
 )
 
 from zhinst.toolkit import (
@@ -42,6 +44,8 @@ __all__ = [
     "UHFQA",
     "ZIDevice",
     "HF2",
+    "SHFLI",
+    "GHFLI",
     "Waveforms",
     "CommandTable",
     "Sequence",

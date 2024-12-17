@@ -19,6 +19,8 @@ zhinst-qcodes exposes the following classes:
    ~zhinst.qcodes.device_creator.UHFQA
    ~zhinst.qcodes.device_creator.HF2
    ~zhinst.qcodes.device_creator.ZIDevice
+   ~zhinst.qcodes.device_creator.SHFLI
+   ~zhinst.qcodes.device_creator.GHFLI
 
 In addition the following classes are imported from
 `zhinst-toolkit <https://docs.zhinst.com/zhinst-toolkit/en/latest/package_documentation.html>`_:
