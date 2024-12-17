@@ -85,6 +85,10 @@ class SHFQA(SHFQADriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -102,6 +106,7 @@ class SHFQA(SHFQADriver):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -126,6 +131,10 @@ class SHFSG(SHFSGDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -143,6 +152,7 @@ class SHFSG(SHFSGDriver):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -167,6 +177,10 @@ class HDAWG(HDAWGDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -184,6 +198,7 @@ class HDAWG(HDAWGDriver):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -208,6 +223,10 @@ class PQSC(PQSCDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -225,6 +244,7 @@ class PQSC(PQSCDriver):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -249,6 +269,10 @@ class SHFQC(SHFQCDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -266,6 +290,7 @@ class SHFQC(SHFQCDriver):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -290,6 +315,10 @@ class UHFLI(UHFLIDriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -307,6 +336,7 @@ class UHFLI(UHFLIDriver):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -331,6 +361,10 @@ class UHFQA(UHFQADriver):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -348,6 +382,7 @@ class UHFQA(UHFQADriver):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -372,6 +407,10 @@ class SHFLI(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -389,6 +428,7 @@ class SHFLI(ZIBaseInstrument):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -413,6 +453,10 @@ class GHFLI(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -430,6 +474,7 @@ class GHFLI(ZIBaseInstrument):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -454,6 +499,10 @@ class MFLI(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -471,6 +520,7 @@ class MFLI(ZIBaseInstrument):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -495,6 +545,10 @@ class MFIA(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -512,6 +566,7 @@ class MFIA(ZIBaseInstrument):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=False, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
@@ -536,6 +591,10 @@ class HF2(ZIBaseInstrument):
         new_session: By default zhinst-qcodes reuses already existing data
             server session (within itself only), meaning only one session to a
             data server exists. Setting the flag will create a new session.
+        allow_version_mismatch: if set to True, the connection to the data-server
+            will succeed even if the data-server is on a different version of LabOne.
+            If False, an exception will be raised if the data-server is on a
+            different version. (default = False)
 
     Warning:
         Creating a new session should be done carefully and reusing
@@ -553,6 +612,7 @@ class HF2(ZIBaseInstrument):
         name=None,
         raw=False,
         new_session: bool = False,
+        allow_version_mismatch: bool = False,
     ):
         session = ZISession(host, port, hf2=True, new_session=new_session)
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
