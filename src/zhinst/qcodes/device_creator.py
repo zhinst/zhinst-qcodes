@@ -2,6 +2,7 @@
 
 The classes can be used without creating as session to a data server.
 """
+
 import typing as t
 
 from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
@@ -315,6 +316,88 @@ class UHFLI(UHFLIDriver):
 
 class UHFQA(UHFQADriver):
     """QCoDeS driver for the Zurich Instruments UHFQA.
+
+    Args:
+        serial: Serial number of the device, e.g. *'dev12000'*.
+            The serial number can be found on the back panel of the instrument.
+        server_host: Host address of the data server (e.g. localhost)
+        server_port: Port number of the data server. If not specified the session
+            uses the default port. (default = 8004)
+        interface: Device interface (e.g. = "1GbE"). If not specified
+            the default interface from the discover is used.
+        name: Name of the instrument in qcodes.
+        raw: Flag if qcodes instance should only created with the nodes and
+            not forwarding the toolkit functions. (default = False)
+        new_session: By default zhinst-qcodes reuses already existing data
+            server session (within itself only), meaning only one session to a
+            data server exists. Setting the flag will create a new session.
+
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
+    """
+
+    def __init__(
+        self,
+        serial: str,
+        host: str,
+        port: int = 8004,
+        *,
+        interface: t.Optional[str] = None,
+        name=None,
+        raw=False,
+        new_session: bool = False,
+    ):
+        session = ZISession(host, port, hf2=False, new_session=new_session)
+        tk_device = session.toolkit_session.connect_device(serial, interface=interface)
+        super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
+
+
+class SHFLI(ZIBaseInstrument):
+    """QCoDeS driver for the Zurich Instruments SHFLI.
+
+    Args:
+        serial: Serial number of the device, e.g. *'dev12000'*.
+            The serial number can be found on the back panel of the instrument.
+        server_host: Host address of the data server (e.g. localhost)
+        server_port: Port number of the data server. If not specified the session
+            uses the default port. (default = 8004)
+        interface: Device interface (e.g. = "1GbE"). If not specified
+            the default interface from the discover is used.
+        name: Name of the instrument in qcodes.
+        raw: Flag if qcodes instance should only created with the nodes and
+            not forwarding the toolkit functions. (default = False)
+        new_session: By default zhinst-qcodes reuses already existing data
+            server session (within itself only), meaning only one session to a
+            data server exists. Setting the flag will create a new session.
+
+    Warning:
+        Creating a new session should be done carefully and reusing
+        the created session is not possible. Consider instantiating a
+        new session directly.
+    """
+
+    def __init__(
+        self,
+        serial: str,
+        host: str,
+        port: int = 8004,
+        *,
+        interface: t.Optional[str] = None,
+        name=None,
+        raw=False,
+        new_session: bool = False,
+    ):
+        session = ZISession(host, port, hf2=False, new_session=new_session)
+        tk_device = session.toolkit_session.connect_device(serial, interface=interface)
+        super().__init__(tk_device, session, name=name, raw=raw)
+        session.devices[self.serial] = self
+
+
+class GHFLI(ZIBaseInstrument):
+    """QCoDeS driver for the Zurich Instruments GHFLI.
 
     Args:
         serial: Serial number of the device, e.g. *'dev12000'*.

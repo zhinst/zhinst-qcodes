@@ -1,6 +1,7 @@
 # zhinst-qcodes Changelog
 
 ## Version 0.6.0
+* Add explicit Instrument wrappers for SHFLI and GHFLI
 * The constructor of `Session` fails when attempting to connect to a data-server on a different LabOne version. This behavior can be overridden by setting the newly added allow_version_mismatch keyword argument to True. When allow_version_mismatch=True is passed to the `Session` constructor the connection to the data-server succeeds even if the version doesn't match.
 
 ## Version 0.5.5
