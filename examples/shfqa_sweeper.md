@@ -106,7 +106,7 @@ sweeper.plot()
 ### Create the envelope
 
 ```python
-from scipy.signal import gaussian
+from scipy.signal.windows import gaussian
 import numpy as np
 
 SHFQA_SAMPLING_FREQUENCY = 2e9

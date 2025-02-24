@@ -47,7 +47,7 @@ device.qachannels[CHANNEL_INDEX].output.on(1)
 ### Generate waveforms
 
 ```python
-from scipy.signal import gaussian
+from scipy.signal.windows import gaussian
 import numpy as np
 
 
