@@ -69,7 +69,7 @@ device.scopes[SCOPE_CHANNEL].configure(
 
 ```python
 
-from scipy.signal import gaussian
+from scipy.signal.windows import gaussian
 import numpy as np
 
 RISE_FALL_TIME = 10e-9
