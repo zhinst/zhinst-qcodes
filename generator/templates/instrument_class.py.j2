@@ -4,9 +4,9 @@ import re
 from typing import Union, Optional,List,Dict, Any, Tuple
 import deprecation
 import numpy as np
-from qcodes.instrument.channel import ChannelList
-from qcodes.instrument.parameter import Parameter as QCParameter
-from qcodes.utils.validators import ComplexNumbers
+from qcodes.instrument import ChannelList
+from qcodes.parameters import Parameter as QCParameter
+from qcodes.validators import ComplexNumbers
 from zhinst.toolkit.driver.devices.{{ name.lower() }} import {{ name }} as TK{{ name }}
 from zhinst.toolkit import CommandTable,Waveforms, Sequence
 from zhinst.toolkit.interface import AveragingMode, SHFQAChannelMode

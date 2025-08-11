@@ -6,7 +6,7 @@ from zhinst.qcodes.driver.devices.base import ZIBaseInstrument
 from zhinst.toolkit.driver.modules import ModuleType as TKModuleType
 from zhinst.toolkit.driver.modules.{{ module_name }} import {{name}} as TK{{name}}
 from zhinst.toolkit.driver.modules.base_module import ZIModule
-from qcodes.instrument.base import Instrument
+from qcodes.instrument import Instrument
 {% if base_module != "ZIInstrument"%}
 from zhinst.qcodes.driver.modules.base_module import ZIBaseModule
 {% endif -%}

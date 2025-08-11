@@ -7,10 +7,9 @@ from contextlib import contextmanager, nullcontext
 from collections.abc import Mapping
 
 import numpy as np
-from qcodes.instrument.base import Instrument
-from qcodes.instrument.channel import ChannelList, InstrumentChannel
-from qcodes.instrument.parameter import Parameter
-from qcodes.utils.validators import ComplexNumbers
+from qcodes.instrument import ChannelList, Instrument, InstrumentChannel
+from qcodes.parameters import Parameter
+from qcodes.validators import ComplexNumbers
 from zhinst.toolkit.nodetree import Node, NodeTree
 from zhinst.toolkit.nodetree.helper import NodeDict as TKNodeDict
 from zhinst.toolkit.nodetree.node import NodeInfo
