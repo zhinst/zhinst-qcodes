@@ -7,7 +7,7 @@ from zhinst.qcodes.qcodes_adaptions import init_nodetree, ZIInstrument
 
 if t.TYPE_CHECKING:
     from zhinst.qcodes.session import ZISession, Session
-    from qcodes.instrument.base import Instrument
+    from qcodes.instrument import Instrument
 
 
 class ZIBaseInstrument(ZIInstrument):
