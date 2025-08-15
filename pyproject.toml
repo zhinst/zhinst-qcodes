@@ -1,3 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.2", "setuptools_scm[toml]"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zhinst-qcodes"
+authors = [{ name = "Zurich Instrument", email = "info@zhinst.com" }]
+description = "Zurich Instruments drivers for QCoDeS"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering",
+  "Intended Audience :: Science/Research",
+]
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.13",
+  "zhinst-toolkit>=0.7.1",
+  "qcodes>=0.35.0",
+  "typing_extensions>=4.1.1",
+]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/zhinst/zhinst-qcodes"
+"Bug Tracker" = "https://github.com/zhinst/zhinst-qcodes/issues"
+Documentation = "https://docs.zhinst.com/zhinst-qcodes/en/latest/"
+"Release notes" = "https://docs.zhinst.com/zhinst-qcodes/en/latest/changelog/index.html"
+Source = "https://github.com/zhinst/zhinst-qcodes"
+
 [tool.black]
 line-length = 88
 target-version = ['py37']
@@ -13,6 +51,11 @@ extend-exclude = '''
 )/
 '''
 
+[tool.mypy]
+ignore_missing_imports = true
+show_error_codes = true
+no_implicit_optional = false
+
 [tool.isort]
 profile = "black"
 src_paths = ["src", "tests"]
@@ -21,13 +64,14 @@ src_paths = ["src", "tests"]
 testpaths = ["tests", "scripts/tests"]
 addopts = "-l"
 
-[build-system]
-requires = [
-    "setuptools>=42",
-    "wheel",
-    "setuptools_scm[toml]"
-]
-build-backend = "setuptools.build_meta"
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["zhinst.*"]
+namespaces = true
 
 [tool.setuptools_scm]
 "write_to" = "src/zhinst/qcodes/_version.py"
