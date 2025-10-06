@@ -32,8 +32,11 @@ pip install zhinst-qcodes
 ## Documentation
 See the documentation page [here](https://docs.zhinst.com/zhinst-qcodes/en/latest).
 Since zhinst-qcodes is based on zhinst-toolkit and has exactly the same interface
-and functions, the [documentation](https://docs.zhinst.com/zhinst-toolkit/en/latest)
-for zhinst-toolkit can be applied nearly one to one and has much more examples.
+and functions, the [documentation](https://docs.zhinst.com/labone_api_user_manual/reference/toolkit/index.html)
+for zhinst-toolkit can be applied nearly one to one. 
+Moreover, similar examples to those of zhinst-toolkit available 
+[here](https://github.com/zhinst/zhinst-toolkit/tree/main/examples) 
+can be used for zhinst-qcodes.
 
 ## Contributing
 We welcome contributions by the community, either as bug reports, fixes and new
