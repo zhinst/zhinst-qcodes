@@ -108,7 +108,13 @@ class SHFQA(SHFQADriver):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -154,7 +160,13 @@ class SHFSG(SHFSGDriver):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -200,7 +212,13 @@ class HDAWG(HDAWGDriver):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -246,7 +264,13 @@ class PQSC(PQSCDriver):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -292,7 +316,13 @@ class SHFQC(SHFQCDriver):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -338,7 +368,13 @@ class UHFLI(UHFLIDriver):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -384,7 +420,13 @@ class UHFQA(UHFQADriver):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -430,7 +472,13 @@ class SHFLI(ZIBaseInstrument):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -476,7 +524,13 @@ class GHFLI(ZIBaseInstrument):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -522,7 +576,13 @@ class MFLI(ZIBaseInstrument):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -568,7 +628,13 @@ class MFIA(ZIBaseInstrument):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=False, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=False,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
@@ -614,7 +680,13 @@ class HF2(ZIBaseInstrument):
         new_session: bool = False,
         allow_version_mismatch: bool = False,
     ):
-        session = ZISession(host, port, hf2=True, new_session=new_session)
+        session = ZISession(
+            host,
+            port,
+            hf2=True,
+            new_session=new_session,
+            allow_version_mismatch=allow_version_mismatch,
+        )
         tk_device = session.toolkit_session.connect_device(serial, interface=interface)
         super().__init__(tk_device, session, name=name, raw=raw)
         session.devices[self.serial] = self
