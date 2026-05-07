@@ -169,6 +169,22 @@ class ModuleHandler:
         module = self._tk_modules.create_daq_module()
         return ZIModules.ZIDAQModule(module, self._session)
 
+    def create_data_streaming_module(self) -> ZIModules.ZIDataStreamingModule:
+        """Create a QCoDeS instance of the DataStreamingModule.
+
+        The new instance creates a new session to the DataServer.
+        New instances should therefor be created carefully since they consume
+        resources.
+
+        The new module is not managed by toolkit. A managed instance is provided
+        by the property `data_streaming`.
+
+        Returns:
+            created module
+        """
+        module = self._tk_modules.create_data_streaming_module()
+        return ZIModules.ZIDataStreamingModule(module, self._session)
+
     def create_device_settings_module(self) -> ZIModules.ZIDeviceSettingsModule:
         """Create a QCoDeS instance of the DeviceSettingsModule.
 
@@ -342,6 +358,17 @@ class ModuleHandler:
         resources.
         """
         return self.create_daq_module()
+
+    @cached_property
+    def data_streaming(self) -> ZIModules.ZIDataStreamingModule:
+        """Managed instance of the zhinst.core.DataStreamingModule.
+
+        Managed in this sense means that only one instance is created
+        and hold inside the connection Manager. This makes it easier to access
+        the modules from with toolkit, since creating a module requires
+        resources.
+        """
+        return self.create_data_streaming_module()
 
     @cached_property
     def device_settings(self) -> ZIModules.ZIDeviceSettingsModule:
