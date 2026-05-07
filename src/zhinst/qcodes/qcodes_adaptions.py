@@ -66,12 +66,15 @@ class ZISnapshotHelper:
             }
         else:
             kwargs = {"flat": True}
-        prefix = self._nodetree.prefix_hide
+        prefix = self._nodetree.prefix_hide or ""
         if not name:
-            name = prefix if prefix else ""
+            name = prefix
         else:
-            name = "/" + prefix + "/" + name
-        self._value_dict = self._nodetree.connection.get(f"{name}/*", **kwargs)
+            if prefix:
+                name = "/" + prefix + "/" + name
+            elif not name.startswith("/"):
+                name = "/" + name
+        self._value_dict = self._nodetree.connection.get(f"{name}/*", **kwargs)  # type: ignore[assignment]
         self._start = datetime.now()
         return True
 
@@ -80,7 +83,7 @@ class ZISnapshotHelper:
         self._is_running = False
         self._value_dict = {}
 
-    def get(self, parameter: Parameter, fallback_get: t.Callable) -> t.Any:
+    def get(self, parameter: "ZIParameter", fallback_get: t.Callable) -> t.Any:
         """Get the value for a specific QCoDeS Parameter.
 
         Tries to mimic the behavior of a normal get (e.g. update cache).
@@ -198,8 +201,8 @@ class ZIParameter(Parameter):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.get_raw = kwargs["get_cmd"]
-        self.set_raw = kwargs["set_cmd"]
+        self.get_raw = kwargs["get_cmd"]  # type: ignore[method-assign]
+        self.set_raw = kwargs["set_cmd"]  # type: ignore[method-assign]
         self.get = self._wrap_get(self.get_raw)
         self.set = self._set_zi
         self._snapshot_cache = snapshot_cache
@@ -269,7 +272,9 @@ class ZIParameter(Parameter):
         return self._wrap_get(lambda: set_return)() if set_return is not None else None
 
     def snapshot_base(
-        self, update: bool = True, params_to_skip_update: t.List[str] = None
+        self,
+        update: t.Optional[bool] = True,
+        params_to_skip_update: t.Optional[t.Sequence[str]] = None,
     ) -> dict:
         """State of the parameter as a JSON-compatible dict.
 
@@ -356,7 +361,7 @@ class ZIParameter(Parameter):
         return self._tk_node.node_info
 
     @property
-    def zi_node(self) -> Node:
+    def zi_node(self) -> str:
         """Zurich Instrument node representation of the Parameter."""
         return self._zi_node
 
@@ -381,14 +386,14 @@ class ZINode(InstrumentChannel):
         self,
         *args,
         snapshot_cache: ZISnapshotHelper,
-        zi_node: Node = None,
+        zi_node: str = None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self._snapshot_cache = snapshot_cache
         self._zi_node = zi_node
 
-    def snapshot(self, update: bool = True) -> dict:
+    def snapshot(self, update: t.Optional[bool] = True) -> dict:  # type: ignore[misc]
         """Decorate a snapshot dictionary with metadata.
 
         Override base method to make update default True and use the
@@ -439,7 +444,7 @@ class ZIChannelList(ChannelList):
         self._snapshot_cache = snapshot_cache
         self._zi_node = zi_node
 
-    def snapshot(self, update: bool = True) -> dict:
+    def snapshot(self, update: t.Optional[bool] = True) -> dict:  # type: ignore[misc]
         """Decorate a snapshot dictionary with metadata.
 
         Override base method to make update default True and use the
@@ -489,7 +494,7 @@ class ZIInstrument(Instrument):
         super().__init__(name)
         self._snapshot_cache = ZISnapshotHelper(nodetree, is_module=is_module)
 
-    def snapshot(self, update: bool = True) -> dict:
+    def snapshot(self, update: t.Optional[bool] = True) -> dict:  # type: ignore[misc]
         """Decorate a snapshot dictionary with metadata.
 
         Override base method to make update default True and use the
@@ -569,14 +574,13 @@ def tk_node_to_qcodes_list(tk_node: Node) -> t.List[str]:
         List of strings that form a QCoDeS object.
     """
     if tk_node.raw_tree[-1].isdigit():
-        parents = tk_node.raw_tree
+        parents = list(tk_node.raw_tree)
         name = "value"
     else:
-        parents = tk_node.raw_tree[:-1]
+        parents = list(tk_node.raw_tree[:-1])
         name = tk_node.raw_tree[-1]
         # Attributes are not allowed to start with a number (#31)
         name = "_" + name if name[0].isdigit() else name
-    parents = list(parents)
     numbers = [subnode for subnode in parents if subnode.isdigit()]
     while numbers:
         number = numbers.pop()

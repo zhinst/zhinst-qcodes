@@ -96,6 +96,7 @@ autorange
 Loopback
 gaussian
 upconversion
+upsampling
 clockbase
 demodulator
 transactional
@@ -155,6 +156,7 @@ MultiDeviceSyncModule
 ImpedanceModule
 DeviceSettingsModule
 DataAcquisitionModule
+DataStreamingModule
 AwgModule
 osc
 
@@ -255,6 +257,7 @@ autorange
 Loopback
 gaussian
 upconversion
+upsampling
 clockbase
 demodulator
 transactional

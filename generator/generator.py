@@ -1,10 +1,12 @@
 """Autogenerate the QCoDeS drivers from toolkit and zhinst-core."""
 
+import builtins
 import importlib
 import inspect
 import re
 import typing as t
 from collections import namedtuple
+from functools import cached_property
 from pathlib import Path
 
 import autoflake
@@ -24,6 +26,26 @@ function_tuple = namedtuple("function", ["name", "is_deprecated"])
 class_tuple = namedtuple("toolkit_class", ["functions", "parameters", "sub_modules"])
 
 
+def _property_func(prop):
+    """Return the underlying getter function for ``property`` or ``cached_property``."""
+    if isinstance(prop, builtins.property):
+        return prop.fget
+    return prop.func
+
+
+def _resolved_signature(func) -> inspect.Signature:
+    """Return signature with PEP 563 string annotations resolved when possible.
+
+    Falls back to the unresolved signature if a forward reference cannot be
+    evaluated (e.g. ``"DeviceType"``), which the rendered template handles via
+    the ``enums`` replacement table.
+    """
+    try:
+        return inspect.signature(func, eval_str=True)
+    except NameError:
+        return inspect.signature(func)
+
+
 def getPropertyInfo(
     name: str, property: object, class_type: object
 ) -> t.Union[parameter_tuple, submodule_tuple]:
@@ -37,8 +59,9 @@ def getPropertyInfo(
     Returns:
         Union[parameter_tuple,submodule_tuple]
     """
-    typehint = t.get_type_hints(property.fget)
-    if "deprecated" in inspect.getsource(property.fget):
+    fget = _property_func(property)
+    typehint = t.get_type_hints(fget)
+    if "deprecated" in inspect.getsource(fget):
         # TODO decide if we should keep them or remove them?
         print(f"WARNING {name}: deprecated property -> ignored")
     elif "typing.Union" in str(typehint["return"]) or "typing.Sequence" in str(
@@ -101,7 +124,7 @@ def getInfo(class_type: object, existing_names: list) -> t.Tuple[class_tuple, li
         # ignore private/blacklisted and existing items
         if name.startswith("_") or name in blacklist_names or name in existing_names:
             continue
-        if isinstance(attribute, property):
+        if isinstance(attribute, property) or isinstance(attribute, cached_property):
             property_info = getPropertyInfo(name, attribute, class_type)
             if isinstance(property_info, parameter_tuple):
                 parameters.append(property_info)
@@ -110,7 +133,7 @@ def getInfo(class_type: object, existing_names: list) -> t.Tuple[class_tuple, li
         else:
             # function
             if not callable(attribute):
-                raise RuntimeError("Unsupported class item")
+                raise RuntimeError("Unsupported class item", attribute)
             functions.append(
                 function_tuple(name, "deprecated" in inspect.getsource(attribute))
             )
@@ -182,7 +205,9 @@ def generate_parameter_info(parameters: list, class_type: object) -> list:
     has_node_param = False
     for parameter, is_node in parameters:
         has_node_param = True if has_node_param or is_node else False
-        signature = inspect.signature(getattr(class_type, parameter).fget)
+        signature = _resolved_signature(
+            _property_func(getattr(class_type, parameter))
+        )
         try:
             return_annotation = signature.return_annotation.__name__
         except AttributeError:
@@ -236,7 +261,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
             deprecation_deco = inspect.getsource(getattr(toolkit_class, name))
             decorator = deprecated_regex.search(deprecation_deco).group(1)
         docstring = getattr(toolkit_class, name).__doc__
-        signature = inspect.signature(getattr(toolkit_class, name))
+        signature = _resolved_signature(getattr(toolkit_class, name))
         signature_str = str(signature)
         is_node_doc = False
         # replace toolkit enum typehint with direct typehint

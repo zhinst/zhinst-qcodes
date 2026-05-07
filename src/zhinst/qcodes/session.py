@@ -697,8 +697,8 @@ class Session(ZIInstrument):
             recording_time=recording_time, timeout=timeout, flags=flags
         )
         polled_data = {}
-        for tk_node, data in polled_data_tk.items():
-            tk_node = self._tk_object.raw_path_to_node(tk_node)
+        for raw_path, data in polled_data_tk.items():
+            tk_node = self._tk_object.raw_path_to_node(str(raw_path))
             device = self.devices[tk_node.root.prefix_hide]
             parameter = tk_node_to_parameter(device, tk_node)
             polled_data[parameter] = data

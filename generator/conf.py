@@ -21,6 +21,7 @@ MODULE_DRIVERS = [
     "DAQModule",
     "ScopeModule",
     "SweeperModule",
+    "DataStreamingModule",
     "ImpedanceModule",
     "DeviceSettingsModule",
     "PIDAdvisorModule",
