@@ -7,7 +7,7 @@ from zhinst.toolkit.driver.devices import DeviceType
 
 if t.TYPE_CHECKING:
     from qcodes.instrument import Instrument
-    from zhinst.qcodes.session import Session, ZISession
+    from zhinst.qcodes.session import Session
 
 
 class ZIBaseInstrument(ZIInstrument):
@@ -29,9 +29,9 @@ class ZIBaseInstrument(ZIInstrument):
     def __init__(
         self,
         tk_object: DeviceType,
-        session: t.Union["ZISession", "Session", "Instrument"],
+        session: t.Union["Session", "Instrument"],
         name: t.Optional[str] = None,
-        raw: bool = False,
+        raw: t.Union[bool, None] = False,
     ):
         self._tk_object = tk_object
         self._session = session
@@ -128,4 +128,4 @@ class ZIBaseInstrument(ZIInstrument):
     @property
     def session(self) -> "Session":
         """Underlying session the device is connected through."""
-        return self._session
+        return t.cast("Session", self._session)

@@ -32,6 +32,6 @@ TOOLKIT_MODULE_MODULE = "zhinst.toolkit.driver.modules"
 # Typing
 # Weird typing infos that can be replaced with the right term
 TYPE_HINT_REPLACEMENTS = {
-    "<built-in function array>": "np.array",
+    "<built-in function array>": "np.ndarray",
     "~Numpy2DArray": "np.ndarray",
 }

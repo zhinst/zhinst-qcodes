@@ -443,8 +443,16 @@ class ModuleHandler:
         return self.create_shfqa_sweeper()
 
 
-class ZISession:
-    """Session to a data server.
+def ZISession(
+    server_host: str,
+    server_port: t.Optional[int] = None,
+    *,
+    hf2: t.Optional[bool] = None,
+    new_session: bool = False,
+    connection: t.Optional[ziDAQServer] = None,
+    allow_version_mismatch: bool = False,
+) -> "Session":
+    """Create or reuse a :class:`Session` to a data server.
 
     Zurich Instruments devices use a server-based connectivity methodology.
     Server-based means that all communication between the user and the
@@ -456,7 +464,7 @@ class ZISession:
     https://docs.zhinst.com/labone_api_user_manual/description_and_guidelines/software_architecture.html)
 
     The entry point into any connection is therefor a client session to a
-    existing data sever. This class represents a single client session to a
+    existing data sever. This factory returns a single client session to a
     data server. The session enables the user to connect to one or multiple
     instruments (also creates the dedicated objects for each device), access
     the LabOne modules and poll data.
@@ -496,33 +504,21 @@ class ZISession:
             If False, an exception will be raised if the data-server is on a
             different version. (default = False)
     """
-
-    def __new__(
-        cls,
-        server_host: str,
-        server_port: t.Optional[int] = None,
-        *,
-        hf2: t.Optional[bool] = None,
-        new_session=False,
-        connection: t.Optional[ziDAQServer] = None,
-        allow_version_mismatch: bool = False,
-    ):
-        """Session creator."""
-        if not new_session:
-            for instance in Session.instances():
-                if instance.server_host == server_host and (
-                    (instance.is_hf2_server and hf2)
-                    or server_port is None
-                    or instance.server_port == server_port
-                ):
-                    return instance
-        return Session(
-            server_host,
-            server_port,
-            hf2=hf2,
-            connection=connection,
-            allow_version_mismatch=allow_version_mismatch,
-        )
+    if not new_session:
+        for instance in Session.instances():
+            if instance.server_host == server_host and (
+                (instance.is_hf2_server and hf2)
+                or server_port is None
+                or instance.server_port == server_port
+            ):
+                return instance
+    return Session(
+        server_host,
+        server_port,
+        hf2=hf2,
+        connection=connection,
+        allow_version_mismatch=allow_version_mismatch,
+    )
 
 
 class Session(ZIInstrument):

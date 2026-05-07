@@ -39,7 +39,7 @@ Args:
         super().__init__(
             f"zi_{name}_{len(self.instances())}", tk_object.root, is_module=True
         )
-        init_nodetree(self, self._tk_object, self._snapshot_cache)
+        init_nodetree(self, self._tk_object.root, self._snapshot_cache)
 
         self._tk_object.root.update_nodes(
             {
@@ -95,8 +95,8 @@ Args:
         try:
             node = signal.zi_node  # type: ignore[union-attr]
         except AttributeError:
-            node = TKBaseModule._set_node(signal)
-        return node
+            node = TKBaseModule._set_node(signal)  # type: ignore[arg-type]
+        return node  # type: ignore[return-value]
 
     def subscribe(self, signal: t.Union[ZIParameter, str]):
         """Subscribe to a node.
@@ -106,10 +106,11 @@ Args:
         Args:
             signal (Node): node that should be subscribed.
         """
+        tk_module = t.cast(TKBaseModule, self._tk_object)
         try:
-            self._tk_object.subscribe(signal.zi_node)  # type: ignore[union-attr]
+            tk_module.subscribe(signal.zi_node)  # type: ignore[union-attr]
         except AttributeError:
-            self._tk_object.subscribe(signal)
+            tk_module.subscribe(signal)  # type: ignore[arg-type]
 
     def unsubscribe(self, signal: t.Union[ZIParameter, str]):
         """Unsubscribe from a node.
@@ -119,16 +120,19 @@ Args:
         Args:
             signal (Node): node that should be unsubscribe.
         """
+        tk_module = t.cast(TKBaseModule, self._tk_object)
         try:
-            self._tk_object.unsubscribe(signal.zi_node)  # type: ignore[union-attr]
+            tk_module.unsubscribe(signal.zi_node)  # type: ignore[union-attr]
         except AttributeError:
-            self._tk_object.unsubscribe(signal)
+            tk_module.unsubscribe(signal)  # type: ignore[arg-type]
 
     @property
-    def raw_module(self) -> ZIModule:  # type: ignore [type-var]
+    def raw_module(self) -> ZIModule:  # type: ignore[type-var]
         """Underlying zhinst.core module."""
-        return self._tk_object.raw_module
+        return self._tk_object.raw_module  # type: ignore[return-value, union-attr]
 {% else %}
+    _tk_object: TK{{ name }}
+
     def __init__(self, tk_object: TK{{ name }}, session: "Session", name :str = "{{ module_name.lower() }}"):
         super().__init__(tk_object, session, name)
         {% for node in node_param %}
@@ -149,7 +153,9 @@ Args:
         """{{ function.docstring }}"""
         {% if function.is_node_dict -%}
         return NodeDict(self._tk_object.{{ function.name }}({{ function.call_signature }}))
-        {%else-%}
+        {%- elif function.returns_none -%}
+        self._tk_object.{{ function.name }}({{ function.call_signature }})
+        {%- else -%}
         return self._tk_object.{{ function.name }}({{ function.call_signature }})
-        {% endif-%}
+        {%- endif %}
 {% endfor %}

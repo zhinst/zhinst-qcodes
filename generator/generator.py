@@ -368,6 +368,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
                 call_parameter_str.append(f"{param}={param}")
         call_signature = ", ".join(call_parameter_str)
 
+        returns_none = signature.return_annotation is None
         functions_info.append(
             {
                 "name": name,
@@ -379,6 +380,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
                 if signature.return_annotation
                 else "",
                 "is_node_dict": is_node_doc,
+                "returns_none": returns_none,
             }
         )
     return functions_info
@@ -546,6 +548,8 @@ def generate_device_api():
             {"name": "MFLI", "parent": "ZIBaseInstrument", "is_hf2": False},
             {"name": "MFIA", "parent": "ZIBaseInstrument", "is_hf2": False},
             {"name": "HF2", "parent": "ZIBaseInstrument", "is_hf2": True},
+            {"name": "SHFLI", "parent": "ZIBaseInstrument", "is_hf2": False},
+            {"name": "GHFLI", "parent": "ZIBaseInstrument", "is_hf2": False},
         ],
         "imports": [
             "from zhinst.qcodes.driver.devices.base import ZIBaseInstrument",

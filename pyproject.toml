@@ -90,6 +90,23 @@ known-first-party = ["zhinst"]
 ignore_missing_imports = true
 show_error_codes = true
 no_implicit_optional = false
+mypy_path = "src"
+namespace_packages = true
+explicit_package_bases = true
+
+# device_settings_module: qcodes wrapper accepts a qcodes device but the
+# underlying toolkit call expects a toolkit device; the conversion happens at
+# node-set time via the SetParser, which mypy cannot see.
+# shfqa / shfqc: toolkit's @not_callable_in_transactions decorator widens
+# the wrapped function signature to (Node, *Any) -> Any, hiding the real
+# **kwargs. Both should be fixed upstream.
+[[tool.mypy.overrides]]
+module = [
+  "zhinst.qcodes.driver.modules.device_settings_module",
+  "zhinst.qcodes.driver.devices.shfqa",
+  "zhinst.qcodes.driver.devices.shfqc",
+]
+disable_error_code = ["arg-type", "call-arg"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "scripts/tests"]

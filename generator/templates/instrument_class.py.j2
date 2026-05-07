@@ -24,6 +24,8 @@ class {{ class.name }}(ZIBaseInstrument):
     """QCoDeS driver for the Zurich Instruments {{ class.name }}.
     """
 
+    _tk_object: TK{{ class.name }}
+
     def _init_additional_nodes(self):
         """Init class specific modules and parameters."""
         {% filter indent(width=8) -%}{% include 'init_module.py.j2' %}{% endfilter %}
