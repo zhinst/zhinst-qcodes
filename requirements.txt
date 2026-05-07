@@ -2,12 +2,10 @@
 zhinst-toolkit
 numpy
 
-# Generator (black/isort are used by generator/generator.py to format output)
-autoflake
+# Generator (ruff is invoked via subprocess to format output)
 jinja2
 click
-black
-isort
+ruff
 
 # Tests
 pytest

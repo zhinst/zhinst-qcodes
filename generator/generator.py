@@ -4,21 +4,93 @@ import builtins
 import importlib
 import inspect
 import re
+import subprocess
 import typing as t
 from collections import namedtuple
 from functools import cached_property
 from pathlib import Path
 
-import autoflake
-import black
 import click
 import conf
-import isort
 import jinja2
 
 from zhinst.toolkit.driver.devices.base import BaseInstrument
 from zhinst.toolkit.driver.modules.base_module import BaseModule
 from zhinst.toolkit.nodetree import Node, NodeTree
+
+
+def _ruff_format(code: str, filename: str) -> str:
+    """Sort imports, remove unused imports, and format the generated code with ruff.
+
+    Replaces the previous black + isort + autoflake pipeline. Ruff picks up
+    the project's ``pyproject.toml`` (line length, target version, isort
+    ``known-first-party``).
+    """
+    fixed = subprocess.run(
+        [
+            "ruff",
+            "check",
+            "--fix-only",
+            "--select",
+            "I,F401",
+            "--stdin-filename",
+            filename,
+            "-",
+        ],
+        input=code,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    return subprocess.run(
+        ["ruff", "format", "--stdin-filename", filename, "-"],
+        input=fixed,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+
+def _examples_to_doctest(docstring: str) -> str:
+    """Convert Google-style ``Example(s):`` blocks into RST doctest blocks.
+
+    sphinxcontrib-spelling skips doctest blocks but walks the body of a
+    Google-style ``Example:`` definition. Prefixing the indented body with
+    ``>>> `` turns it into a doctest block so the spell checker ignores
+    code samples that toolkit ships in function docstrings.
+    """
+    if not docstring:
+        return docstring
+    lines = docstring.splitlines()
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        header = re.match(r"^(\s*)(Examples?):\s*$", lines[i])
+        if not header:
+            out.append(lines[i])
+            i += 1
+            continue
+        out.append(lines[i])
+        i += 1
+        body_indent: str | None = None
+        while i < len(lines):
+            line = lines[i]
+            if line.strip() == "":
+                out.append(line)
+                i += 1
+                continue
+            leading = re.match(r"^(\s+)", line)
+            if not leading or len(leading.group(1)) <= len(header.group(1)):
+                break
+            if body_indent is None:
+                body_indent = leading.group(1)
+            if not line.startswith(body_indent):
+                break
+            out.append(f"{body_indent}>>> {line[len(body_indent) :]}")
+            i += 1
+    suffix = "\n" if docstring.endswith("\n") else ""
+    return "\n".join(out) + suffix
+
 
 parameter_tuple = namedtuple("parameter", ["name", "is_node"])
 submodule_tuple = namedtuple("submodule", ["subclass", "name", "is_list"])
@@ -205,9 +277,7 @@ def generate_parameter_info(parameters: list, class_type: object) -> list:
     has_node_param = False
     for parameter, is_node in parameters:
         has_node_param = True if has_node_param or is_node else False
-        signature = _resolved_signature(
-            _property_func(getattr(class_type, parameter))
-        )
+        signature = _resolved_signature(_property_func(getattr(class_type, parameter)))
         try:
             return_annotation = signature.return_annotation.__name__
         except AttributeError:
@@ -247,7 +317,9 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
         "Waveforms": "zhinst.toolkit.waveform.Waveforms",
         "CommandTable": "zhinst.toolkit.command_table.CommandTable",
         "Sequence": "zhinst.toolkit.sequence.Sequence",
+        "TKBaseInstrument": "zhinst.toolkit.driver.devices.base.BaseInstrument",
         "Path": "pathlib.Path",
+        "t.": "typing.",
         '"DeviceType"': "ForwardRef('DeviceType')",
     }
     # regex to find deprecation decorator
@@ -260,7 +332,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
             # copy deprecation decorator
             deprecation_deco = inspect.getsource(getattr(toolkit_class, name))
             decorator = deprecated_regex.search(deprecation_deco).group(1)
-        docstring = getattr(toolkit_class, name).__doc__
+        docstring = _examples_to_doctest(getattr(toolkit_class, name).__doc__)
         signature = _resolved_signature(getattr(toolkit_class, name))
         signature_str = str(signature)
         is_node_doc = False
@@ -391,17 +463,9 @@ def generate_qcodes_driver(
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("instrument_class.py.j2")
     result = template.render(data)
-    # result = black.format_str(result, mode=black.FileMode())
-    result = black.format_str(
-        result,
-        mode=black.mode.Mode(
-            target_versions={black.TargetVersion.PY310},
-            line_length=88,
-        ),
-    )
-    result = autoflake.fix_code(result, remove_all_unused_imports=True)
     module_name = camel_to_snake(toolkit_class.__name__)
     py_filename = str(output_dir) + "/" + module_name.lower() + ".py"
+    result = _ruff_format(result, py_filename)
     with open(py_filename, "w+") as outfile:
         outfile.write(result)
     print(f"{py_filename} created.")
@@ -455,15 +519,8 @@ def generate_qcodes_driver_modules(
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("module_class.py.j2")
     result = template.render(data)
-    result = black.format_str(
-        result,
-        mode=black.mode.Mode(
-            target_versions={black.TargetVersion.PY310},
-            line_length=88,
-        ),
-    )
-    result = autoflake.fix_code(result, remove_all_unused_imports=True)
     py_filename = str(output_dir) + "/" + module_name.lower() + ".py"
+    result = _ruff_format(result, py_filename)
     with open(py_filename, "w+") as outfile:
         outfile.write(result)
     print(f"{py_filename} created.")
@@ -505,16 +562,7 @@ def generate_device_api():
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("device_api.py.j2")
     result = template.render(data)
-    result = black.format_str(
-        result,
-        mode=black.mode.Mode(
-            target_versions={black.TargetVersion.PY37},
-            line_length=88,
-            string_normalization=False,
-        ),
-    )
-    result = autoflake.fix_code(result, remove_all_unused_imports=True)
-    result = isort.code(result)
+    result = _ruff_format(result, DEVICE_API_FILEPATH)
     with open(DEVICE_API_FILEPATH, "w+") as outfile:
         outfile.write(result)
     print(f"{DEVICE_API_FILEPATH} created.")
