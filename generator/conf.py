@@ -19,13 +19,14 @@ OUTPUT_DIR_MODULE_DRIVER = PKG_ROOT.parent / "src/zhinst/qcodes/driver/modules/"
 MODULE_DRIVERS = [
     "BaseModule",
     "DAQModule",
-    "ScopeModule",
-    "SweeperModule",
     "DataStreamingModule",
-    "ImpedanceModule",
     "DeviceSettingsModule",
+    "ImpedanceModule",
     "PIDAdvisorModule",
     "PrecompensationAdvisorModule",
+    "ScopeModule",
+    "SweeperModule",
+    "TimelineModule",
 ]
 TOOLKIT_MODULE_MODULE = "zhinst.toolkit.driver.modules"
 

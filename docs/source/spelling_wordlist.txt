@@ -147,6 +147,7 @@ superheterodyne
 sw
 SweeperModule
 swtriggers
+TimelineModule
 tk
 transactional
 trigchannel

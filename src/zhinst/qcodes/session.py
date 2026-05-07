@@ -337,6 +337,22 @@ class ModuleHandler:
         module = self._tk_modules.create_shfqa_sweeper()
         return ZIModules.ZISHFQASweeper(module, self._session)
 
+    def create_timeline_module(self) -> ZIModules.ZITimelineModule:
+        """Create a QCoDeS instance of the TimelineModule.
+
+        The new instance creates a new session to the DataServer.
+        New instances should therefor be created carefully since they consume
+        resources.
+
+        The new module is not managed by toolkit. A managed instance is provided
+        by the property `timeline_module`.
+
+        Returns:
+            created module
+        """
+        module = self._tk_modules.create_timeline_module()
+        return ZIModules.ZITimelineModule(module, self._session)
+
     @cached_property
     def awg(self) -> ZIModules.ZIBaseModule:
         """Managed instance of the zhinst.core.AwgModule.
@@ -468,6 +484,17 @@ class ModuleHandler:
         resources.
         """
         return self.create_shfqa_sweeper()
+
+    @cached_property
+    def timeline_module(self) -> ZIModules.ZITimelineModule:
+        """Managed instance of the zhinst.core.TimelineModule.
+
+        Managed in this sense means that only one instance is created
+        and hold inside the connection Manager. This makes it easier to access
+        the modules from with toolkit, since creating a module requires
+        resources.
+        """
+        return self.create_timeline_module()
 
 
 def ZISession(

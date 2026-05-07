@@ -14,6 +14,7 @@ from zhinst.qcodes.driver.modules.precompensation_advisor_module import (
 from zhinst.qcodes.driver.modules.scope_module import ZIScopeModule
 from zhinst.qcodes.driver.modules.shfqa_sweeper import ZISHFQASweeper
 from zhinst.qcodes.driver.modules.sweeper_module import ZISweeperModule
+from zhinst.qcodes.driver.modules.timeline_module import ZITimelineModule
 
 ModuleType = t.Union[
     ZIBaseModule,
@@ -26,6 +27,7 @@ ModuleType = t.Union[
     ZIScopeModule,
     ZISHFQASweeper,
     ZISweeperModule,
+    ZITimelineModule,
 ]
 
 __all__ = [
@@ -37,7 +39,8 @@ __all__ = [
     "ZIImpedanceModule",
     "ZIPIDAdvisorModule",
     "ZIPrecompensationAdvisorModule",
-    "ZIScopeModule",
     "ZISHFQASweeper",
+    "ZIScopeModule",
     "ZISweeperModule",
+    "ZITimelineModule",
 ]
