@@ -25,6 +25,28 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[dependency-groups]
+docs = [
+  # Sphinx 9 broke autosectionlabel handling for myst-included markdown,
+  # and several extensions in this stack (nbsphinx_link, pydata_sphinx_theme)
+  # have not caught up yet.
+  "sphinx<9",
+  "sphinx-issues",
+  "nbsphinx",
+  "nbsphinx_link",
+  # nbsphinx_link is unmaintained and imports docutils.utils.error_reporting,
+  # which was removed in docutils 0.21.
+  "docutils<0.21",
+  "myst-parser",
+  "pydata_sphinx_theme",
+  "sphinx_autodoc_typehints",
+  "jupytext",
+  "ipython",
+  "requests",
+  "sphinxcontrib-spelling",
+  "lxml_html_clean",
+]
+
 [project.readme]
 file = "README.md"
 content-type = "text/markdown"
@@ -36,29 +58,35 @@ Documentation = "https://docs.zhinst.com/zhinst-qcodes/en/latest/"
 "Release notes" = "https://docs.zhinst.com/zhinst-qcodes/en/latest/changelog/index.html"
 Source = "https://github.com/zhinst/zhinst-qcodes"
 
-[tool.black]
+[tool.ruff]
 line-length = 88
-target-version = ['py37']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  | .mypy-cache
-  | .tox
-  | venv*
-  | docs
-  | build
-  | dist
-)/
-'''
+target-version = "py310"
+extend-exclude = ["docs", "examples", "tests", ".ipynb_checkpoints"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "D"]
+ignore = [
+  # Missing docstring in __init__ (docstring lives on the class)
+  "D107",
+  # Missing docstring in magic method
+  "D105",
+  # Missing argument descriptions (not enforced by previous flake8 setup)
+  "D417",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+known-first-party = ["zhinst"]
 
 [tool.mypy]
 ignore_missing_imports = true
 show_error_codes = true
 no_implicit_optional = false
-
-[tool.isort]
-profile = "black"
-src_paths = ["src", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "scripts/tests"]

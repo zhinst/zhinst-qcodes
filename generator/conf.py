@@ -1,6 +1,6 @@
 """Configuration for zhinst QCoDes driver generation."""
-from pathlib import Path
 
+from pathlib import Path
 
 PKG_ROOT = Path(__file__).parent
 TEMPLATE_PATH = PKG_ROOT / "templates"

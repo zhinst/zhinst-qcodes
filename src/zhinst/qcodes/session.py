@@ -1,23 +1,22 @@
 """Connection Manager for the LabOne Python API."""
 
+import typing as t
 from collections.abc import MutableMapping
 from functools import cached_property
-import typing as t
-
-from zhinst.toolkit.session import Devices as TKDevices
-from zhinst.toolkit.session import PollFlags
-from zhinst.toolkit.session import Session as TKSession
-from zhinst.toolkit.session import ModuleHandler as TKModuleHandler
-from zhinst.core import ziDAQServer
 
 import zhinst.qcodes.driver.devices as ZIDevices
 import zhinst.qcodes.driver.modules as ZIModules
+from zhinst.core import ziDAQServer
 from zhinst.qcodes.qcodes_adaptions import (
+    ZIInstrument,
+    ZIParameter,
     init_nodetree,
     tk_node_to_parameter,
-    ZIParameter,
-    ZIInstrument,
 )
+from zhinst.toolkit.session import Devices as TKDevices
+from zhinst.toolkit.session import ModuleHandler as TKModuleHandler
+from zhinst.toolkit.session import PollFlags
+from zhinst.toolkit.session import Session as TKSession
 
 
 class Devices(MutableMapping):

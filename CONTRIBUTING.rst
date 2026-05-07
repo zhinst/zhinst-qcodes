@@ -17,7 +17,7 @@ Code contributions
 
 * The project uses `Google Style Python docstrings <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`_
 
-* The project uses `black`, `flake8` and `mypy` to check for code style.
+* The project uses `ruff` (lint + format) and `mypy` to check for code style.
 
 Development environment setup
 -----------------------------
@@ -58,12 +58,12 @@ Running all tests
 
         $ pytest
 
-Running lint test
-~~~~~~~~~~~~~~~~~
+Running lint and format checks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     .. code-block:: sh
 
-        $ tox -e lint
+        $ tox -e ruff
 
 Running typing tests
 ~~~~~~~~~~~~~~~~~~~~
@@ -71,13 +71,6 @@ Running typing tests
     .. code-block:: sh
 
         $ tox -e typing
-
-Running code format check
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: sh
-
-        $ tox -e black
 
 Running coverage
 ~~~~~~~~~~~~~~~~
@@ -121,7 +114,7 @@ Change to docs directory
 
     .. code-block:: sh
 
-        $ pip install -r docs/requirements.txt
+        $ uv pip install --group docs -e .
 
 - Build the HTML documentation along with examples with Sphinx
 

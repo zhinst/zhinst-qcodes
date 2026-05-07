@@ -2,17 +2,15 @@
 zhinst-toolkit
 numpy
 
-# Generator
+# Generator (black/isort are used by generator/generator.py to format output)
 autoflake
 jinja2
 click
+black
+isort
 
 # Tests
 pytest
-
-# Lint
-black==22.3.0
-isort==5.10.1
 
 # Misc
 pre-commit

@@ -1,4 +1,5 @@
 """Module for all device drivers."""
+
 import typing as t
 
 from zhinst.qcodes.driver.devices.base import ZIBaseInstrument

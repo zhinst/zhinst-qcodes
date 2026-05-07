@@ -1,4 +1,5 @@
 """Module for toolkit representations of native LabOne modules."""
+
 import typing as t
 
 from zhinst.qcodes.driver.modules.base_module import ZIBaseModule

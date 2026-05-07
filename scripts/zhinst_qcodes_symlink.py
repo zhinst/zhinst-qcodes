@@ -14,10 +14,10 @@ Running the script:
 
     >>> python scripts/zhinst_qcodes_symlink.py
 """
+
 import os
 import sysconfig
 from pathlib import Path
-
 
 SRC_DIR = Path(Path(__file__).parent.parent / Path("src/zhinst/qcodes")).resolve()
 DEST_DIR = Path(sysconfig.get_path("purelib")) / "zhinst/qcodes"

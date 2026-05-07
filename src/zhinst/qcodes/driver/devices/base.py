@@ -1,13 +1,13 @@
 """Base modules for the Zurich Instrument specific QCoDeS driver."""
+
 import typing as t
 
+from zhinst.qcodes.qcodes_adaptions import ZIInstrument, init_nodetree
 from zhinst.toolkit.driver.devices import DeviceType
 
-from zhinst.qcodes.qcodes_adaptions import init_nodetree, ZIInstrument
-
 if t.TYPE_CHECKING:
-    from zhinst.qcodes.session import ZISession, Session
     from qcodes.instrument import Instrument
+    from zhinst.qcodes.session import Session, ZISession
 
 
 class ZIBaseInstrument(ZIInstrument):

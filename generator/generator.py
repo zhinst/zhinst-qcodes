@@ -1,20 +1,22 @@
 """Autogenerate the QCoDeS drivers from toolkit and zhinst-core."""
-from collections import namedtuple
-import typing as t
+
+import importlib
 import inspect
 import re
-import importlib
-import jinja2
-import isort
-import black
-import autoflake
-import click
+import typing as t
+from collections import namedtuple
 from pathlib import Path
+
+import autoflake
+import black
+import click
+import conf
+import isort
+import jinja2
 
 from zhinst.toolkit.driver.devices.base import BaseInstrument
 from zhinst.toolkit.driver.modules.base_module import BaseModule
 from zhinst.toolkit.nodetree import Node, NodeTree
-import conf
 
 parameter_tuple = namedtuple("parameter", ["name", "is_node"])
 submodule_tuple = namedtuple("submodule", ["subclass", "name", "is_list"])

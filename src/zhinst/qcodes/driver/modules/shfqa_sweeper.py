@@ -1,9 +1,9 @@
 """Toolkit adaption for the zhinst.utils.SHFSweeper."""
+
 import typing as t
 
+from zhinst.qcodes.qcodes_adaptions import ZIInstrument, init_nodetree
 from zhinst.toolkit.driver.modules.shfqa_sweeper import SHFQASweeper as TKSHFQASweeper
-
-from zhinst.qcodes.qcodes_adaptions import init_nodetree, ZIInstrument
 
 if t.TYPE_CHECKING:
     from zhinst.qcodes.driver.devices import DeviceType
