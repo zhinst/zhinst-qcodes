@@ -345,7 +345,7 @@ class ModuleHandler:
         resources.
 
         The new module is not managed by toolkit. A managed instance is provided
-        by the property `timeline_module`.
+        by the property `timeline`.
 
         Returns:
             created module
@@ -486,7 +486,7 @@ class ModuleHandler:
         return self.create_shfqa_sweeper()
 
     @cached_property
-    def timeline_module(self) -> ZIModules.ZITimelineModule:
+    def timeline(self) -> ZIModules.ZITimelineModule:
         """Managed instance of the zhinst.core.TimelineModule.
 
         Managed in this sense means that only one instance is created
