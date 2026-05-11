@@ -1,6 +1,6 @@
 """Configuration for zhinst QCoDes driver generation."""
-from pathlib import Path
 
+from pathlib import Path
 
 PKG_ROOT = Path(__file__).parent
 TEMPLATE_PATH = PKG_ROOT / "templates"
@@ -19,18 +19,20 @@ OUTPUT_DIR_MODULE_DRIVER = PKG_ROOT.parent / "src/zhinst/qcodes/driver/modules/"
 MODULE_DRIVERS = [
     "BaseModule",
     "DAQModule",
-    "ScopeModule",
-    "SweeperModule",
-    "ImpedanceModule",
+    "DataStreamingModule",
     "DeviceSettingsModule",
+    "ImpedanceModule",
     "PIDAdvisorModule",
     "PrecompensationAdvisorModule",
+    "ScopeModule",
+    "SweeperModule",
+    "TimelineModule",
 ]
 TOOLKIT_MODULE_MODULE = "zhinst.toolkit.driver.modules"
 
 # Typing
 # Weird typing infos that can be replaced with the right term
 TYPE_HINT_REPLACEMENTS = {
-    "<built-in function array>": "np.array",
+    "<built-in function array>": "np.ndarray",
     "~Numpy2DArray": "np.ndarray",
 }

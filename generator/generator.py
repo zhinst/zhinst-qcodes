@@ -1,25 +1,121 @@
 """Autogenerate the QCoDeS drivers from toolkit and zhinst-core."""
-from collections import namedtuple
-import typing as t
+
+import builtins
+import importlib
 import inspect
 import re
-import importlib
-import jinja2
-import isort
-import black
-import autoflake
-import click
+import subprocess
+import typing as t
+from collections import namedtuple
+from functools import cached_property
 from pathlib import Path
+
+import click
+import conf
+import jinja2
 
 from zhinst.toolkit.driver.devices.base import BaseInstrument
 from zhinst.toolkit.driver.modules.base_module import BaseModule
 from zhinst.toolkit.nodetree import Node, NodeTree
-import conf
+
+
+def _ruff_format(code: str, filename: str) -> str:
+    """Sort imports, remove unused imports, and format the generated code with ruff.
+
+    Replaces the previous black + isort + autoflake pipeline. Ruff picks up
+    the project's ``pyproject.toml`` (line length, target version, isort
+    ``known-first-party``).
+    """
+    fixed = subprocess.run(
+        [
+            "ruff",
+            "check",
+            "--fix-only",
+            "--select",
+            "I,F401",
+            "--stdin-filename",
+            filename,
+            "-",
+        ],
+        input=code,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    return subprocess.run(
+        ["ruff", "format", "--stdin-filename", filename, "-"],
+        input=fixed,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+
+def _examples_to_doctest(docstring: str) -> str:
+    """Convert Google-style ``Example(s):`` blocks into RST doctest blocks.
+
+    sphinxcontrib-spelling skips doctest blocks but walks the body of a
+    Google-style ``Example:`` definition. Prefixing the indented body with
+    ``>>> `` turns it into a doctest block so the spell checker ignores
+    code samples that toolkit ships in function docstrings.
+    """
+    if not docstring:
+        return docstring
+    lines = docstring.splitlines()
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        header = re.match(r"^(\s*)(Examples?):\s*$", lines[i])
+        if not header:
+            out.append(lines[i])
+            i += 1
+            continue
+        out.append(lines[i])
+        i += 1
+        body_indent: str | None = None
+        while i < len(lines):
+            line = lines[i]
+            if line.strip() == "":
+                out.append(line)
+                i += 1
+                continue
+            leading = re.match(r"^(\s+)", line)
+            if not leading or len(leading.group(1)) <= len(header.group(1)):
+                break
+            if body_indent is None:
+                body_indent = leading.group(1)
+            if not line.startswith(body_indent):
+                break
+            out.append(f"{body_indent}>>> {line[len(body_indent) :]}")
+            i += 1
+    suffix = "\n" if docstring.endswith("\n") else ""
+    return "\n".join(out) + suffix
+
 
 parameter_tuple = namedtuple("parameter", ["name", "is_node"])
 submodule_tuple = namedtuple("submodule", ["subclass", "name", "is_list"])
 function_tuple = namedtuple("function", ["name", "is_deprecated"])
 class_tuple = namedtuple("toolkit_class", ["functions", "parameters", "sub_modules"])
+
+
+def _property_func(prop):
+    """Return the underlying getter function for ``property`` or ``cached_property``."""
+    if isinstance(prop, builtins.property):
+        return prop.fget
+    return prop.func
+
+
+def _resolved_signature(func) -> inspect.Signature:
+    """Return signature with PEP 563 string annotations resolved when possible.
+
+    Falls back to the unresolved signature if a forward reference cannot be
+    evaluated (e.g. ``"DeviceType"``), which the rendered template handles via
+    the ``enums`` replacement table.
+    """
+    try:
+        return inspect.signature(func, eval_str=True)
+    except NameError:
+        return inspect.signature(func)
 
 
 def getPropertyInfo(
@@ -35,8 +131,9 @@ def getPropertyInfo(
     Returns:
         Union[parameter_tuple,submodule_tuple]
     """
-    typehint = t.get_type_hints(property.fget)
-    if "deprecated" in inspect.getsource(property.fget):
+    fget = _property_func(property)
+    typehint = t.get_type_hints(fget)
+    if "deprecated" in inspect.getsource(fget):
         # TODO decide if we should keep them or remove them?
         print(f"WARNING {name}: deprecated property -> ignored")
     elif "typing.Union" in str(typehint["return"]) or "typing.Sequence" in str(
@@ -99,7 +196,7 @@ def getInfo(class_type: object, existing_names: list) -> t.Tuple[class_tuple, li
         # ignore private/blacklisted and existing items
         if name.startswith("_") or name in blacklist_names or name in existing_names:
             continue
-        if isinstance(attribute, property):
+        if isinstance(attribute, property) or isinstance(attribute, cached_property):
             property_info = getPropertyInfo(name, attribute, class_type)
             if isinstance(property_info, parameter_tuple):
                 parameters.append(property_info)
@@ -108,7 +205,7 @@ def getInfo(class_type: object, existing_names: list) -> t.Tuple[class_tuple, li
         else:
             # function
             if not callable(attribute):
-                raise RuntimeError("Unsupported class item")
+                raise RuntimeError("Unsupported class item", attribute)
             functions.append(
                 function_tuple(name, "deprecated" in inspect.getsource(attribute))
             )
@@ -180,7 +277,7 @@ def generate_parameter_info(parameters: list, class_type: object) -> list:
     has_node_param = False
     for parameter, is_node in parameters:
         has_node_param = True if has_node_param or is_node else False
-        signature = inspect.signature(getattr(class_type, parameter).fget)
+        signature = _resolved_signature(_property_func(getattr(class_type, parameter)))
         try:
             return_annotation = signature.return_annotation.__name__
         except AttributeError:
@@ -220,7 +317,9 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
         "Waveforms": "zhinst.toolkit.waveform.Waveforms",
         "CommandTable": "zhinst.toolkit.command_table.CommandTable",
         "Sequence": "zhinst.toolkit.sequence.Sequence",
+        "TKBaseInstrument": "zhinst.toolkit.driver.devices.base.BaseInstrument",
         "Path": "pathlib.Path",
+        "t.": "typing.",
         '"DeviceType"': "ForwardRef('DeviceType')",
     }
     # regex to find deprecation decorator
@@ -233,8 +332,8 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
             # copy deprecation decorator
             deprecation_deco = inspect.getsource(getattr(toolkit_class, name))
             decorator = deprecated_regex.search(deprecation_deco).group(1)
-        docstring = getattr(toolkit_class, name).__doc__
-        signature = inspect.signature(getattr(toolkit_class, name))
+        docstring = _examples_to_doctest(getattr(toolkit_class, name).__doc__)
+        signature = _resolved_signature(getattr(toolkit_class, name))
         signature_str = str(signature)
         is_node_doc = False
         # replace toolkit enum typehint with direct typehint
@@ -269,6 +368,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
                 call_parameter_str.append(f"{param}={param}")
         call_signature = ", ".join(call_parameter_str)
 
+        returns_none = signature.return_annotation is None
         functions_info.append(
             {
                 "name": name,
@@ -280,6 +380,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
                 if signature.return_annotation
                 else "",
                 "is_node_dict": is_node_doc,
+                "returns_none": returns_none,
             }
         )
     return functions_info
@@ -364,17 +465,9 @@ def generate_qcodes_driver(
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("instrument_class.py.j2")
     result = template.render(data)
-    # result = black.format_str(result, mode=black.FileMode())
-    result = black.format_str(
-        result,
-        mode=black.mode.Mode(
-            target_versions={black.TargetVersion.PY310},
-            line_length=88,
-        ),
-    )
-    result = autoflake.fix_code(result, remove_all_unused_imports=True)
     module_name = camel_to_snake(toolkit_class.__name__)
     py_filename = str(output_dir) + "/" + module_name.lower() + ".py"
+    result = _ruff_format(result, py_filename)
     with open(py_filename, "w+") as outfile:
         outfile.write(result)
     print(f"{py_filename} created.")
@@ -428,15 +521,8 @@ def generate_qcodes_driver_modules(
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("module_class.py.j2")
     result = template.render(data)
-    result = black.format_str(
-        result,
-        mode=black.mode.Mode(
-            target_versions={black.TargetVersion.PY310},
-            line_length=88,
-        ),
-    )
-    result = autoflake.fix_code(result, remove_all_unused_imports=True)
     py_filename = str(output_dir) + "/" + module_name.lower() + ".py"
+    result = _ruff_format(result, py_filename)
     with open(py_filename, "w+") as outfile:
         outfile.write(result)
     print(f"{py_filename} created.")
@@ -462,6 +548,8 @@ def generate_device_api():
             {"name": "MFLI", "parent": "ZIBaseInstrument", "is_hf2": False},
             {"name": "MFIA", "parent": "ZIBaseInstrument", "is_hf2": False},
             {"name": "HF2", "parent": "ZIBaseInstrument", "is_hf2": True},
+            {"name": "SHFLI", "parent": "ZIBaseInstrument", "is_hf2": False},
+            {"name": "GHFLI", "parent": "ZIBaseInstrument", "is_hf2": False},
         ],
         "imports": [
             "from zhinst.qcodes.driver.devices.base import ZIBaseInstrument",
@@ -478,16 +566,7 @@ def generate_device_api():
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("device_api.py.j2")
     result = template.render(data)
-    result = black.format_str(
-        result,
-        mode=black.mode.Mode(
-            target_versions={black.TargetVersion.PY37},
-            line_length=88,
-            string_normalization=False,
-        ),
-    )
-    result = autoflake.fix_code(result, remove_all_unused_imports=True)
-    result = isort.code(result)
+    result = _ruff_format(result, DEVICE_API_FILEPATH)
     with open(DEVICE_API_FILEPATH, "w+") as outfile:
         outfile.write(result)
     print(f"{DEVICE_API_FILEPATH} created.")

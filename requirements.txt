@@ -2,17 +2,13 @@
 zhinst-toolkit
 numpy
 
-# Generator
-autoflake
+# Generator (ruff is invoked via subprocess to format output)
 jinja2
 click
+ruff
 
 # Tests
 pytest
-
-# Lint
-black==22.3.0
-isort==5.10.1
 
 # Misc
 pre-commit

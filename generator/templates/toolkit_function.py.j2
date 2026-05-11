@@ -2,5 +2,9 @@
 {{ function.decorator }}
 def {{ function.name }}{{ function.signature }}:
     """{{ function.docstring }}"""
+    {% if function.returns_none -%}
+    self._tk_object.{{ function.name }}({{ function.call_signature }})
+    {%- else -%}
     return self._tk_object.{{ function.name }}({{ function.call_signature }})
+    {%- endif %}
 {% endfor %}

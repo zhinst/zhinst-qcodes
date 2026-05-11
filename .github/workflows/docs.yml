@@ -14,23 +14,22 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout tag/branch"
-        uses: "actions/checkout@v3"
+        uses: "actions/checkout@v4"
         with: { fetch-depth: 0, submodules: "true" }
       - name: "Setup Python"
-        uses: "actions/setup-python@v3"
+        uses: "actions/setup-python@v5"
         with:
           python-version: "3.11"
+
+      - name: "Setup uv"
+        uses: "astral-sh/setup-uv@v4"
 
       - name: "Install build dependencies"
         run: |
           set -xe
           python -VV
-          python -m site
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install git+https://github.com/zhinst/zhinst-toolkit
-          python -m pip install --upgrade -r requirements.txt
-          python -m pip install --upgrade -r docs/requirements.txt
-          pip install .
+          uv pip install --system git+https://github.com/zhinst/zhinst-toolkit
+          uv pip install --system --group docs -e .
 
       - name: "Build docs"
         run: |

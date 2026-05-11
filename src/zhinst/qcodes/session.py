@@ -1,23 +1,22 @@
 """Connection Manager for the LabOne Python API."""
 
+import typing as t
 from collections.abc import MutableMapping
 from functools import cached_property
-import typing as t
-
-from zhinst.toolkit.session import Devices as TKDevices
-from zhinst.toolkit.session import PollFlags
-from zhinst.toolkit.session import Session as TKSession
-from zhinst.toolkit.session import ModuleHandler as TKModuleHandler
-from zhinst.core import ziDAQServer
 
 import zhinst.qcodes.driver.devices as ZIDevices
 import zhinst.qcodes.driver.modules as ZIModules
+from zhinst.core import ziDAQServer
 from zhinst.qcodes.qcodes_adaptions import (
+    ZIInstrument,
+    ZIParameter,
     init_nodetree,
     tk_node_to_parameter,
-    ZIParameter,
-    ZIInstrument,
 )
+from zhinst.toolkit.session import Devices as TKDevices
+from zhinst.toolkit.session import ModuleHandler as TKModuleHandler
+from zhinst.toolkit.session import PollFlags
+from zhinst.toolkit.session import Session as TKSession
 
 
 class Devices(MutableMapping):
@@ -169,6 +168,22 @@ class ModuleHandler:
         """
         module = self._tk_modules.create_daq_module()
         return ZIModules.ZIDAQModule(module, self._session)
+
+    def create_data_streaming_module(self) -> ZIModules.ZIDataStreamingModule:
+        """Create a QCoDeS instance of the DataStreamingModule.
+
+        The new instance creates a new session to the DataServer.
+        New instances should therefor be created carefully since they consume
+        resources.
+
+        The new module is not managed by toolkit. A managed instance is provided
+        by the property `data_streaming`.
+
+        Returns:
+            created module
+        """
+        module = self._tk_modules.create_data_streaming_module()
+        return ZIModules.ZIDataStreamingModule(module, self._session)
 
     def create_device_settings_module(self) -> ZIModules.ZIDeviceSettingsModule:
         """Create a QCoDeS instance of the DeviceSettingsModule.
@@ -322,6 +337,22 @@ class ModuleHandler:
         module = self._tk_modules.create_shfqa_sweeper()
         return ZIModules.ZISHFQASweeper(module, self._session)
 
+    def create_timeline_module(self) -> ZIModules.ZITimelineModule:
+        """Create a QCoDeS instance of the TimelineModule.
+
+        The new instance creates a new session to the DataServer.
+        New instances should therefor be created carefully since they consume
+        resources.
+
+        The new module is not managed by toolkit. A managed instance is provided
+        by the property `timeline_module`.
+
+        Returns:
+            created module
+        """
+        module = self._tk_modules.create_timeline_module()
+        return ZIModules.ZITimelineModule(module, self._session)
+
     @cached_property
     def awg(self) -> ZIModules.ZIBaseModule:
         """Managed instance of the zhinst.core.AwgModule.
@@ -343,6 +374,17 @@ class ModuleHandler:
         resources.
         """
         return self.create_daq_module()
+
+    @cached_property
+    def data_streaming(self) -> ZIModules.ZIDataStreamingModule:
+        """Managed instance of the zhinst.core.DataStreamingModule.
+
+        Managed in this sense means that only one instance is created
+        and hold inside the connection Manager. This makes it easier to access
+        the modules from with toolkit, since creating a module requires
+        resources.
+        """
+        return self.create_data_streaming_module()
 
     @cached_property
     def device_settings(self) -> ZIModules.ZIDeviceSettingsModule:
@@ -443,9 +485,28 @@ class ModuleHandler:
         """
         return self.create_shfqa_sweeper()
 
+    @cached_property
+    def timeline_module(self) -> ZIModules.ZITimelineModule:
+        """Managed instance of the zhinst.core.TimelineModule.
 
-class ZISession:
-    """Session to a data server.
+        Managed in this sense means that only one instance is created
+        and hold inside the connection Manager. This makes it easier to access
+        the modules from with toolkit, since creating a module requires
+        resources.
+        """
+        return self.create_timeline_module()
+
+
+def ZISession(
+    server_host: str,
+    server_port: t.Optional[int] = None,
+    *,
+    hf2: t.Optional[bool] = None,
+    new_session: bool = False,
+    connection: t.Optional[ziDAQServer] = None,
+    allow_version_mismatch: bool = False,
+) -> "Session":
+    """Create or reuse a :class:`Session` to a data server.
 
     Zurich Instruments devices use a server-based connectivity methodology.
     Server-based means that all communication between the user and the
@@ -457,7 +518,7 @@ class ZISession:
     https://docs.zhinst.com/labone_api_user_manual/description_and_guidelines/software_architecture.html)
 
     The entry point into any connection is therefor a client session to a
-    existing data sever. This class represents a single client session to a
+    existing data sever. This factory returns a single client session to a
     data server. The session enables the user to connect to one or multiple
     instruments (also creates the dedicated objects for each device), access
     the LabOne modules and poll data.
@@ -497,33 +558,21 @@ class ZISession:
             If False, an exception will be raised if the data-server is on a
             different version. (default = False)
     """
-
-    def __new__(
-        cls,
-        server_host: str,
-        server_port: t.Optional[int] = None,
-        *,
-        hf2: t.Optional[bool] = None,
-        new_session=False,
-        connection: t.Optional[ziDAQServer] = None,
-        allow_version_mismatch: bool = False,
-    ):
-        """Session creator."""
-        if not new_session:
-            for instance in Session.instances():
-                if instance.server_host == server_host and (
-                    (instance.is_hf2_server and hf2)
-                    or server_port is None
-                    or instance.server_port == server_port
-                ):
-                    return instance
-        return Session(
-            server_host,
-            server_port,
-            hf2=hf2,
-            connection=connection,
-            allow_version_mismatch=allow_version_mismatch,
-        )
+    if not new_session:
+        for instance in Session.instances():
+            if instance.server_host == server_host and (
+                (instance.is_hf2_server and hf2)
+                or server_port is None
+                or instance.server_port == server_port
+            ):
+                return instance
+    return Session(
+        server_host,
+        server_port,
+        hf2=hf2,
+        connection=connection,
+        allow_version_mismatch=allow_version_mismatch,
+    )
 
 
 class Session(ZIInstrument):
@@ -698,8 +747,8 @@ class Session(ZIInstrument):
             recording_time=recording_time, timeout=timeout, flags=flags
         )
         polled_data = {}
-        for tk_node, data in polled_data_tk.items():
-            tk_node = self._tk_object.raw_path_to_node(tk_node)
+        for raw_path, data in polled_data_tk.items():
+            tk_node = self._tk_object.raw_path_to_node(str(raw_path))
             device = self.devices[tk_node.root.prefix_hide]
             parameter = tk_node_to_parameter(device, tk_node)
             polled_data[parameter] = data

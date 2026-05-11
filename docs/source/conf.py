@@ -37,7 +37,7 @@ extensions = [
     "nbsphinx",
     "nbsphinx_link",
     "IPython.sphinxext.ipython_console_highlighting",
-    "m2r2",
+    "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
 ]
@@ -47,7 +47,6 @@ autodoc_default_options = {"show-inheritance": True}
 autodoc_typehints = "both"
 autodoc_typehints_format = "short"
 autosummary_generate = True
-set_type_checking_flag = False
 
 # Sphinx issues
 issues_github_path = "zhinst/zhinst-qcodes"
