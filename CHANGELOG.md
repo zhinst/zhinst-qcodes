@@ -1,5 +1,9 @@
 # zhinst-qcodes Changelog
 
+## Version 0.8.0
+* Add support for Timeline Module
+* Add support for Data Streaming Module
+
 ## Version 0.7.0
 * Remove calls that will be deprecated in qcodes 0.54.0 and bumped the required qcodes to 0.35
 
