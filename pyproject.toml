@@ -19,7 +19,7 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.13",
-  "zhinst-toolkit>=0.7.1",
+  "zhinst-toolkit>=1.4.0",
   "qcodes>=0.35.0",
   "typing_extensions>=4.1.1",
 ]
