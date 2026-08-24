@@ -7,7 +7,7 @@ The following section provides a set of examples.
 
    zhinst-qcodes is based on zhinst-toolkit. Meaning it has the same device
    specific functions and structure. Please take a look at the examples in the
-   `zhinst-toolkit examples <https://docs.zhinst.com/zhinst-toolkit/en/latest/examples/index.html>`_
+   `zhinst-toolkit examples <https://github.com/zhinst/zhinst-toolkit/tree/main/examples>`_
    for a more extensive list of examples.
 
 .. toctree::
