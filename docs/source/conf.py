@@ -57,6 +57,15 @@ autosectionlabel_maxdepth = 2
 
 nbsphinx_execute = "never"
 
+# No notebook here contains real markdown-cell equations (the only `$...$`
+# occurrences are inside matplotlib axis-label strings, rendered by
+# matplotlib itself, not MathJax), and nbsphinx_execute="never" means no
+# interactive ipywidgets can exist either. Both defaults assume the worst
+# case and pull MathJax/require.js from a CDN on every page; disable them
+# to avoid the unvendored, unpinned external script load.
+nbsphinx_assume_equations = False
+nbsphinx_requirejs_path = ""
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
