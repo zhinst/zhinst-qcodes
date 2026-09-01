@@ -70,7 +70,7 @@ and has no logic builtin what so ever.
 For the device drivers this means that some device may have additional functionality
 provided by zhinst-toolkit. zhinst-qcodes forwards these functionalities.
 Please take a look at the examples in the
-`zhinst-toolkit examples <https://docs.zhinst.com/zhinst-toolkit/en/latest/examples/index.html>`_
+`zhinst-toolkit examples <https://github.com/zhinst/zhinst-toolkit/tree/main/examples>`_
 to see a list of all available functions. As already mentioned they can be used
 with the exact same syntax, which also is the case for all the examples from
 zhinst-toolkit (just replace the imports from zhinst-toolkit with zhinst-qcodes).
@@ -172,5 +172,5 @@ examples.
     <zhinst.core.DataAcquisitionModule at 0x10edc5630>
 
 Please take a look at the examples in the
-`zhinst-toolkit examples <https://docs.zhinst.com/zhinst-toolkit/en/latest/examples/index.html>`_
+`zhinst-toolkit examples <https://github.com/zhinst/zhinst-toolkit/tree/main/examples>`_
 to see some of the modules in action.

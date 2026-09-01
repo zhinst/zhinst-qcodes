@@ -23,7 +23,7 @@ zhinst-qcodes exposes the following classes:
    ~zhinst.qcodes.device_creator.GHFLI
 
 In addition the following classes are imported from
-`zhinst-toolkit <https://docs.zhinst.com/zhinst-toolkit/en/latest/package_documentation.html>`_:
+`zhinst-toolkit <https://docs.zhinst.com/labone_api_user_manual/reference/toolkit/>`_:
 
 * Waveforms
 * CommandTable

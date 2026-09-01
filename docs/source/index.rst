@@ -22,10 +22,10 @@ zhinst-qcodes forwards all calls (functions, parameters ...) to zhinst qcodes
 and has no logic builtin what so ever.
 
 For the most cases the
-`zhinst-toolkit documentation <https://docs.zhinst.com/zhinst-toolkit/en/latest/>`_
+`zhinst-toolkit documentation <https://docs.zhinst.com/labone_api_user_manual/reference/toolkit/>`_
 will therefor serve as a reference for this package as well. If you can not find
 a answer to your question here please refer to the
-`zhinst-toolkit documentation <https://docs.zhinst.com/zhinst-toolkit/en/latest/>`_
+`zhinst-toolkit documentation <https://docs.zhinst.com/labone_api_user_manual/reference/toolkit/>`_
 instead.
 
 Get started with the :ref:`first_steps/installation:Installation` and then get
