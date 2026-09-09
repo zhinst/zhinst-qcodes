@@ -16,6 +16,32 @@ from zhinst.toolkit.nodetree.helper import NodeDict as TKNodeDict
 from zhinst.toolkit.nodetree.node import NodeInfo
 
 
+def _is_full_snapshot_update(update: t.Optional[t.Union[bool, str]]) -> bool:
+    """Whether ``update`` requests a full refresh of every value.
+
+    The bulk node-tree read that :class:`ZISnapshotHelper` performs is only
+    appropriate for a *full* snapshot. A full snapshot corresponds to the legacy
+    ``update=True`` or, since QCoDeS 0.59, the canonical ``update="All"`` value.
+
+    Every other value must NOT trigger the bulk read:
+
+    * ``None`` / ``"Only_invalid"``: only refresh values whose cache is invalid,
+      which QCoDeS does one parameter at a time (and guards each with a
+      ``try/except``, so an unresponsive node degrades to its cached value).
+    * ``False`` / ``"Never"``: never read from the device at all.
+
+    Treating any truthy value as "full" is wrong for QCoDeS >= 0.59, whose
+    measurement ``Runner`` snapshots the station with the truthy *string*
+    ``"Only_invalid"`` before every dataset -- which previously forced a full
+    ``get("/dev.../*")`` read on every acquisition and could time out.
+
+    This check is intentionally version-agnostic (it accepts both the legacy
+    ``bool``/``None`` values and the QCoDeS >= 0.59 strings), so it does not
+    require raising the minimum supported QCoDeS version.
+    """
+    return update is True or update == "All"
+
+
 class ZISnapshotHelper:
     """Helper class for the snapshot with Zurich Instrument devices.
 
@@ -405,7 +431,11 @@ class ZINode(InstrumentChannel):
         Returns:
             dict: Base snapshot.
         """
-        with self._snapshot_cache.snapshot(self._zi_node) if update else nullcontext():
+        with (
+            self._snapshot_cache.snapshot(self._zi_node)
+            if _is_full_snapshot_update(update)
+            else nullcontext()
+        ):
             return super().snapshot(update)
 
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
@@ -424,7 +454,11 @@ class ZINode(InstrumentChannel):
                 readable snapshot will be cropped if this value is exceeded.
                 Defaults to 80 to be consistent with default terminal width.
         """
-        with self._snapshot_cache.snapshot(self._zi_node) if update else nullcontext():
+        with (
+            self._snapshot_cache.snapshot(self._zi_node)
+            if _is_full_snapshot_update(update)
+            else nullcontext()
+        ):
             return super().print_readable_snapshot(update, max_chars)
 
 
@@ -456,7 +490,11 @@ class ZIChannelList(ChannelList):
         Returns:
             dict: Base snapshot.
         """
-        with self._snapshot_cache.snapshot(self._zi_node) if update else nullcontext():
+        with (
+            self._snapshot_cache.snapshot(self._zi_node)
+            if _is_full_snapshot_update(update)
+            else nullcontext()
+        ):
             return super().snapshot(update)
 
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
@@ -475,7 +513,11 @@ class ZIChannelList(ChannelList):
                 readable snapshot will be cropped if this value is exceeded.
                 Defaults to 80 to be consistent with default terminal width.
         """
-        with self._snapshot_cache.snapshot(self._zi_node) if update else nullcontext():
+        with (
+            self._snapshot_cache.snapshot(self._zi_node)
+            if _is_full_snapshot_update(update)
+            else nullcontext()
+        ):
             return super().print_readable_snapshot(update, max_chars)
 
 
@@ -506,7 +548,11 @@ class ZIInstrument(Instrument):
         Returns:
             dict: Base snapshot.
         """
-        with self._snapshot_cache.snapshot() if update else nullcontext():
+        with (
+            self._snapshot_cache.snapshot()
+            if _is_full_snapshot_update(update)
+            else nullcontext()
+        ):
             return super().snapshot(update)
 
     def print_readable_snapshot(self, update: bool = True, max_chars: int = 80) -> None:
@@ -525,7 +571,11 @@ class ZIInstrument(Instrument):
                 readable snapshot will be cropped if this value is exceeded.
                 Defaults to 80 to be consistent with default terminal width.
         """
-        with self._snapshot_cache.snapshot() if update else nullcontext():
+        with (
+            self._snapshot_cache.snapshot()
+            if _is_full_snapshot_update(update)
+            else nullcontext()
+        ):
             return super().print_readable_snapshot(update, max_chars)
 
 
