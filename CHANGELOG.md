@@ -1,5 +1,10 @@
 # zhinst-qcodes Changelog
 
+## Version 0.8.1
+* Only perform the bulk node tree read for a full snapshot (`update=True` or `update="All"`).
+  With qcodes 0.59 and newer it ran on every snapshot, including the one the measurement `Runner` takes before each dataset, where it could fail with `TimeoutError: Command timed out`.
+* Fix `snapshot(update=False)` still reading from the device with qcodes 0.59 and newer.
+
 ## Version 0.8.0
 * Add support for Timeline Module
 * Add support for Data Streaming Module
