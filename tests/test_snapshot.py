@@ -1,11 +1,8 @@
 """Tests for snapshot ``update`` handling in the ZI qcodes adaptions.
 
-These cover the fix for the bulk node-tree read being performed for any truthy
-``update`` value: since QCoDeS 0.59 the measurement ``Runner`` snapshots the
-station with ``update="Only_invalid"`` (a truthy string) before every dataset,
-which previously forced a full ``get("/dev.../*")`` read on every acquisition
-and could time out. The bulk read must only happen for a full ("All"/``True``)
-snapshot.
+Covers: the bulk read only fires for a full snapshot or an "Only_invalid"
+snapshot with an invalid cache, and a failing bulk read falls back
+per-parameter instead of aborting.
 """
 
 from unittest.mock import MagicMock
@@ -18,6 +15,7 @@ from zhinst.qcodes.qcodes_adaptions import (
     ZINode,
     ZIParameter,
     _is_full_snapshot_update,
+    _needs_bulk_snapshot_read,
 )
 
 
@@ -36,13 +34,70 @@ def test_is_full_snapshot_update(update, expected):
     assert _is_full_snapshot_update(update) is expected
 
 
+class _FakeCache:
+    def __init__(self, valid):
+        self.valid = valid
+
+
+class _FakeParameter:
+    def __init__(self, valid):
+        self.cache = _FakeCache(valid)
+
+
+class _FakeNode:
+    def __init__(self, parameters=None, submodules=None):
+        self.parameters = parameters or {}
+        self.submodules = submodules or {}
+
+
+@pytest.mark.parametrize(
+    "update, any_invalid, expected",
+    [
+        (True, False, True),
+        ("All", False, True),
+        (False, True, False),
+        ("Never", True, False),
+        ("Only_invalid", True, True),
+        ("Only_invalid", False, False),
+        (None, True, True),
+        (None, False, False),
+    ],
+)
+def test_needs_bulk_snapshot_read(update, any_invalid, expected):
+    node = _FakeNode(
+        parameters={"p": _FakeParameter(valid=not any_invalid)},
+        submodules={"sub": _FakeNode(parameters={"q": _FakeParameter(valid=True)})},
+    )
+    assert _needs_bulk_snapshot_read(node, update) is expected
+
+
+def test_needs_bulk_snapshot_read_rejects_unrecognized_update():
+    # Only None/"Only_invalid" may trigger the invalid-cache check; anything
+    # else not covered by _is_full_snapshot_update must not read at all,
+    # even with an invalid cache present.
+    node = _FakeNode(parameters={"p": _FakeParameter(valid=False)})
+    assert _needs_bulk_snapshot_read(node, "some_unexpected_value") is False
+
+
+def test_needs_bulk_snapshot_read_checks_nested_submodule():
+    node = _FakeNode(
+        parameters={"p": _FakeParameter(valid=True)},
+        submodules={"sub": _FakeNode(parameters={"q": _FakeParameter(valid=False)})},
+    )
+    assert _needs_bulk_snapshot_read(node, "Only_invalid") is True
+    assert _needs_bulk_snapshot_read(node, None) is True
+
+
 class _FakeConnection:
-    def __init__(self, value_map):
+    def __init__(self, value_map, raise_on_get=False):
         self._value_map = value_map
         self.get_calls = []
+        self.raise_on_get = raise_on_get
 
     def get(self, path, **kwargs):
         self.get_calls.append(path)
+        if self.raise_on_get:
+            raise TimeoutError("Command timed out")
         return dict(self._value_map)
 
 
@@ -104,20 +159,50 @@ def instrument():
     Instrument.close_all()
 
 
-@pytest.mark.parametrize("update", ["Only_invalid", None, "Never", False])
-def test_partial_snapshot_does_not_bulk_read(instrument, update):
+@pytest.mark.parametrize("update", ["Never", False])
+def test_never_snapshot_does_not_bulk_read(instrument, update):
     instr, connection, _counters = instrument
     instr.snapshot(update=update)
-    # No whole-tree ``get(".../*")`` at the instrument or submodule level.
     assert connection.get_calls == []
 
 
 @pytest.mark.parametrize("update", ["Only_invalid", None])
-def test_only_invalid_reads_invalid_caches_individually(instrument, update):
+def test_only_invalid_bulk_reads_when_a_cache_is_invalid(instrument, update):
     instr, connection, counters = instrument
     instr.snapshot(update=update)
+    assert len(connection.get_calls) == 1
+    assert counters["root"] == 0
+    assert counters["child"] == 0
+
+
+@pytest.mark.parametrize("update", ["Only_invalid", None])
+def test_only_invalid_skips_bulk_read_once_caches_are_valid(instrument, update):
+    instr, connection, _counters = instrument
+    instr.snapshot(update="All")  # marks every cache valid
+    connection.get_calls.clear()
+    instr.snapshot(update=update)
     assert connection.get_calls == []
-    # The invalid caches (root + submodule child) are refreshed one at a time.
+
+
+def test_only_invalid_second_snapshot_costs_nothing_at_all(instrument):
+    # Skipping the per-parameter get too is qcodes' own behavior, only
+    # guaranteed for ``None`` (not the "Only_invalid" string pre-0.59).
+    instr, connection, counters = instrument
+    instr.snapshot(update="All")
+    connection.get_calls.clear()
+    instr.snapshot(update=None)
+    assert connection.get_calls == []
+    assert counters["root"] == 0
+    assert counters["child"] == 0
+
+
+@pytest.mark.parametrize("update", ["Only_invalid", None])
+def test_only_invalid_falls_back_per_parameter_if_bulk_read_fails(instrument, update):
+    instr, connection, counters = instrument
+    connection.raise_on_get = True
+    instr.snapshot(update=update)
+    # Bulk read failed but didn't abort; fell back per-parameter instead.
+    assert len(connection.get_calls) == 1
     assert counters["root"] == 1
     assert counters["child"] == 1
 

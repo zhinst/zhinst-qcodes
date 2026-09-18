@@ -42,6 +42,36 @@ def _is_full_snapshot_update(update: t.Optional[t.Union[bool, str]]) -> bool:
     return update is True or update == "All"
 
 
+def _has_invalid_cache(node: t.Any) -> bool:
+    """Whether any parameter cache in ``node``'s subtree is invalid.
+
+    Args:
+        node: A :class:`ZIInstrument`, :class:`ZINode` or
+            :class:`ZIChannelList` (or plain QCoDeS equivalent).
+    """
+    if isinstance(node, ChannelList):
+        return any(_has_invalid_cache(channel) for channel in node)
+    if any(not parameter.cache.valid for parameter in node.parameters.values()):
+        return True
+    return any(_has_invalid_cache(submodule) for submodule in node.submodules.values())
+
+
+def _needs_bulk_snapshot_read(
+    node: t.Any, update: t.Optional[t.Union[bool, str]]
+) -> bool:
+    """Whether a snapshot of ``node`` with this ``update`` needs the bulk read.
+
+    For ``None``/``"Only_invalid"`` this is only true if the subtree has an
+    invalid parameter cache. Relies on
+    :meth:`ZISnapshotHelper._start_snapshot` tolerating a failing bulk read.
+    """
+    if _is_full_snapshot_update(update):
+        return True
+    if update is None or update == "Only_invalid":
+        return _has_invalid_cache(node)
+    return False
+
+
 class ZISnapshotHelper:
     """Helper class for the snapshot with Zurich Instrument devices.
 
@@ -100,7 +130,11 @@ class ZISnapshotHelper:
                 name = "/" + prefix + "/" + name
             elif not name.startswith("/"):
                 name = "/" + name
-        self._value_dict = self._nodetree.connection.get(f"{name}/*", **kwargs)  # type: ignore[assignment]
+        try:
+            self._value_dict = self._nodetree.connection.get(f"{name}/*", **kwargs)  # type: ignore[assignment]
+        except Exception:
+            # Don't let a bad node abort the snapshot; fall back per-parameter.
+            self._value_dict = {}
         self._start = datetime.now()
         return True
 
@@ -433,7 +467,7 @@ class ZINode(InstrumentChannel):
         """
         with (
             self._snapshot_cache.snapshot(self._zi_node)
-            if _is_full_snapshot_update(update)
+            if _needs_bulk_snapshot_read(self, update)
             else nullcontext()
         ):
             return super().snapshot(update)
@@ -456,7 +490,7 @@ class ZINode(InstrumentChannel):
         """
         with (
             self._snapshot_cache.snapshot(self._zi_node)
-            if _is_full_snapshot_update(update)
+            if _needs_bulk_snapshot_read(self, update)
             else nullcontext()
         ):
             return super().print_readable_snapshot(update, max_chars)
@@ -492,7 +526,7 @@ class ZIChannelList(ChannelList):
         """
         with (
             self._snapshot_cache.snapshot(self._zi_node)
-            if _is_full_snapshot_update(update)
+            if _needs_bulk_snapshot_read(self, update)
             else nullcontext()
         ):
             return super().snapshot(update)
@@ -515,7 +549,7 @@ class ZIChannelList(ChannelList):
         """
         with (
             self._snapshot_cache.snapshot(self._zi_node)
-            if _is_full_snapshot_update(update)
+            if _needs_bulk_snapshot_read(self, update)
             else nullcontext()
         ):
             return super().print_readable_snapshot(update, max_chars)
@@ -550,7 +584,7 @@ class ZIInstrument(Instrument):
         """
         with (
             self._snapshot_cache.snapshot()
-            if _is_full_snapshot_update(update)
+            if _needs_bulk_snapshot_read(self, update)
             else nullcontext()
         ):
             return super().snapshot(update)
@@ -573,7 +607,7 @@ class ZIInstrument(Instrument):
         """
         with (
             self._snapshot_cache.snapshot()
-            if _is_full_snapshot_update(update)
+            if _needs_bulk_snapshot_read(self, update)
             else nullcontext()
         ):
             return super().print_readable_snapshot(update, max_chars)
