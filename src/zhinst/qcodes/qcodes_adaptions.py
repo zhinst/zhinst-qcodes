@@ -437,6 +437,10 @@ class ZINode(InstrumentChannel):
     Overwrite the snapshot functionality to use the ZISnapshotHelper.
     Forwards all args and kwargs to the QCoDeS InstrumentChannel class.
 
+    A qcodes "submodule" is a nested node in the LabOne node tree: e.g.
+    ``demods`` is a submodule of the instrument, and ``demods/0`` is a
+    submodule of ``demods``.
+
     Args:
         snapshot_cache (ZISnapshotHelper): ZI specific SnapshotHelper object
         zi_node (Node): ZI specific node object of the nodetree
