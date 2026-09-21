@@ -14,15 +14,15 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout tag/branch"
-        uses: "actions/checkout@v4"
+        uses: "actions/checkout@v7"
         with: { fetch-depth: 0, submodules: "true" }
       - name: "Setup Python"
-        uses: "actions/setup-python@v5"
+        uses: "actions/setup-python@v7"
         with:
           python-version: "3.11"
 
       - name: "Setup uv"
-        uses: "astral-sh/setup-uv@v4"
+        uses: "astral-sh/setup-uv@v10.2.0"
 
       - name: "Install build dependencies"
         run: |
@@ -38,7 +38,7 @@ jobs:
           cd docs && make html EXAMPLE_SRC=remote
 
       - name: Store artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs
           path: docs/build/html
