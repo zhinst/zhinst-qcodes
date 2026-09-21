@@ -14,16 +14,22 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: py310
-          python: "3.10"
-          coverage: true
-          tox: py310
-        - name: py311
-          python: "3.11"
-          tox: py311
-        - name: py312
-          python: "3.12"
-          tox: py312
+          - name: py310
+            python: "3.10"
+            coverage: true
+            tox: py310
+          - name: py311
+            python: "3.11"
+            tox: py311
+          - name: py312
+            python: "3.12"
+            tox: py312
+          - name: py313
+            python: "3.13"
+            tox: py313
+          - name: py314
+            python: "3.14"
+            tox: py314
 
     steps:
       - uses: "actions/checkout@v2"
