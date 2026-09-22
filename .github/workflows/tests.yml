@@ -9,7 +9,7 @@ on:
 
 jobs:
   tests:
-    name: "Python ${{ matrix.python }}"
+    name: "${{ matrix.name }}"
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
@@ -30,6 +30,9 @@ jobs:
           - name: py314
             python: "3.14"
             tox: py314
+          - name: min
+            python: "3.10"
+            tox: min
 
     steps:
       - uses: "actions/checkout@v7"
