@@ -1,5 +1,9 @@
 # zhinst-qcodes Changelog
 
+## Version 0.8.2
+* Fix the first `Only_invalid` snapshot of a session reading every parameter one at a time
+  instead of in a single bulk node tree read (`#88`).
+
 ## Version 0.8.1
 * Only perform the bulk node tree read for a full snapshot (`update=True` or `update="All"`).
   With qcodes 0.59 and newer it ran on every snapshot, including the one the measurement `Runner` takes before each dataset, where it could fail with `TimeoutError: Command timed out`.
