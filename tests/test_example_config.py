@@ -14,7 +14,7 @@ def test_example_config():
     with open(EXAMPLES_DIRECTORY + "test.spec.yml", "rb") as f:
         test_spec = yaml.load(f, Loader=yaml.Loader)
 
-    examples_list = glob(EXAMPLES_DIRECTORY + "*.md")
+    examples_list = glob(EXAMPLES_DIRECTORY + "*.ipynb")
 
     for example in examples_list:
         example_name = Path(example).name.split(".")[0]
@@ -22,16 +22,16 @@ def test_example_config():
             continue
 
         # Check that the notebook is in the config file
-        assert (
-            example_name in test_spec
-        ), f'Example "{example_name}" was not included in the configuration file.'
+        assert example_name in test_spec, (
+            f'Example "{example_name}" was not included in the configuration file.'
+        )
 
         # Check that it has the device id specified
-        assert (
-            "device_type" in test_spec[example_name]
-        ), f'No device_type was specified for the example "{example_name}".'
+        assert "device_type" in test_spec[example_name], (
+            f'No device_type was specified for the example "{example_name}".'
+        )
 
         # Check that the device id was written
-        assert (
-            test_spec[example_name]["device_type"] != None
-        ), f'The field "device_type" is empty for the example "{example_name}".'
+        assert test_spec[example_name]["device_type"] != None, (
+            f'The field "device_type" is empty for the example "{example_name}".'
+        )

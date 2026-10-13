@@ -2,13 +2,11 @@ Ways to contribute
 ==================
 
 * Opening a new ticket to `Issues`_ or by commenting on existing one with new solutions or suggestions
-* By improving the project `documentation`_.
-* By improving and adding new project `examples`_.
+* By improving the project documentation.
+* By improving and adding new project examples.
 * By contributing code; bug fixes, new features and so on.
 
 .. _Issues: https://github.com/zhinst/zhinst-qcodes/issues
-.. _documentation: https://docs.zhinst.com/zhinst-qcodes/en/latest/
-.. _examples: https://docs.zhinst.com/zhinst-qcodes/en/latest/examples/index.html
 
 Code contributions
 ==================
@@ -83,16 +81,6 @@ Running coverage
 
 The report can be seen in your browser by opening `htmlcov/index.html`.
 
-Building the examples
----------------------
-
-The examples are stored as Markdown files. If you wish to turn the local 
-`examples/*.md` files into Jupyter Notebooks by using the following script:
-
-    .. code-block:: sh
-
-        $ python scripts/generate_notebooks.py local
-
 Building the documentation
 --------------------------
 
@@ -141,9 +129,7 @@ experiments and measurements. Examples using `zhinst qcodes` are welcome.
 File format
 -----------
 
-The examples are written by using Jupyter Notebooks, but version controlled as Markdown files.
-
-The ready made example Notebooks can be translated to a Markdown file by using `Jupytext <https://jupytext.readthedocs.io/en/latest/>`_.
+The examples are Jupyter Notebooks (`.ipynb`), committed as-is in `/examples`.
 
 Structure
 ---------
@@ -154,7 +140,4 @@ Including the output of Notebook cells is highly encouraged.
 Adding to documentation
 -----------------------
 
-Version controlled Markdown files are translated to Notebooks in CI and
-then to HTML for display.
-
-To include the example in HTML documentation, create an NB link in `docs <https://github.com/zhinst/zhinst-qcodes/tree/main/docs/source/examples>`_.
+To include an example in the HTML documentation, create an NB link in `docs <https://github.com/zhinst/zhinst-qcodes/tree/main/docs/source/examples>`_.
