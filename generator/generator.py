@@ -51,47 +51,6 @@ def _ruff_format(code: str, filename: str) -> str:
     ).stdout
 
 
-def _examples_to_doctest(docstring: str) -> str:
-    """Convert Google-style ``Example(s):`` blocks into RST doctest blocks.
-
-    sphinxcontrib-spelling skips doctest blocks but walks the body of a
-    Google-style ``Example:`` definition. Prefixing the indented body with
-    ``>>> `` turns it into a doctest block so the spell checker ignores
-    code samples that toolkit ships in function docstrings.
-    """
-    if not docstring:
-        return docstring
-    lines = docstring.splitlines()
-    out: list[str] = []
-    i = 0
-    while i < len(lines):
-        header = re.match(r"^(\s*)(Examples?):\s*$", lines[i])
-        if not header:
-            out.append(lines[i])
-            i += 1
-            continue
-        out.append(lines[i])
-        i += 1
-        body_indent: str | None = None
-        while i < len(lines):
-            line = lines[i]
-            if line.strip() == "":
-                out.append(line)
-                i += 1
-                continue
-            leading = re.match(r"^(\s+)", line)
-            if not leading or len(leading.group(1)) <= len(header.group(1)):
-                break
-            if body_indent is None:
-                body_indent = leading.group(1)
-            if not line.startswith(body_indent):
-                break
-            out.append(f"{body_indent}>>> {line[len(body_indent) :]}")
-            i += 1
-    suffix = "\n" if docstring.endswith("\n") else ""
-    return "\n".join(out) + suffix
-
-
 parameter_tuple = namedtuple("parameter", ["name", "is_node"])
 submodule_tuple = namedtuple("submodule", ["subclass", "name", "is_list"])
 function_tuple = namedtuple("function", ["name", "is_deprecated"])
@@ -332,7 +291,7 @@ def generate_functions_info(functions: list, toolkit_class: object) -> list:
             # copy deprecation decorator
             deprecation_deco = inspect.getsource(getattr(toolkit_class, name))
             decorator = deprecated_regex.search(deprecation_deco).group(1)
-        docstring = _examples_to_doctest(getattr(toolkit_class, name).__doc__)
+        docstring = getattr(toolkit_class, name).__doc__
         signature = _resolved_signature(getattr(toolkit_class, name))
         signature_str = str(signature)
         is_node_doc = False
