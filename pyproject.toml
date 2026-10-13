@@ -27,26 +27,6 @@ dependencies = [
 ]
 dynamic = ["version"]
 
-[dependency-groups]
-docs = [
-  # Sphinx 9 broke autosectionlabel handling for myst-included markdown,
-  # and several extensions in this stack (nbsphinx_link, pydata_sphinx_theme)
-  # have not caught up yet.
-  "sphinx<9",
-  "sphinx-issues",
-  "nbsphinx",
-  "nbsphinx_link",
-  # nbsphinx_link is unmaintained and imports docutils.utils.error_reporting,
-  # which was removed in docutils 0.21.
-  "docutils<0.21",
-  "myst-parser",
-  "pydata_sphinx_theme",
-  "sphinx_autodoc_typehints",
-  "ipython",
-  "sphinxcontrib-spelling",
-  "lxml_html_clean",
-]
-
 [project.readme]
 file = "README.md"
 content-type = "text/markdown"
@@ -59,7 +39,7 @@ Source = "https://github.com/zhinst/zhinst-qcodes"
 [tool.ruff]
 line-length = 88
 target-version = "py310"
-extend-exclude = ["docs", "examples", "tests", ".ipynb_checkpoints"]
+extend-exclude = ["examples", "tests", ".ipynb_checkpoints"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "D"]

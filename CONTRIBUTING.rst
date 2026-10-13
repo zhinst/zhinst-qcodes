@@ -81,37 +81,6 @@ Running coverage
 
 The report can be seen in your browser by opening `htmlcov/index.html`.
 
-Building the documentation
---------------------------
-
-Zhinst-qcodes uses `Sphinx <https://pypi.org/project/Sphinx/>`_ to build the package documentation.
-
-- Install the package in editable mode
-
-    .. code-block:: sh
-
-        $ pip install -e .
-
-Change to docs directory
-
-    .. code-block:: sh
-
-        $ cd docs
-
-- Install the docs dependencies
-
-    .. code-block:: sh
-
-        $ uv pip install --group docs -e .
-
-- Build the HTML documentation along with examples with Sphinx
-
-    .. code-block:: sh
-
-        $ make html [local | remote]
-
-The generated documentation can be seen in your browser by opening `docs/html/index.html`.
-
 Pull requests
 --------------
 
@@ -136,8 +105,3 @@ Structure
 
 Please see the existing examples in /examples and try to keep the same structure.
 Including the output of Notebook cells is highly encouraged.
-
-Adding to documentation
------------------------
-
-To include an example in the HTML documentation, create an NB link in `docs <https://github.com/zhinst/zhinst-qcodes/tree/main/docs/source/examples>`_.
