@@ -51,8 +51,9 @@ jobs:
           pip install tox
           tox -e ${{ matrix.tox }}
 
-      - name: "Run coverage"
+      - name: "Upload coverage"
         if: matrix.coverage
-        run: |
-          python -m pip install --upgrade codecov
-          codecov
+        uses: "codecov/codecov-action@v7"
+        with:
+          files: "./coverage.xml"
+          token: "${{ secrets.CODECOV_TOKEN }}"
