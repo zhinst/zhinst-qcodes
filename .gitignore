@@ -45,7 +45,6 @@ coverage.xml
 .pytest_cache/
 
 # Jupyter Notebook
-examples/*.ipynb
 *.ipynb_checkpoints
 .ipynb_*
 
