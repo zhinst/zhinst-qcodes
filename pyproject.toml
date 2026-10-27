@@ -8,7 +8,6 @@ authors = [{ name = "Zurich Instrument", email = "info@zhinst.com" }]
 description = "Zurich Instruments drivers for QCoDeS"
 classifiers = [
   "Development Status :: 4 - Beta",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -18,12 +17,12 @@ classifiers = [
   "Topic :: Scientific/Engineering",
   "Intended Audience :: Science/Research",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
   "numpy>=1.22.0",
   "zhinst-toolkit>=1.4.0",
-  "qcodes>=0.35.0",
-  "typing_extensions>=4.1.1",
+  "qcodes>=0.55.0",
+  "typing_extensions>=4.6.0",
 ]
 dynamic = ["version"]
 
@@ -38,7 +37,7 @@ Source = "https://github.com/zhinst/zhinst-qcodes"
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py311"
 extend-exclude = ["examples", "tests", ".ipynb_checkpoints"]
 
 [tool.ruff.lint]
@@ -98,6 +97,10 @@ include-package-data = true
 where = ["src"]
 include = ["zhinst.*"]
 namespaces = true
+
+[tool.setuptools.package-data]
+"zhinst.qcodes" = ["py.typed"]
+"zhinst.qcodes.driver.devices._stubs" = ["*.pyi"]
 
 [tool.setuptools_scm]
 "write_to" = "src/zhinst/qcodes/_version.py"

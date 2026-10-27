@@ -14,12 +14,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: py310
-            python: "3.10"
-            coverage: true
-            tox: py310
           - name: py311
             python: "3.11"
+            coverage: true
             tox: py311
           - name: py312
             python: "3.12"
@@ -31,7 +28,7 @@ jobs:
             python: "3.14"
             tox: py314
           - name: min
-            python: "3.10"
+            python: "3.11"
             tox: min
 
     steps:

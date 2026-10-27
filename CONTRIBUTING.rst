@@ -81,6 +81,33 @@ Running coverage
 
 The report can be seen in your browser by opening `htmlcov/index.html`.
 
+Type stubs for the device node trees
+------------------------------------
+
+The QCoDeS parameters and submodules of a device (e.g. ``mfli.demods[0].rate``)
+are created at runtime from the node tree reported by the LabOne Data Server.
+To make them visible to static type checkers and IDEs, ``.pyi`` stubs are
+generated for selected devices (``STUB_DEVICES`` in ``generator/conf.py``) and
+stored in ``src/zhinst/qcodes/driver/devices/_stubs``. The device classes in
+``device_creator.py`` inherit from the generated ``<DEVICE>Nodes`` mixin while
+type checking only.
+
+The stubs are generated from the node documentation of the online user manual.
+To update the stubs of a device (e.g. the MFLI):
+
+    .. code-block:: sh
+
+        $ python generator/nodedoc_scraper.py MFLI
+        $ python generator/generator.py stubs MFLI
+
+The first command downloads the node documentation into
+``generator/nodedocs/mfli.json``, the second one creates the stub from it. To
+add stubs for a new device, add it to ``STUB_DEVICES`` and regenerate
+``device_creator.py`` with ``python generator/generator.py device-api``.
+
+``tests/test_stubs.py`` verifies that the stubs match the node tree created at
+runtime and ``tests/typing`` contains static typing checks run by ``tox -e typing``.
+
 Pull requests
 --------------
 

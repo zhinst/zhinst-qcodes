@@ -9,6 +9,17 @@ from zhinst.qcodes.session import ZISession
 {{import}}
 {% endfor %}
 
+{% if stub_imports %}
+if t.TYPE_CHECKING:
+{% for import in stub_imports %}
+    {{ import.statement }}
+{% endfor %}
+else:
+{% for import in stub_imports %}
+    {{ import.name }} = object
+{% endfor %}
+{% endif %}
+
 {% for class in classes %}
 
 {% if class.is_hf2 %}
@@ -17,7 +28,7 @@ from zhinst.qcodes.session import ZISession
 {% set DEVICE_DEFAULT_PORT = 8004 %}
 {% endif %}
 
-class {{ class.name }}({{ class.parent }}):
+class {{ class.name }}({{ class.parent }}{% if class.stubs %}, {{ class.stubs }}{% endif %}):
     """QCoDeS driver for the Zurich Instruments {{ class.name }}.
 
     Args:

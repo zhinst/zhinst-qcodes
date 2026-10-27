@@ -40,6 +40,7 @@ def _ruff_format(code: str, filename: str) -> str:
         input=code,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
     ).stdout
     return subprocess.run(
@@ -47,6 +48,7 @@ def _ruff_format(code: str, filename: str) -> str:
         input=fixed,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
     ).stdout
 
@@ -520,7 +522,21 @@ def generate_device_api():
             "from zhinst.qcodes.driver.devices.uhfli import UHFLI as UHFLIDriver",
             "from zhinst.qcodes.driver.devices.uhfqa import UHFQA as UHFQADriver",
         ],
+        "stub_imports": [],
     }
+    # Devices with generated node tree stubs inherit from the stub mixin
+    # while type checking (``object`` at runtime).
+    for device_class in data["classes"]:
+        if device_class["name"] in conf.STUB_DEVICES:
+            mixin = f"{device_class['name']}Nodes"
+            device_class["stubs"] = mixin
+            data["stub_imports"].append(
+                {
+                    "name": mixin,
+                    "statement": f"from {conf.STUB_MODULE}."
+                    f"{device_class['name'].lower()} import {mixin}",
+                }
+            )
     templateLoader = jinja2.FileSystemLoader(searchpath=conf.TEMPLATE_PATH)
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template("device_api.py.j2")
@@ -531,9 +547,38 @@ def generate_device_api():
     print(f"{DEVICE_API_FILEPATH} created.")
 
 
+def generate_stub(device: str) -> None:
+    """Generate the type stub for the node tree of a device.
+
+    Args:
+        device: Device type, e.g. ``MFLI``.
+    """
+    import stub_generator
+
+    path = stub_generator.stub_path(device)
+    result = _ruff_format(stub_generator.render_stub(device), str(path))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\n") as outfile:
+        outfile.write(result)
+    print(f"{path} created.")
+
+
 @click.group()
 def main():
     """Autogeneration of QCoDeS driver from zhinst.toolkit."""
+
+
+@main.command(help="type stubs for the node tree of a device")
+@click.argument("name", type=str)
+def stubs(name):
+    """Generate the node tree type stubs of a device."""
+    generate_stub(name.upper())
+
+
+@main.command(help="device API (device_creator.py)")
+def device_api():
+    """Generate the device API."""
+    generate_device_api()
 
 
 @main.command(help="toolkit instrument class")
@@ -567,6 +612,8 @@ def generate_all():
         module = importlib.import_module(f"{conf.TOOLKIT_DEVICE_MODULE}.{name.lower()}")
         generate_qcodes_driver(getattr(module, name.upper()))
     generate_device_api()
+    for name in conf.STUB_DEVICES:
+        generate_stub(name)
 
     for name in conf.MODULE_DRIVERS:
         module = importlib.import_module(

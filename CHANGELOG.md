@@ -1,5 +1,13 @@
 # zhinst-qcodes Changelog
 
+## Unreleased
+* Add type stubs for the node tree of the MFLI. Static type checkers and IDEs now know the
+  parameters and submodules of `zhinst.qcodes.MFLI` (e.g. `mfli.demods[0].rate`), including
+  the value type, unit and documentation of each node.
+* `ZIParameter` is generic in the value type for getting and setting, and `ZIChannelList` is
+  generic in the type of its elements.
+* Drop support for Python 3.10 and require qcodes 0.55.0 or newer.
+
 ## Version 0.8.2
 * Fix the first `Only_invalid` snapshot of a session reading every parameter one at a time
   instead of in a single bulk node tree read (`#88`).

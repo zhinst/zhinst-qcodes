@@ -15,6 +15,12 @@ from zhinst.qcodes.driver.devices.uhfli import UHFLI as UHFLIDriver
 from zhinst.qcodes.driver.devices.uhfqa import UHFQA as UHFQADriver
 from zhinst.qcodes.session import ZISession
 
+if t.TYPE_CHECKING:
+    from zhinst.qcodes.driver.devices._stubs.mfli import MFLINodes
+
+else:
+    MFLINodes = object
+
 
 class ZIDevice(ZIBaseInstrument):
     """QCoDeS driver for the Zurich Instruments ZIDevice.
@@ -432,7 +438,7 @@ class UHFQA(UHFQADriver):
         session.devices[self.serial] = self
 
 
-class MFLI(ZIBaseInstrument):
+class MFLI(ZIBaseInstrument, MFLINodes):
     """QCoDeS driver for the Zurich Instruments MFLI.
 
     Args:

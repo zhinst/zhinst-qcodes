@@ -30,6 +30,11 @@ MODULE_DRIVERS = [
 ]
 TOOLKIT_MODULE_MODULE = "zhinst.toolkit.driver.modules"
 
+# Devices with generated type stubs for their node tree
+# (node documentation in generator/nodedocs, see nodedoc_scraper.py)
+STUB_DEVICES = ["MFLI"]
+STUB_MODULE = "zhinst.qcodes.driver.devices._stubs"
+
 # Typing
 # Weird typing infos that can be replaced with the right term
 TYPE_HINT_REPLACEMENTS = {

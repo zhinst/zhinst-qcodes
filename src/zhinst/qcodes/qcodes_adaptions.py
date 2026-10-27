@@ -7,13 +7,26 @@ from contextlib import contextmanager, nullcontext
 from datetime import datetime
 
 import numpy as np
+from typing_extensions import TypeVar
 
-from qcodes.instrument import ChannelList, Instrument, InstrumentChannel
+from qcodes.instrument import (
+    ChannelList,
+    Instrument,
+    InstrumentBase,
+    InstrumentChannel,
+    InstrumentModule,
+)
 from qcodes.parameters import Parameter
 from qcodes.validators import ComplexNumbers
 from zhinst.toolkit.nodetree import Node, NodeTree
 from zhinst.toolkit.nodetree.helper import NodeDict as TKNodeDict
 from zhinst.toolkit.nodetree.node import NodeInfo
+
+# Value type returned when getting a ZIParameter.
+_GetT = TypeVar("_GetT", default=t.Any)
+# Value type accepted when setting a ZIParameter. Differs from ``_GetT`` e.g. for
+# enumerated nodes, which return an ``IntEnum`` but also accept keyword strings.
+_SetT = TypeVar("_SetT", default=t.Any)
 
 
 def _is_full_snapshot_update(update: t.Optional[t.Union[bool, str]]) -> bool:
@@ -241,11 +254,15 @@ class ZISnapshotHelper:
         return self._is_running
 
 
-class ZIParameter(Parameter):
+class ZIParameter(Parameter[_GetT, InstrumentBase | None], t.Generic[_GetT, _SetT]):
     """Zurich Instrument specific QCoDeS Parameter.
 
     Overwrite the snapshot functionality to use the ZISnapshotHelper.
     Forwards all args and kwargs to the QCoDeS Parameter class.
+
+    The class is generic in the value type returned by a get (``_GetT``) and
+    the value type accepted by a set (``_SetT``). The type arguments are only
+    used for static type checking (e.g. by the generated device stubs).
 
     Args:
         snapshot_cache (ZISnapshotHelper): ZI specific SnapshotHelper object
@@ -264,12 +281,57 @@ class ZIParameter(Parameter):
         self.get_raw = kwargs["get_cmd"]  # type: ignore[method-assign]
         self.set_raw = kwargs["set_cmd"]  # type: ignore[method-assign]
         self.get = self._wrap_get(self.get_raw)
-        self.set = self._set_zi
+        # ``_set_zi`` returns the acknowledged value of a deep set.
+        self.set = self._set_zi  # pyright: ignore[reportAttributeAccessIssue]
         self._snapshot_cache = snapshot_cache
         self._zi_node = zi_node
         self._tk_node = tk_node
 
-    def __call__(self, *args, **kwargs):
+    # Setting accepts ``_SetT`` rather than ``_GetT``, which narrows the
+    # signature of ``Parameter.__call__``.
+    @t.overload  # type: ignore[override]
+    def __call__(
+        self,
+        *,
+        deep: t.Literal[False] = ...,
+        enum: bool = ...,
+        parse: bool = ...,
+        **kwargs: t.Any,
+    ) -> _GetT: ...
+
+    @t.overload
+    def __call__(
+        self,
+        *,
+        deep: t.Literal[True],
+        enum: bool = ...,
+        parse: bool = ...,
+        **kwargs: t.Any,
+    ) -> tuple[t.Optional[int], _GetT]: ...
+
+    @t.overload
+    def __call__(
+        self,
+        value: _SetT,
+        *,
+        deep: t.Literal[False] = ...,
+        enum: bool = ...,
+        parse: bool = ...,
+        **kwargs: t.Any,
+    ) -> None: ...
+
+    @t.overload
+    def __call__(
+        self,
+        value: _SetT,
+        *,
+        deep: t.Literal[True],
+        enum: bool = ...,
+        parse: bool = ...,
+        **kwargs: t.Any,
+    ) -> _GetT: ...
+
+    def __call__(self, *args: t.Any, **kwargs: t.Any) -> t.Any:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Call operator that either gets (empty) or gets the value of a node.
 
         Args:
@@ -500,7 +562,10 @@ class ZINode(InstrumentChannel):
             return super().print_readable_snapshot(update, max_chars)
 
 
-class ZIChannelList(ChannelList):
+_ModuleT = TypeVar("_ModuleT", bound=InstrumentModule, default=ZINode)
+
+
+class ZIChannelList(ChannelList[_ModuleT]):
     """Zurich Instrument specific QCoDeS InstrumentChannel.
 
     Overwrite the snapshot functionality to use the ZISnapshotHelper.

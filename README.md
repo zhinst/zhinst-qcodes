@@ -38,6 +38,25 @@ Moreover, similar examples to those of zhinst-toolkit available
 [here](https://github.com/zhinst/zhinst-toolkit/tree/main/examples)
 can be used for zhinst-qcodes.
 
+### Static typing
+
+The parameters and submodules of a device are created at runtime from the
+node tree of the connected device. For the MFLI, the package ships type stubs
+describing its node tree, so IDEs and static type checkers (e.g. mypy or
+pyright) know the nodes, their value types and documentation:
+
+```python
+from zhinst.qcodes import MFLI
+
+mfli = MFLI("dev1234", "localhost")
+mfli.oscs[0].freq(10e3)  # accepts a float
+rate = mfli.demods[0].rate()  # float
+```
+
+The stubs are based on the node documentation of the MFLI user manual and
+cover all options. Nodes of options not installed on a device are not
+available at runtime.
+
 ## Contributing
 
 We welcome contributions by the community, either as bug reports, fixes and new
